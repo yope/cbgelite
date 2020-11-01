@@ -169,6 +169,46 @@ class CBG:
 		self.line(x, y+h, x+w, y+h, clear)
 		self.line(x+w, y, x+w, y+h, clear)
 
+	def ellipse(self, x, y, a, b, clear=False):
+		x0 = x - a // 2
+		x1 = x + a // 2
+		y0 = y - b // 2
+		y1 = y + b // 2
+		b1 = b & 1
+		dx = 4*(1-a)*b*b
+		dy = 4*(b1+1)*a*a
+		err = dx+dy+b1*a*a
+		y0 += (b+1)/2
+		y1 = y0-b1
+		a *= 8*a
+		b1 = 8*b*b
+		while True:
+			self.putpixel(int(x1), int(y0), clear)
+			self.putpixel(int(x0), int(y0), clear)
+			self.putpixel(int(x0), int(y1), clear)
+			self.putpixel(int(x1), int(y1), clear)
+			e2 = 2 * err
+			if e2 <= dy:
+				y0 += 1
+				y1 -= 1
+				dy += a
+				err += dy
+			if e2 >= dx or 2*err > dy:
+				x0 += 1
+				x1 -= 1
+				dx += b1
+				err += dx
+			if x0 > x1:
+				break
+
+		while y0-y1 < b:
+			self.putpixel(x0-1, y0)
+			self.putpixel(x1+1, y0)
+			y0 += 1
+			self.putpixel(x0-1, y1)
+			self.putpixel(x1+1, y1)
+			y1 -= 1
+
 	def fillrect(self, x, y, w, h, clear=False):
 		# FIXME: Optimize this.
 		for i in range(y, y+h):
