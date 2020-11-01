@@ -20,6 +20,7 @@ class CBG:
 		self.curx = 5
 		self.cury = 5
 		self.putcursor(0, 0)
+		self.clearcolormap()
 		self.clearscreen()
 		self.font = FontData("chargen.rom")
 		self.font.optimize(self.bitmasks)
@@ -36,6 +37,7 @@ class CBG:
 	def handle_sigint(self, sig, frm):
 		signal.signal(signal.SIGINT, self.orig_sigint)
 		self.enable_cursor()
+		print("\x1b[0m", end='')
 		print("Screen size: {}x{}".format(self.width, self.height))
 		print("Screen Char size: {}x{}".format(self.cwidth, self.cheight))
 		sys.exit(1)
@@ -43,6 +45,10 @@ class CBG:
 	def clearmap(self):
 		size = self.cwidth * self.cheight
 		self.map = bytearray(b'\x00' * size)
+
+	def clearcolormap(self):
+		size = self.cwidth * self.cheight
+		self.colormap = bytearray(b'\x0f' * size)
 
 	def clearscreen(self):
 		self.clearmap()
@@ -80,16 +86,58 @@ class CBG:
 			for c in range(4):
 				self.putcode(x + c, y + r, data[r*4+c])
 
-	def drawtext(self, x, y, s):
+	def drawtext(self, x, y, s, fg=None, bg=None):
 		for c in s:
 			self.drawglyph(x, y, c)
+			if fg or bg:
+				self.colorrect(x, y, 8, 8, fg, bg)
 			x += 8
 
+	def colorrect(self, x, y, w, h, fg, bg):
+		x = int(x / 2)
+		y = int(y / 4)
+		w = int(w / 2)
+		h = int(h / 4)
+		msk = 0
+		if fg is None:
+			fg = 0
+			msk |= 0x0f
+		if bg is None:
+			bg = 0
+			msk |= 0xf0
+		c = (bg << 4) | fg
+		if msk:
+			for i in range(y, y+h):
+				idx = i * self.cwidth
+				for j in range(x, x+w):
+					self.colormap[idx + j] &= msk
+					self.colormap[idx + j] |= c
+		else:
+			for i in range(y, y+h):
+				idx = i * self.cwidth
+				for j in range(x, x+w):
+					self.colormap[idx + j] = c
+
 	def redraw_screen(self):
+		fg0 = 16
+		bg0 = 16
+		curc = 256
 		for y in range(self.cheight):
 			print("\x1b[{};1H".format(y+1), end='')
 			for x in range(self.cwidth):
-				b = self.map[y * self.cwidth + x]
+				idx = y * self.cwidth + x
+				b = self.map[idx]
+				c = self.colormap[idx]
+				if curc != c:
+					fg = c & 0x0f
+					curc = c
+					if fg0 != fg:
+						fg0 = fg
+						print("\x1b[38;5;{}m".format(fg), end='')
+					bg = c >> 4
+					if bg0 != bg:
+						bg0 = bg
+						print("\x1b[48;5;{}m".format(bg), end='')
 				if b:
 					u = chr(0x2800 + b)
 				else:
