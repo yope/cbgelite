@@ -5,6 +5,56 @@ from cbg import CBG, G3d
 from ship import ShipReader
 import sys
 from time import sleep
+from math import sin
+
+class BarGraph:
+	def __init__(self, cbg, x, y, w, h, fg, bg, ticks=0):
+		self.value = 1.0
+		self.w = w
+		self.h = h
+		self.x = x
+		self.y = y
+		self.fg = fg
+		self.bg = bg
+		self.cbg = cbg
+		self.ticks = ticks
+
+	def setup(self):
+		self.cbg.colorrect(self.x, self.y + 2, self.w, self.h-3, self.fg, self.bg)
+
+	def set_value(self, v):
+		v = max(0.0, v)
+		v = min(1.0, v)
+		self.value = v
+
+	def redraw(self):
+		self.cbg.fillrect(self.x, self.y + 2, int(self.value * self.w), self.h - 4)
+		if self.ticks < 2:
+			return
+		ts = (self.w - 1) // (self.ticks - 1)
+		for i in range(self.ticks):
+			self.cbg.putpixel(self.x + i * ts, self.y + self.h - 1)
+
+class Battery:
+	def __init__(self, cbg, x, y, bw, bh):
+		self.value = 1.0
+		self.bars = []
+		for i in range(4):
+			self.bars.append(BarGraph(cbg, x, y + i * 8, bw, bh, 5, 0))
+
+	def setup(self):
+		for b in self.bars:
+			b.setup()
+
+	def set_value(self, v):
+		self.value = v
+		for i in range(4):
+			vb = v * 4.0 - (3.0 - i)
+			self.bars[i].set_value(vb)
+
+	def redraw(self):
+		for b in self.bars:
+			b.redraw()
 
 class Elite:
 	def __init__(self):
@@ -35,18 +85,52 @@ class Elite:
 		self.sboxw = 64
 		self.radarw = self.width-2*self.sboxw
 		self.g3d = G3d(self.cbg, cx = self.width // 2, cy = self.ystatus // 2)
+		self.bgnames = ["FS", "AS", "FV", "CT", "LT", "AL"]
+		self.battery = Battery(self.cbg, self.sboxw + self.radarw + 2, self.ystatus + 28, 40, 7)
+
+	def setup_screen(self):
+		self.cbg.colorrect(0, 0, self.width, self.height, 11, 0)
+		self.cbg.colorrect(2, 4, self.width-3, self.ystatus-4, 15, 0)
+		bglen = 40
+		bgcolors = [5, 5, 3, 1, 1, 10]
+		bgticks = [0, 0, 6, 5, 6, 5]
+		bgvals = [1.0, 1.0, 0.4, 0.1, 0.0, 0.6]
+		for i in range(7):
+			y = self.ystatus + 10 + i * 8
+			x2 = self.sboxw + self.radarw
+			self.cbg.colorrect(self.sboxw - bglen, y, bglen, 4, 2, 0)
+			self.cbg.colorrect(x2+2, y, bglen, 4, 2, 0)
+			if i==6:
+				continue
+			bgr = BarGraph(self.cbg, self.sboxw-bglen, y-6, bglen, 7, bgcolors[i], 0, bgticks[i])
+			bgr.set_value(bgvals[i])
+			setattr(self, "bar_"+self.bgnames[i].lower(), bgr)
+			bgr.setup()
+		self.cbg.colorrect(2, self.ystatus+6, 18, 16, 15, 0)
+		self.cbg.colorrect(self.width-20, self.ystatus+6, 16, 24, 14, 0)
+		self.cbg.colorrect(2, self.ystatus+6+16, 18, 32, 14, 0)
+		self.cbg.colorrect(self.width-20, self.ystatus+6+24, 16, 32, 15, 0)
+		self.battery.setup()
 
 	def draw_background(self):
-		self.cbg.rect(0, 0, self.width-1, self.height-1)
-		self.cbg.line(0, self.ystatus, self.width-1, self.ystatus)
-		self.cbg.line(self.sboxw, self.ystatus, self.sboxw, self.height-1)
-		self.cbg.line(self.sboxw + self.radarw, self.ystatus, self.sboxw + self.radarw, self.height-1)
-		for i in range(6):
-			y = self.ystatus + 9 + i * 9
-			bglen = 40
-			x2 = self.sboxw + self.radarw
+		self.cbg.rect(1, 2, self.width-2, self.height-4)
+		self.cbg.line(1, self.ystatus, self.width-1, self.ystatus)
+		self.cbg.line(self.sboxw, self.ystatus, self.sboxw, self.height-2)
+		self.cbg.line(self.sboxw + self.radarw + 1, self.ystatus, self.sboxw + self.radarw + 1, self.height-2)
+		tl = self.bgnames
+		tl.append("MI")
+		tr = ["SP", "RL", "DC", "1", "2", "3", "4"]
+		bglen = 40
+		for i in range(7):
+			y = self.ystatus + 11 + i * 8
+			x2 = self.sboxw + self.radarw + 1
 			self.cbg.line(self.sboxw - bglen, y, self.sboxw, y)
 			self.cbg.line(x2, y, x2 + bglen, y)
+			self.cbg.drawtext(4, y-5, tl[i])
+			self.cbg.drawtext(self.width-20, y-5, tr[i])
+			if i<6:
+				getattr(self, "bar_"+self.bgnames[i].lower()).redraw()
+		self.battery.redraw()
 
 	def draw_title(self):
 		self.draw_background()
@@ -61,6 +145,7 @@ class Elite:
 		ry = 0.0
 		rz = 0.0
 		dz = 150
+		self.setup_screen()
 		while True:
 			self.g3d.setRotMat(rx, ry, rz)
 			self.g3d.setTranslation((0, 0, dz))
@@ -70,6 +155,7 @@ class Elite:
 			self.cbg.redraw_screen()
 			ry += 0.1
 			rz += 0.03
+			self.bar_fs.set_value(0.5+0.5*sin(rz))
 			sleep(0.04)
 
 	def run(self):
