@@ -6,6 +6,8 @@ from math import sin, cos, sqrt
 from collections import deque
 import sys
 
+from ship import ShipReader
+
 class CBG:
 	def __init__(self):
 		self.charcodes = [chr(x) for x in range(0x2800, 0x2900)]
@@ -114,8 +116,8 @@ class G3d:
 		self.cbg = cbg
 		self.width = cbg.width
 		self.height = cbg.height
-		self.persp = 200.0
-		self.cdist = 200.0
+		self.persp = 400.0
+		self.cdist = 400.0
 		self.cx = self.width / 2
 		self.cy = self.height / 2
 		self.rmat = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
@@ -193,7 +195,7 @@ class G3d:
 
 	def backface(self, p0, p1, p2):
 		vcop = self.normalize((p0[0], p0[1], p0[2] + self.persp))
-		dp = self.dot(vcop, self.normalize(self.normal(p0, p1, p2)))
+		dp = self.dot(vcop, self.normal(p0, p1, p2))
 		return (dp > 0)
 
 	def cube(self, w, h, d):
@@ -228,6 +230,34 @@ class G3d:
 			self.line(p[2], p[3])
 			self.line(p[3], p[0])
 
+	def draw_ship(self, s):
+		for f in s.face:
+			fe = s.face[f]
+			n = self.rotate(s.norm[f])
+			p0 = self.translate(self.rotate(s.vert[s.edge[fe[0]][0]]))
+			vcop = self.normalize((p0[0], p0[1], p0[2] + self.persp ))
+			dp = self.dot(vcop, n)
+			if dp > 0:
+				continue
+			for ei in fe:
+				e = s.edge[ei]
+				p0 = self.translate(self.rotate(s.vert[e[0]]))
+				p1 = self.translate(self.rotate(s.vert[e[1]]))
+				self.line(p0, p1)
+
+	def spinship(self, s):
+		rx = 0.0
+		ry = 0.0
+		rz = 0.0
+		dz = 0
+		while True:
+			self.setRotMat(rx, ry, rz)
+			self.setTranslation((0, 0, dz))
+			self.cbg.clear()
+			self.draw_ship(s)
+			ry += 0.1
+			rz += 0.03
+			sleep(0.04)
 
 	def spincube(self):
 		rx = 0.0
@@ -235,7 +265,7 @@ class G3d:
 		rz = 0.0
 		while True:
 			self.setRotMat(rx, ry, rz)
-			self.setTranslation((0, 0, 0))
+			self.setTranslation((0, 0, 1000))
 			self.cbg.clear()
 			self.cube(120, 120, 120)
 			self.setRotMat(rz, rx, ry, (70, 0, 0))
@@ -249,7 +279,8 @@ def main():
 	c = CBG()
 	#c.liney()
 	d = G3d(c)
-	d.spincube()
+	#d.spincube()
+	d.spinship(ShipReader("cobra_mk3.ship"))
 	c.end()
 
 if __name__ == "__main__":
