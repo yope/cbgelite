@@ -10,6 +10,7 @@ from math import sin
 class BarGraph:
 	def __init__(self, cbg, x, y, w, h, fg, bg, ticks=0):
 		self.value = 1.0
+		self.minval = 0.0
 		self.w = w
 		self.h = h
 		self.x = x
@@ -23,17 +24,32 @@ class BarGraph:
 		self.cbg.colorrect(self.x, self.y + 2, self.w, self.h-3, self.fg, self.bg)
 
 	def set_value(self, v):
-		v = max(0.0, v)
+		v = max(self.minval, v)
 		v = min(1.0, v)
 		self.value = v
 
-	def redraw(self):
-		self.cbg.fillrect(self.x, self.y + 2, int(self.value * self.w), self.h - 4)
+	def draw_ticks(self):
 		if self.ticks < 2:
 			return
 		ts = (self.w - 1) // (self.ticks - 1)
 		for i in range(self.ticks):
 			self.cbg.putpixel(self.x + i * ts, self.y + self.h - 1)
+
+	def redraw(self):
+		self.cbg.fillrect(self.x, self.y + 2, int(self.value * self.w), self.h - 4)
+		self.draw_ticks()
+
+class Meter(BarGraph):
+	def __init__(self, cbg, x, y, w, h, fg, bg, ticks=0):
+		super().__init__(cbg, x, y, w, h, fg, bg, ticks=ticks)
+		self.value = 0.0
+		self.minval = -1.0
+
+	def redraw(self):
+		v = (self.value - self.minval) / (1.0 - self.minval)
+		xp = self.x + int(v * self.w)
+		self.cbg.line(xp, self.y + 2, xp, self.y + self.h - 3)
+		self.draw_ticks()
 
 class Battery:
 	def __init__(self, cbg, x, y, bw, bh):
@@ -55,6 +71,21 @@ class Battery:
 	def redraw(self):
 		for b in self.bars:
 			b.redraw()
+
+class Radar:
+	def __init__(self, cbg, x, y, w, h):
+		self.x = x
+		self.y = y
+		self.w = w
+		self.h = h
+		self.cbg = cbg
+
+	def redraw(self):
+		cx = self.x + self.w // 2
+		cy = self.y + self.h // 2
+		a = self.w - 24
+		b = self.h - 12
+		self.cbg.ellipse(cx, cy, a, b)
 
 class Elite:
 	def __init__(self):
@@ -86,7 +117,12 @@ class Elite:
 		self.radarw = self.width-2*self.sboxw
 		self.g3d = G3d(self.cbg, cx = self.width // 2, cy = self.ystatus // 2)
 		self.bgnames = ["FS", "AS", "FV", "CT", "LT", "AL"]
-		self.battery = Battery(self.cbg, self.sboxw + self.radarw + 2, self.ystatus + 28, 40, 7)
+		rbx = self.sboxw + self.radarw + 2
+		self.battery = Battery(self.cbg, rbx, self.ystatus + 28, 40, 7)
+		self.speedbar = BarGraph(self.cbg, rbx, self.ystatus + 4, 40, 7, 11, 0, ticks=8)
+		self.rlmeter = Meter(self.cbg, rbx, self.ystatus + 12, 40, 7, 14, 0, ticks=8)
+		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
+		self.radar = Radar(self.cbg, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
 
 	def setup_screen(self):
 		self.cbg.colorrect(0, 0, self.width, self.height, 11, 0)
@@ -111,6 +147,9 @@ class Elite:
 		self.cbg.colorrect(2, self.ystatus+6+16, 18, 32, 14, 0)
 		self.cbg.colorrect(self.width-20, self.ystatus+6+24, 16, 32, 15, 0)
 		self.battery.setup()
+		self.speedbar.setup()
+		self.rlmeter.setup()
+		self.dcmeter.setup()
 
 	def draw_background(self):
 		self.cbg.rect(1, 2, self.width-2, self.height-4)
@@ -131,6 +170,10 @@ class Elite:
 			if i<6:
 				getattr(self, "bar_"+self.bgnames[i].lower()).redraw()
 		self.battery.redraw()
+		self.speedbar.redraw()
+		self.rlmeter.redraw()
+		self.dcmeter.redraw()
+		self.radar.redraw()
 
 	def draw_title(self):
 		self.draw_background()
