@@ -5,8 +5,10 @@ from time import sleep
 from math import sin, cos, sqrt
 from collections import deque
 import sys
+import signal
 
 from ship import ShipReader
+from text import FontData
 
 class CBG:
 	def __init__(self):
@@ -18,28 +20,43 @@ class CBG:
 		self.curx = 5
 		self.cury = 5
 		self.putcursor(0, 0)
-		self.clear()
+		self.clearscreen()
+		self.font = FontData("chargen.rom")
+		self.font.optimize(self.bitmasks)
+		self.orig_sigint = signal.getsignal(signal.SIGINT)
+		signal.signal(signal.SIGINT, self.handle_sigint)
+		self.disable_cursor()
 
-	def clear(self):
+	def enable_cursor(self):
+		print("\x1b[?25h", end='')
+
+	def disable_cursor(self):
+		print("\x1b[?25l", end='')
+
+	def handle_sigint(self, sig, frm):
+		signal.signal(signal.SIGINT, self.orig_sigint)
+		self.enable_cursor()
+		print("Screen size: {}x{}".format(self.width, self.height))
+		print("Screen Char size: {}x{}".format(self.cwidth, self.cheight))
+		sys.exit(1)
+
+	def clearmap(self):
 		size = self.cwidth * self.cheight
 		self.map = bytearray(b'\x00' * size)
+
+	def clearscreen(self):
+		self.clearmap()
 		self.redraw_screen()
 
 	def putcursor(self, x, y):
 		if self.cury == y and  self.curx == x:
 			return
-		print("\x1b[{};{}H".format(x+1, y+1), end='')
+		print("\x1b[{};{}H".format(int(y)+1, int(x)+1), end='')
 		self.curx = x
 		self.cury = y
 
-	def puchar(self, x, y, char):
-		if x == self.curx and y == self.cury:
-			print(char, end='')
-			self.curx += len(char)
-			return
-		print("\x1b[{};{}H{}".format(x+1, y+1, char), end='')
-		self.curx = x + len(char)
-		self.cury = y
+	def putcode(self, x, y, code):
+		self.map[x + y * self.cwidth] = code
 
 	def putpixel(self, x, y, clear=False):
 		if x >= self.width or y >=self.height or x < 0 or y < 0:
@@ -47,20 +64,30 @@ class CBG:
 		cpx = x >> 1
 		cpy = y >> 2
 		bmp = self.bitmasks[y & 3][x & 1]
-		cmd = "\x1b[{};{}H".format(cpy, cpx)
 		idx = cpx + cpy * self.cwidth
 		b = self.map[idx]
 		if clear:
 			b &= ~bmp
 		else:
 			b |= bmp
-		u = chr(0x2800+b)
 		self.map[idx] = b
-		print(cmd + u, end='')
+
+	def drawglyph(self, x, y, char):
+		data = self.font.getchar(char)
+		x = int(x / 2)
+		y = int(y / 4)
+		for r in range(2):
+			for c in range(4):
+				self.putcode(x + c, y + r, data[r*4+c])
+
+	def drawtext(self, x, y, s):
+		for c in s:
+			self.drawglyph(x, y, c)
+			x += 8
 
 	def redraw_screen(self):
 		for y in range(self.cheight):
-			print("\x1b[{};1H".format(y), end='')
+			print("\x1b[{};1H".format(y+1), end='')
 			for x in range(self.cwidth):
 				b = self.map[y * self.cwidth + x]
 				if b:
@@ -68,6 +95,7 @@ class CBG:
 				else:
 					u = ' '
 				print(u, end='')
+		sys.stdout.flush()
 
 	def line(self, x0, y0, x1, y1, clear=False):
 		dx = abs(x1 - x0)
@@ -86,7 +114,12 @@ class CBG:
 			if e2 <= dx:
 				err += dx
 				y0 += sy
-		sys.stdout.flush()
+
+	def rect(self, x, y, w, h, clear=False):
+		self.line(x, y, x+w, y, clear)
+		self.line(x, y, x, y+h, clear)
+		self.line(x, y+h, x+w, y+h, clear)
+		self.line(x+w, y, x+w, y+h, clear)
 
 	def end(self):
 		print("\x1b[{};{}H".format(self.cheight - 3, 0))
@@ -112,14 +145,14 @@ class CBG:
 			sleep(0.02)
 
 class G3d:
-	def __init__(self, cbg):
+	def __init__(self, cbg, cx=None, cy=None):
 		self.cbg = cbg
 		self.width = cbg.width
 		self.height = cbg.height
 		self.persp = 400.0
 		self.cdist = 400.0
-		self.cx = self.width / 2
-		self.cy = self.height / 2
+		self.cx = cx or self.width / 2
+		self.cy = cy or self.height / 2
 		self.rmat = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 		self.tvec = (0.0, 0.0, 0.0)
 		self.rotc = (0.0, 0.0, 0.0)
@@ -245,16 +278,28 @@ class G3d:
 				p1 = self.translate(self.rotate(s.vert[e[1]]))
 				self.line(p0, p1)
 
+	def draw_background(self):
+		sh = self.cbg.height
+		sw = self.cbg.width
+		self.cbg.rect(0, 0, sw-2, sh-9)
+		self.cbg.line(0, 3 * sh // 4, sw-2, 3 * sh // 4)
+		tx = sw // 2 - 80
+		self.cbg.drawtext(tx, 8, "---- E L I T E ----")
+		tx = sw // 2 - 80
+		self.cbg.drawtext(tx, (3 * sh // 4) - 16, "Commander Jameson")
+
 	def spinship(self, s):
 		rx = 0.0
 		ry = 0.0
 		rz = 0.0
-		dz = 0
+		dz = 150
 		while True:
 			self.setRotMat(rx, ry, rz)
 			self.setTranslation((0, 0, dz))
-			self.cbg.clear()
+			self.cbg.clearmap()
+			self.draw_background()
 			self.draw_ship(s)
+			self.cbg.redraw_screen()
 			ry += 0.1
 			rz += 0.03
 			sleep(0.04)
@@ -266,11 +311,12 @@ class G3d:
 		while True:
 			self.setRotMat(rx, ry, rz)
 			self.setTranslation((0, 0, 1000))
-			self.cbg.clear()
+			self.cbg.clearmap()
 			self.cube(120, 120, 120)
 			self.setRotMat(rz, rx, ry, (70, 0, 0))
 			self.setTranslation((-50, 50, 50))
 			self.cube(60, 60, 60)
+			self.redraw_screen()
 			ry += 0.1
 			rz += 0.03
 			sleep(0.04)
@@ -278,7 +324,7 @@ class G3d:
 def main():
 	c = CBG()
 	#c.liney()
-	d = G3d(c)
+	d = G3d(c, cy=c.height / 2 - 40)
 	#d.spincube()
 	d.spinship(ShipReader("cobra_mk3.ship"))
 	c.end()
