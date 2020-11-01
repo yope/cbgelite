@@ -169,6 +169,12 @@ class CBG:
 		self.line(x, y+h, x+w, y+h, clear)
 		self.line(x+w, y, x+w, y+h, clear)
 
+	def fillrect(self, x, y, w, h, clear=False):
+		# FIXME: Optimize this.
+		for i in range(y, y+h):
+			for j in range(x, x+w):
+				self.putpixel(j, i, clear)
+
 	def end(self):
 		print("\x1b[{};{}H".format(self.cheight - 3, 0))
 
