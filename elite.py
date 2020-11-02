@@ -78,7 +78,22 @@ class Radar:
 		self.y = y
 		self.w = w
 		self.h = h
+		self.sradw = 22
+		self.sradh = 22
+		self.sradx = x + w - self.sradw
+		self.srady = y - 6
 		self.cbg = cbg
+
+	def setup(self):
+		self.cbg.colorrect(self.x + 2, self.y + 2, self.w - 4, self.h - 4, 1, 0)
+		self.cbg.colorrect(self.sradx, self.srady, self.sradw + 2, self.sradh + 4, 13, 0)
+
+	def redraw_srad(self):
+		cx = self.sradx + self.sradw // 2
+		cy = self.srady + self.sradh // 2
+		a = self.sradw
+		b = self.sradh
+		self.cbg.ellipse(cx, cy, a, b)
 
 	def redraw(self):
 		cx = self.x + self.w // 2
@@ -86,6 +101,15 @@ class Radar:
 		a = self.w - 24
 		b = self.h - 12
 		self.cbg.ellipse(cx, cy, a, b)
+		self.redraw_srad()
+		self.cbg.line(cx, cy + b // 2, cx, cy - b // 2, pattern=0xaaaa)
+		self.cbg.line(cx - a // 2, cy - 2, cx + a // 2, cy - 2, pattern=0x8888)
+		self.cbg.line(cx - a // 2 + 14, cy - b // 4 - 3, cx + a // 2 - 14, cy - b // 4 - 3, pattern=0x8888)
+		self.cbg.line(cx - a // 2 + 8, cy + b // 4 + 1, cx + a // 2 - 8, cy + b // 4 + 1, pattern=0x8888)
+		self.cbg.line(cx - int(a/6.5), cy - b // 2 + 2, cx - int(a/2.5), cy + b // 2 - 9, pattern=0xaaaa)
+		self.cbg.line(cx + int(a/6.5), cy - b // 2 + 2, cx + int(a/2.5), cy + b // 2 - 9, pattern=0xaaaa)
+		self.cbg.line(cx - int(a/6.5), cy - b // 2 + 2, cx, cy - 3, pattern=0x8888)
+		self.cbg.line(cx + int(a/6.5), cy - b // 2 + 2, cx, cy - 3, pattern=0x8888)
 
 class Elite:
 	def __init__(self):
@@ -150,6 +174,7 @@ class Elite:
 		self.speedbar.setup()
 		self.rlmeter.setup()
 		self.dcmeter.setup()
+		self.radar.setup()
 
 	def draw_background(self):
 		self.cbg.rect(1, 2, self.width-2, self.height-4)
