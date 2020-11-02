@@ -138,6 +138,8 @@ class CBG:
 					if bg0 != bg:
 						bg0 = bg
 						print("\x1b[48;5;{}m".format(bg), end='')
+				# NOTE: This optimization significantly lower CPU load of the
+				# Terminal emulator (at least lxterminal):
 				if b:
 					u = chr(0x2800 + b)
 				else:
