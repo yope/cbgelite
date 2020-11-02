@@ -4,7 +4,7 @@
 from cbg import CBG, G3d
 from ship import ShipReader
 import sys
-from time import sleep
+from time import sleep, monotonic
 from math import sin
 
 class BarGraph:
@@ -208,12 +208,16 @@ class Elite:
 		tx = sw // 2 - 80
 		self.cbg.drawtext(tx, self.ystatus - 16, "Commander Jameson")
 
-	def title_screen(self):
+	def title_screen(self, showfps=False):
 		rx = 0.0
 		ry = 0.0
 		rz = 0.0
 		dz = 150
 		self.setup_screen()
+		if showfps:
+			t0 = monotonic()
+			fr = 0
+			fps = 0.0
 		while True:
 			self.g3d.setRotMat(rx, ry, rz)
 			self.g3d.setTranslation((0, 0, dz))
@@ -224,11 +228,22 @@ class Elite:
 			ry += 0.1
 			rz += 0.03
 			self.bar_fs.set_value(0.5+0.5*sin(rz))
-			sleep(0.04)
+			if showfps:
+				print("\x1b[2;2HFPS:{:.2f}".format(fps))
+			else:
+				sleep(0.04)
+				continue
+			fr += 1
+			if fr > 10:
+				t = monotonic()
+				fps = fr / (t - t0)
+				t0 = t
+				fr = 0
 
-	def run(self):
-		self.title_screen()
+	def run(self, showfps=False):
+		self.title_screen(showfps)
 
 if __name__ == "__main__":
+	showfps = ("-fps" in sys.argv)
 	e = Elite()
-	e.run()
+	e.run(showfps=showfps)
