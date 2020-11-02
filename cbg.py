@@ -145,23 +145,39 @@ class CBG:
 				print(u, end='')
 		sys.stdout.flush()
 
-	def line(self, x0, y0, x1, y1, clear=False):
+	def line(self, x0, y0, x1, y1, clear=False, pattern=None):
 		dx = abs(x1 - x0)
 		sx = 1 if (x0 < x1) else -1
 		dy = -abs(y1 - y0)
 		sy = 1 if (y0 < y1) else -1
 		err = dx + dy
-		while True:
-			self.putpixel(x0, y0, clear)
-			if (x0 == x1) and (y0 == y1):
-				break
-			e2 = 2 * err
-			if e2 >= dy:
-				err += dy
-				x0 += sx
-			if e2 <= dx:
-				err += dx
-				y0 += sy
+		if pattern:
+			i = 0
+			while True:
+				if pattern & (1 << i):
+					self.putpixel(x0, y0, clear)
+				if (x0 == x1) and (y0 == y1):
+					break
+				i = (i+1) & 0x0f
+				e2 = 2 * err
+				if e2 >= dy:
+					err += dy
+					x0 += sx
+				if e2 <= dx:
+					err += dx
+					y0 += sy
+		else:
+			while True:
+				self.putpixel(x0, y0, clear)
+				if (x0 == x1) and (y0 == y1):
+					break
+				e2 = 2 * err
+				if e2 >= dy:
+					err += dy
+					x0 += sx
+				if e2 <= dx:
+					err += dx
+					y0 += sy
 
 	def rect(self, x, y, w, h, clear=False):
 		self.line(x, y, x+w, y, clear)
