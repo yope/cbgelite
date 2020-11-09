@@ -17,11 +17,12 @@ class CBG:
 		self.charcodes = [chr(x) for x in range(0x2800, 0x2900)]
 		self.bitmasks = ((1, 8), (2, 16), (4, 32), (64, 128))
 		self.cheight, self.cwidth = (int(x) for x in os.popen('stty size', 'r').read().split())
-		self.width = self.cwidth * 2
-		self.height = self.cheight * 4
 		self.curx = 5
 		self.cury = 5
 		self.putcursor(0, 0)
+		self.set_log_area(max(0, self.cheight-60))
+		self.width = self.cwidth * 2
+		self.height = self.cheight * 4
 		self.clearcolormap()
 		self.clearscreen()
 		self.font = FontData("chargen.rom")
@@ -31,6 +32,24 @@ class CBG:
 		self.disable_cursor()
 		self.disable_echo()
 
+	def set_log_area(self, h):
+		self.cheight -= h
+		self.log_l0 = self.cheight
+		self.log_h = h
+		if h > 0:
+			self.logbuf = deque(maxlen=h)
+		for i in range(h):
+			self.log(" ")
+
+	def log(self, *args):
+		if not self.log_h:
+			return
+		s = " ".join(str(a) for a in args)
+		s = s.ljust(self.cwidth-1, " ")
+		self.logbuf.append(s)
+		for i, l in enumerate(self.logbuf):
+			self.putcursor(0, self.log_l0 + i)
+			print(l, end='')
 
 	def enable_cursor(self):
 		print("\x1b[?25h", end='')
