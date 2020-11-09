@@ -269,6 +269,7 @@ extra priviledges. You basically have two choices to make this work:
 		self.rlmeter.redraw()
 		self.dcmeter.redraw()
 		self.radar.redraw()
+		self.laser.draw()
 
 	def draw_title(self):
 		self.draw_background()
