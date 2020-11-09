@@ -73,16 +73,23 @@ class Battery:
 			b.redraw()
 
 class Radar:
-	def __init__(self, cbg, x, y, w, h):
+	def __init__(self, cbg, m, x, y, w, h):
 		self.x = x
 		self.y = y
 		self.w = w
 		self.h = h
+		self.cx = self.x + self.w // 2
+		self.cy = self.y + self.h // 2
+		self.rradx = self.w // 2 - 12
+		self.rrady = self.h // 2 - 6
+		self.rradz = (self.rrady * 2) // 2.5
+		self.rrange = 10000
 		self.sradw = 22
 		self.sradh = 22
 		self.sradx = x + w - self.sradw
 		self.srady = y - 6
 		self.cbg = cbg
+		self.m = m
 
 	def setup(self):
 		self.cbg.colorrect(self.x + 2, self.y + 2, self.w - 4, self.h - 4, 1, 0)
@@ -96,10 +103,10 @@ class Radar:
 		self.cbg.ellipse(cx, cy, a, b)
 
 	def redraw(self):
-		cx = self.x + self.w // 2
-		cy = self.y + self.h // 2
-		a = self.w - 24
-		b = self.h - 12
+		cx = self.cx
+		cy = self.cy
+		a = self.rradx * 2
+		b = self.rrady * 2
 		self.cbg.ellipse(cx, cy, a, b)
 		self.redraw_srad()
 		self.cbg.line(cx, cy + b // 2, cx, cy - b // 2, pattern=0xaaaa)
@@ -110,6 +117,25 @@ class Radar:
 		self.cbg.line(cx + int(a/6.5), cy - b // 2 + 2, cx + int(a/2.5), cy + b // 2 - 9, pattern=0xaaaa)
 		self.cbg.line(cx - int(a/6.5), cy - b // 2 + 2, cx, cy - 3, pattern=0x8888)
 		self.cbg.line(cx + int(a/6.5), cy - b // 2 + 2, cx, cy - 3, pattern=0x8888)
+		self.redraw_objects()
+
+	def redraw_objects(self):
+		objs = self.m.get_objects()
+		for o in objs:
+			p = o.get_viewpos()
+			d = sqrt(sum([n*n for n in p]))
+			if d > self.rrange:
+				continue
+			x = int(p[0] * self.rradx / self.rrange) + self.cx
+			y = int(-p[2] * self.rrady / self.rrange) + self.cy
+			bh = int(p[1] * self.rradz / self.rrange)
+			if bh < 0:
+				self.cbg.fillrect(x, y + bh, 2, -bh)
+				self.cbg.fillrect(x, y + bh - 1, 4, 2)
+			elif bh >= 0:
+				if bh:
+					self.cbg.fillrect(x, y, 2, bh)
+				self.cbg.fillrect(x - 2, y + bh - 1, 4, 2)
 
 class Elite:
 	def __init__(self):
@@ -146,7 +172,7 @@ class Elite:
 		self.speedbar = BarGraph(self.cbg, rbx, self.ystatus + 4, 40, 7, 11, 0, ticks=8)
 		self.rlmeter = Meter(self.cbg, rbx, self.ystatus + 12, 40, 7, 14, 0, ticks=8)
 		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
-		self.radar = Radar(self.cbg, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
+		self.radar = Radar(self.cbg, self.m, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
 
 	def setup_screen(self):
 		self.cbg.colorrect(0, 0, self.width, self.height, 11, 0)
