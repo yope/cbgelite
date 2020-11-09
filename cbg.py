@@ -354,6 +354,7 @@ class G3d:
 		sz = sin(rz)
 		cz = cos(rz)
 		self.rmat = (sx, cx, sy, cy, sz, cz)
+		return self.rmat
 
 	def setTranslation(self, p):
 		self.tvec = p
