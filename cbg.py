@@ -331,7 +331,7 @@ class G3d:
 	def point(self, p, clear=False):
 		x, y = self.project2d(*p)
 		if x is not None:
-			self.cbg.putpixel(x, y, clear)
+			self.cbg.putpixel(int(x), int(y), clear)
 
 	def line(self, p0, p1, clear=False):
 		x0, y0 = self.project2d(*p0)
