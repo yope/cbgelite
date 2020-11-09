@@ -6,6 +6,7 @@ from math import sin, cos, sqrt
 from collections import deque
 import sys
 import signal
+import termios
 
 from ship import ShipReader
 from text import FontData
@@ -27,6 +28,8 @@ class CBG:
 		self.orig_sigint = signal.getsignal(signal.SIGINT)
 		signal.signal(signal.SIGINT, self.handle_sigint)
 		self.disable_cursor()
+		self.disable_echo()
+
 
 	def enable_cursor(self):
 		print("\x1b[?25h", end='')
@@ -34,13 +37,29 @@ class CBG:
 	def disable_cursor(self):
 		print("\x1b[?25l", end='')
 
-	def handle_sigint(self, sig, frm):
-		signal.signal(signal.SIGINT, self.orig_sigint)
+	def disable_echo(self):
+		fd = sys.stdin.fileno() # Well.. this is 0, right?
+		flags = termios.tcgetattr(fd)
+		flags[3] &= ~termios.ECHO
+		termios.tcsetattr(fd, termios.TCSANOW, flags)
+
+	def enable_echo(self):
+		fd = sys.stdin.fileno()
+		flags = termios.tcgetattr(fd)
+		flags[3] |= termios.ECHO
+		termios.tcsetattr(fd, termios.TCSANOW, flags)
+
+	def exit(self, retcode):
 		self.enable_cursor()
+		self.enable_echo()
 		print("\x1b[0m", end='')
 		print("Screen size: {}x{}".format(self.width, self.height))
 		print("Screen Char size: {}x{}".format(self.cwidth, self.cheight))
-		sys.exit(1)
+		sys.exit(retcode)
+
+	def handle_sigint(self, sig, frm):
+		signal.signal(signal.SIGINT, self.orig_sigint)
+		self.exit(1)
 
 	def clearmap(self):
 		size = self.cwidth * self.cheight
