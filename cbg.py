@@ -315,7 +315,6 @@ class G3d:
 		self.width = cbg.width
 		self.height = cbg.height
 		self.persp = 400.0
-		self.cdist = 400.0
 		self.cx = cx or self.width / 2
 		self.cy = cy or self.height / 2
 		self.rmat = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
@@ -323,9 +322,8 @@ class G3d:
 		self.rotc = (0.0, 0.0, 0.0)
 
 	def project2d(self, x, y, z):
-		if z <= -self.cdist:
+		if z <= 0:
 			return None, None
-		z += self.cdist
 		x = self.persp * x / z
 		y = self.persp * y / z
 		return x + self.cx, y + self.cy
