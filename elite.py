@@ -6,6 +6,7 @@ from ship import ShipReader
 import sys
 from time import sleep, monotonic
 from math import sin, sqrt
+from microverse import Microverse
 from evdev import Input, find_keyboards
 
 class BarGraph:
@@ -215,6 +216,7 @@ extra priviledges. You basically have two choices to make this work:
 		self.speedbar = BarGraph(self.cbg, rbx, self.ystatus + 4, 40, 7, 11, 0, ticks=8)
 		self.rlmeter = Meter(self.cbg, rbx, self.ystatus + 12, 40, 7, 14, 0, ticks=8)
 		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
+		self.m = Microverse(self.cbg, self.g3d, self.ships)
 		self.radar = Radar(self.cbg, self.m, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
 		self.laser = Laser(self.cbg, 0, 0, self.width, self.ystatus)
 
@@ -280,25 +282,25 @@ extra priviledges. You basically have two choices to make this work:
 		self.cbg.drawtext(tx, self.ystatus - 16, "Commander Jameson")
 
 	def title_screen(self, showfps=False):
-		rx = 0.0
-		ry = 0.0
-		rz = 0.0
-		dz = 150
+		rx = 0.0001
+		ry = 0.0001
+		rz = 0.0001
+		dz = 550
 		self.setup_screen()
 		if showfps:
 			t0 = monotonic()
 			fr = 0
 			fps = 0.0
 		while True:
-			self.g3d.setRotMat(rx, ry, rz)
+			self.g3d.setRotQ(rx, ry, rz)
 			self.g3d.setTranslation((0, 0, dz))
 			self.cbg.clearmap()
 			self.draw_title()
 			self.cbg.setclip(self.spaceclip)
-			self.g3d.draw_ship(self.ships["cobra_mk3"])
+			self.g3d.draw_ship_q(self.ships["cobra_mk3"])
 			self.cbg.setclip(None)
 			self.cbg.redraw_screen()
-			ry += 0.1
+			rx += 0.1
 			rz += 0.03
 			self.bar_fs.set_value(0.5+0.5*sin(rz))
 			if 1 in self.input.keys_pressed():
@@ -315,8 +317,70 @@ extra priviledges. You basically have two choices to make this work:
 				t0 = t
 				fr = 0
 
+	def framsleep(self, ts):
+		now = monotonic()
+		dt = ts + 0.04 - now
+		if dt > 0:
+			sleep(dt)
+		return now
+
+	def microtest(self):
+		self.setup_screen()
+		m = self.m
+		cobra = m.spawn("cobra_mk3",    (-1500, 0, 5000), 0.0, 0.0)
+		viper = m.spawn("viper",        (1500, 0, 5000), -0.5, 2.0)
+		mamba = m.spawn("mamba",        (0, 1500, 5000), -0.5, 2.0)
+		coriolis = m.spawn("coriolis",  (0, -1500, 5000), -0.5, 2.0)
+		asteroid0 = m.spawn("asteroid", (1500, -1500, -5000), -0.1, 1.0)
+		asteroid1 = m.spawn("asteroid", (-1500, 1500, -5000), 0.1, -1.0)
+		roll = 0.0
+		cpitch = 0.0
+		pitch = 0.0
+		p1 = 0.005
+		ts = monotonic()
+		speed = 0.0
+		while True:
+			self.cbg.clearmap()
+			self.draw_background()
+			self.cbg.setclip(self.spaceclip)
+			m.set_roll_pitch(roll, pitch)
+			cobra.local_roll_pitch(0.01, cpitch)
+			coriolis.local_roll_pitch(0.005, 0.0)
+			m.draw()
+			self.cbg.setclip(None)
+			self.cbg.redraw_screen()
+			ts = self.framsleep(ts)
+			m.move(speed)
+			self.speedbar.set_value(speed / 15)
+			self.rlmeter.set_value(roll * 200)
+			self.dcmeter.set_value(pitch * 200)
+			keys = self.input.keys_pressed()
+			if 57 in keys:
+				speed = min(speed + 0.5, 15.0)
+			if 56 in keys:
+				speed = max(speed - 0.5, 0.0)
+			if 23 in keys:
+				pitch = min(pitch + 0.001, 0.02)
+			elif 37 in keys:
+				pitch = max(pitch - 0.001, -0.02)
+			else:
+				pitch = 0.0
+			if 36 in keys:
+				roll = max(roll - 0.001, -0.02)
+			elif 38 in keys:
+				roll = min(roll + 0.001, 0.02)
+			else:
+				roll = 0.0
+			if 17 in keys:
+				cpitch = min(cpitch + 0.001, 0.02)
+			elif 31 in keys:
+				cpitch = max(cpitch - 0.001, -0.02)
+			else:
+				cpitch = 0.0
+
 	def run(self, showfps=False):
 		self.title_screen(showfps)
+		self.microtest()
 
 if __name__ == "__main__":
 	showfps = ("-fps" in sys.argv)
