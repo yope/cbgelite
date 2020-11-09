@@ -11,6 +11,7 @@ import traceback
 
 from ship import ShipReader
 from text import FontData
+from quaternion import *
 
 class CBG:
 	def __init__(self):
@@ -395,6 +396,17 @@ class G3d:
 		dp = self.dot(vcop, self.normal(p0, p1, p2))
 		return (dp > 0)
 
+	def setRotQ(self, rx, ry, rz):
+		q1 = aangle2q((1, 0, 0), rx)
+		q2 = aangle2q((0, 1, 0), ry)
+		q3 = aangle2q((0, 0, 1), rz)
+		self.qtot = qmult(q1, qmult(q2, q3))
+		self.qcon = qconj(self.qtot)
+
+	def rotate_q(self, p):
+		qp = (0.0,) + p
+		return qmult(qmult(self.qtot, qp), self.qcon)[1:]
+
 	def cube(self, w, h, d):
 		x = w / 2
 		y = h / 2
@@ -440,6 +452,21 @@ class G3d:
 				e = s.edge[ei]
 				p0 = self.translate(self.rotate(s.vert[e[0]]))
 				p1 = self.translate(self.rotate(s.vert[e[1]]))
+				self.line(p0, p1)
+
+	def draw_ship_q(self, s):
+		for f in s.face:
+			fe = s.face[f]
+			n = self.rotate_q(s.norm[f])
+			p0 = self.translate(self.rotate_q(s.vert[s.edge[fe[0]][0]]))
+			vcop = self.normalize((p0[0], p0[1], p0[2] + self.persp ))
+			dp = self.dot(vcop, n)
+			if dp > 0:
+				continue
+			for ei in fe:
+				e = s.edge[ei]
+				p0 = self.translate(self.rotate_q(s.vert[e[0]]))
+				p1 = self.translate(self.rotate_q(s.vert[e[1]]))
 				self.line(p0, p1)
 
 	def draw_background(self):
