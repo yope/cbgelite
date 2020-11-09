@@ -5,7 +5,7 @@ from cbg import CBG, G3d
 from ship import ShipReader
 import sys
 from time import sleep, monotonic
-from math import sin
+from math import sin, sqrt
 from evdev import Input, find_keyboards
 
 class BarGraph:
