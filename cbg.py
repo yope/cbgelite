@@ -7,6 +7,7 @@ from collections import deque
 import sys
 import signal
 import termios
+import traceback
 
 from ship import ShipReader
 from text import FontData
@@ -59,6 +60,7 @@ class CBG:
 
 	def handle_sigint(self, sig, frm):
 		signal.signal(signal.SIGINT, self.orig_sigint)
+		traceback.print_stack()
 		self.exit(1)
 
 	def clearmap(self):
