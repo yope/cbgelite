@@ -6,6 +6,7 @@ from ship import ShipReader
 import sys
 from time import sleep, monotonic
 from math import sin
+from evdev import Input, find_keyboards
 
 class BarGraph:
 	def __init__(self, cbg, x, y, w, h, fg, bg, ticks=0):
@@ -182,6 +183,23 @@ class Elite:
 			"thargon",
 			"viper"
 		]
+		kbdname = find_keyboards()
+		if kbdname is None:
+			print("I couldn't find a keyboard connected to your computer, sorry.")
+			self.cbg.exit(2)
+		try:
+			self.input = Input(kbdname)
+		except PermissionError:
+			print("""
+There seems to be an issue with permissions, and I need your help.
+Look, this game is a bare console program, and as unfortunate as it
+seems, there is no way I can access a keyboard device without some
+extra priviledges. You basically have two choices to make this work:
+
+ 1.- Add yourself to the 'input' group so I can access the keyboard. or...
+ 2.- Try running this game with sudo.
+""")
+			self.cbg.exit(3)
 		self.ships = {sn:ShipReader(sn+".ship") for sn in shipnames}
 		self.width = 320
 		self.height = 240
@@ -279,6 +297,8 @@ class Elite:
 			ry += 0.1
 			rz += 0.03
 			self.bar_fs.set_value(0.5+0.5*sin(rz))
+			if 1 in self.input.keys_pressed():
+				break
 			if showfps:
 				print("\x1b[2;2HFPS:{:.2f}".format(fps))
 			else:
