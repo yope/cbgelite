@@ -137,6 +137,30 @@ class Radar:
 					self.cbg.fillrect(x, y, 2, bh)
 				self.cbg.fillrect(x - 2, y + bh - 1, 4, 2)
 
+class Laser:
+	def __init__(self, cbg, x, y, w, h):
+		self.cbg = cbg
+		self.type = "pulse"
+		self.cx = x + w // 2
+		self.cy = y + h // 2
+		self.w = w
+		self.h = h
+
+	def set_type(self, t):
+		self.type = t
+
+	def draw(self):
+		getattr(self, "draw_" + self.type)()
+
+	def draw_pulse(self):
+		r0 = 10
+		l = 12
+		r1 = 10 + l
+		self.cbg.fillrect(self.cx - r1, self.cy, l, 2)
+		self.cbg.fillrect(self.cx + r0, self.cy, l, 2)
+		self.cbg.fillrect(self.cx, self.cy - r1, 2, l)
+		self.cbg.fillrect(self.cx, self.cy + r0, 2, l)
+
 class Elite:
 	def __init__(self):
 		self.cbg = CBG()
@@ -173,6 +197,7 @@ class Elite:
 		self.rlmeter = Meter(self.cbg, rbx, self.ystatus + 12, 40, 7, 14, 0, ticks=8)
 		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
 		self.radar = Radar(self.cbg, self.m, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
+		self.laser = Laser(self.cbg, 0, 0, self.width, self.ystatus)
 
 	def setup_screen(self):
 		self.cbg.colorrect(0, 0, self.width, self.height, 11, 0)
