@@ -205,6 +205,7 @@ extra priviledges. You basically have two choices to make this work:
 		self.height = 240
 		self.hstatus = 64
 		self.ystatus = self.height - self.hstatus - 1
+		self.spaceclip = (4, 4, self.width - 4, self.ystatus - 4)
 		self.sboxw = 64
 		self.radarw = self.width-2*self.sboxw
 		self.g3d = G3d(self.cbg, cx = self.width // 2, cy = self.ystatus // 2)
@@ -292,7 +293,9 @@ extra priviledges. You basically have two choices to make this work:
 			self.g3d.setTranslation((0, 0, dz))
 			self.cbg.clearmap()
 			self.draw_title()
+			self.cbg.setclip(self.spaceclip)
 			self.g3d.draw_ship(self.ships["cobra_mk3"])
+			self.cbg.setclip(None)
 			self.cbg.redraw_screen()
 			ry += 0.1
 			rz += 0.03
