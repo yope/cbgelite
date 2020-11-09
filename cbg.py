@@ -23,6 +23,7 @@ class CBG:
 		self.set_log_area(max(0, self.cheight-60))
 		self.width = self.cwidth * 2
 		self.height = self.cheight * 4
+		self.setclip()
 		self.clearcolormap()
 		self.clearscreen()
 		self.font = FontData("chargen.rom")
@@ -81,6 +82,18 @@ class CBG:
 		signal.signal(signal.SIGINT, self.orig_sigint)
 		traceback.print_stack()
 		self.exit(1)
+
+	def setclip(self, cr=None):
+		if not cr:
+			self.clxmin = 0
+			self.clymin = 0
+			self.clxmax = self.width
+			self.clymax = self.height
+		else:
+			self.clxmin = cr[0]
+			self.clymin = cr[1]
+			self.clxmax = cr[2]
+			self.clymax = cr[3]
 
 	def clearmap(self):
 		size = self.cwidth * self.cheight
