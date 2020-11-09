@@ -118,7 +118,7 @@ class CBG:
 		self.map[x + y * self.cwidth] = code
 
 	def putpixel(self, x, y, clear=False):
-		if x >= self.width or y >=self.height or x < 0 or y < 0:
+		if x < self.clxmin or x > self.clxmax or y < self.clymin or y > self.clymax:
 			return
 		cpx = x >> 1
 		cpy = y >> 2
