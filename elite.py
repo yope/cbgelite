@@ -24,6 +24,7 @@ from time import sleep, monotonic
 from math import sin, sqrt
 from microverse import Microverse
 from evdev import Input, find_keyboards
+from ai import BaseAi
 
 class BarGraph:
 	def __init__(self, cbg, x, y, w, h, fg, bg, ticks=0):
@@ -330,9 +331,11 @@ extra priviledges. You basically have two choices to make this work:
 	async def microtest(self):
 		self.setup_screen()
 		m = self.m
-		cobra = m.spawn("cobra_mkiii",    (-1500, 0, 5000), 0.0, 0.0)
-		viper = m.spawn("krait",        (1500, 0, 5000), -0.5, 2.0)
-		mamba = m.spawn("transporter",        (0, 1500, 5000), -0.5, 2.0)
+		cobra = m.spawn("cobra_mkiii", (-500, 0, 10000), 0.0, 0.0)
+		cobra.add_ai(BaseAi)
+		viper = m.spawn("krait",       (1500, 0, 5000), -0.5, 2.0)
+		viper.add_ai(BaseAi)
+		mamba = m.spawn("transporter", (0, 1500, 5000), -0.5, 2.0)
 		coriolis = m.spawn("coriolis_space_station",  (0, -1500, 5000), -0.5, 2.0)
 		asteroid0 = m.spawn("asteroid", (1500, -1500, -5000), -0.1, 1.0)
 		asteroid1 = m.spawn("asteroid", (-1500, 1500, -5000), 0.1, -1.0)
@@ -347,12 +350,13 @@ extra priviledges. You basically have two choices to make this work:
 			self.draw_background()
 			self.cbg.setclip(self.spaceclip)
 			m.set_roll_pitch(roll, pitch)
-			cobra.local_roll_pitch(0.01, cpitch)
+			cobra.local_roll_pitch(0.0, cpitch)
 			coriolis.local_roll_pitch(0.005, 0.0)
 			m.draw()
 			self.cbg.setclip(None)
 			self.cbg.redraw_screen()
 			ts = await self.framsleep(ts)
+			m.handle()
 			m.move(speed)
 			self.speedbar.set_value(speed / 15)
 			self.rlmeter.set_value(roll * 200)
@@ -368,9 +372,9 @@ extra priviledges. You basically have two choices to make this work:
 				pitch = max(pitch - 0.001, -0.02)
 			else:
 				pitch = 0.0
-			if 36 in keys:
+			if 38 in keys:
 				roll = max(roll - 0.001, -0.02)
-			elif 38 in keys:
+			elif 36 in keys:
 				roll = min(roll + 0.001, 0.02)
 			else:
 				roll = 0.0

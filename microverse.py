@@ -26,8 +26,11 @@ from time import sleep
 random.seed(monotonic())
 
 class Object3D:
-	def __init__(self, mv, pos, ship):
+	def __init__(self, mv, pos, ship, name):
 		self.debug = False
+		self.alive = True
+		self.ai = None
+		self.name = name.replace("_", " ").upper()
 		self.mv = mv
 		self.g3d = mv.g3d
 		self.pos = pos
@@ -43,6 +46,13 @@ class Object3D:
 		self.qltot = qmult(self.qwpitch, self.qwroll)
 		self.local_roll_pitch(0.0, 0.0)
 		self.world_roll_pitch(0.0, 0.0)
+
+	def add_ai(self, AiCls):
+		self.ai = AiCls(self)
+
+	def handle(self):
+		if self.ai:
+			self.ai.handle()
 
 	def local_roll_pitch(self, roll, pitch):
 		self.roll += roll
@@ -79,7 +89,7 @@ class Object3D:
 	def _qrot(self, p):
 		return self._qwrot(self._qlrot(p))
 
-	def _scale_add(self, p, q, n):
+	def scale_add(self, p, q, n):
 		return p[0] * n + q[0], p[1] * n + q[1], p[2] * n + q[2]
 
 	def transform(self, p):
@@ -103,9 +113,9 @@ class Object3D:
 
 		if self.debug:
 			# Draw local coordinate system
-			g.line(self.pos, self._scale_add(self.nosev, self.pos, 300))
-			g.line(self.pos, self._scale_add(self.sidev, self.pos, 300))
-			g.line(self.pos, self._scale_add(self.roofv, self.pos, 300))
+			g.line(self.pos, self.scale_add(self.nosev, self.pos, 300))
+			g.line(self.pos, self.scale_add(self.sidev, self.pos, 300))
+			g.line(self.pos, self.scale_add(self.roofv, self.pos, 300))
 
 		for f in s.face:
 			fe = s.face[f]
@@ -158,6 +168,12 @@ class Microverse:
 		self.roll = 0.0
 		self.pitch = 0.0
 		self.set_roll_pitch(0.0, 0.0)
+		self.flashtext = ""
+		self.flashtout = 0
+
+	def handle(self):
+		for o in self.objects:
+			o.handle()
 
 	def get_objects(self):
 		return self.objects
@@ -174,10 +190,14 @@ class Microverse:
 
 	def spawn(self, name, pos, roll, pitch):
 		s = self.ships[name]
-		obj = Object3D(self, pos, s)
+		obj = Object3D(self, pos, s, name)
 		obj.local_roll_pitch(roll, pitch)
 		self.objects.append(obj)
 		return obj
+
+	def set_flashtext(self, s):
+		self.flashtext = s
+		self.flashtout = 50
 
 	def draw(self):
 		for o in self.objects:
@@ -186,6 +206,11 @@ class Microverse:
 			p.draw()
 			if p.distance() > 250:
 				p.reset()
+		if self.flashtout:
+			slen = len(self.flashtext) * 8
+			x = (self.cbg.width - slen) // 2
+			self.cbg.drawtext(x, 16, self.flashtext)
+			self.flashtout -= 1
 
 	def move(self, dz):
 		dp = (0, 0, -dz)
