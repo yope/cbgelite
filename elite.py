@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-
+import asyncio
 from cbg import CBG, G3d
 from ship import AllShips
 import sys
@@ -164,7 +164,8 @@ class Laser:
 		self.cbg.fillrect(self.cx, self.cy + r0, 2, l)
 
 class Elite:
-	def __init__(self):
+	def __init__(self, loop=None):
+		self.loop = loop or asyncio.get_event_loop()
 		self.cbg = CBG()
 		if self.cbg.width < 320 or self.cbg.height < 240:
 			print("Screen is too small.")
@@ -267,7 +268,7 @@ extra priviledges. You basically have two choices to make this work:
 		tx = sw // 2 - 80
 		self.cbg.drawtext(tx, self.ystatus - 16, "Commander Jameson")
 
-	def title_screen(self, showfps=False):
+	async def title_screen(self, showfps=False):
 		rx = 0.0001
 		ry = 0.0001
 		rz = 0.0001
@@ -294,7 +295,7 @@ extra priviledges. You basically have two choices to make this work:
 			if showfps:
 				print("\x1b[2;2HFPS:{:.2f}".format(fps))
 			else:
-				sleep(0.04)
+				await asyncio.sleep(0.04)
 				continue
 			fr += 1
 			if fr > 10:
@@ -302,15 +303,15 @@ extra priviledges. You basically have two choices to make this work:
 				fps = fr / (t - t0)
 				t0 = t
 				fr = 0
+			await asyncio.sleep(0)
 
-	def framsleep(self, ts):
-		now = monotonic()
-		dt = ts + 0.04 - now
-		if dt > 0:
-			sleep(dt)
+	async def framsleep(self, ts):
+		now = self.loop.time()
+		dt = max(0.0, ts + 0.04 - now)
+		await asyncio.sleep(dt)
 		return now
 
-	def microtest(self):
+	async def microtest(self):
 		self.setup_screen()
 		m = self.m
 		cobra = m.spawn("cobra_mkiii",    (-1500, 0, 5000), 0.0, 0.0)
@@ -335,7 +336,7 @@ extra priviledges. You basically have two choices to make this work:
 			m.draw()
 			self.cbg.setclip(None)
 			self.cbg.redraw_screen()
-			ts = self.framsleep(ts)
+			ts = await self.framsleep(ts)
 			m.move(speed)
 			self.speedbar.set_value(speed / 15)
 			self.rlmeter.set_value(roll * 200)
@@ -364,11 +365,18 @@ extra priviledges. You basically have two choices to make this work:
 			else:
 				cpitch = 0.0
 
-	def run(self, showfps=False):
-		self.title_screen(showfps)
-		self.microtest()
+	async def startup(self, showfps=False):
+		mt = self.loop.create_task(self.run(showfps))
+		mt.add_done_callback(lambda fut: self.cbg.exit(fut.result()))
+
+	async def run(self, showfps=False):
+		await self.title_screen(showfps)
+		await self.microtest()
+		return 0
 
 if __name__ == "__main__":
+	loop = asyncio.get_event_loop()
 	showfps = ("-fps" in sys.argv)
 	e = Elite()
-	e.run(showfps=showfps)
+	loop.run_until_complete(e.startup(showfps=showfps))
+	loop.run_forever()
