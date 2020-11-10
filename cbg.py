@@ -393,6 +393,12 @@ class G3d:
 		n = (v0[1]*v1[2] - v0[2]*v1[1], v0[2]*v1[0] - v0[0]*v1[2], v0[0]*v1[1] - v0[1]*v1[0])
 		return n
 
+	def add(self, p0, p1):
+		return p0[0] + p1[0], p0[1] + p1[1], p0[2] + p1[2]
+
+	def sub(self, p0, p1):
+		return p0[0] - p1[0], p0[1] - p1[1], p0[2] - p1[2]
+
 	def distv(self, v):
 		return sqrt(v[0]**2 + v[1]**2 + v[2]**2)
 
