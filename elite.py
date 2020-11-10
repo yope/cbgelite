@@ -2,7 +2,7 @@
 
 
 from cbg import CBG, G3d
-from ship import ShipReader
+from ship import AllShips
 import sys
 from time import sleep, monotonic
 from math import sin, sqrt
@@ -170,20 +170,6 @@ class Elite:
 			print("Screen is too small.")
 			print("Please resize your terminal to minimal 160x60 characters.")
 			sys.exit(2)
-		shipnames = [
-			"asteroid",
-			"cargo",
-			"cobra_mk3",
-			"coriolis",
-			"escape",
-			"mamba",
-			"missile",
-			"python",
-			"sidewinder",
-			"thargoid",
-			"thargon",
-			"viper"
-		]
 		kbdname = find_keyboards()
 		if kbdname is None:
 			print("I couldn't find a keyboard connected to your computer, sorry.")
@@ -201,7 +187,7 @@ extra priviledges. You basically have two choices to make this work:
  2.- Try running this game with sudo.
 """)
 			self.cbg.exit(3)
-		self.ships = {sn:ShipReader(sn+".ship") for sn in shipnames}
+		self.ships = AllShips("all_ships.ship").ships
 		self.width = 320
 		self.height = 240
 		self.hstatus = 64
@@ -297,7 +283,7 @@ extra priviledges. You basically have two choices to make this work:
 			self.cbg.clearmap()
 			self.draw_title()
 			self.cbg.setclip(self.spaceclip)
-			self.g3d.draw_ship_q(self.ships["cobra_mk3"])
+			self.g3d.draw_ship_q(self.ships["cobra_mkiii"])
 			self.cbg.setclip(None)
 			self.cbg.redraw_screen()
 			rx += 0.1
@@ -327,10 +313,10 @@ extra priviledges. You basically have two choices to make this work:
 	def microtest(self):
 		self.setup_screen()
 		m = self.m
-		cobra = m.spawn("cobra_mk3",    (-1500, 0, 5000), 0.0, 0.0)
-		viper = m.spawn("viper",        (1500, 0, 5000), -0.5, 2.0)
-		mamba = m.spawn("mamba",        (0, 1500, 5000), -0.5, 2.0)
-		coriolis = m.spawn("coriolis",  (0, -1500, 5000), -0.5, 2.0)
+		cobra = m.spawn("cobra_mkiii",    (-1500, 0, 5000), 0.0, 0.0)
+		viper = m.spawn("krait",        (1500, 0, 5000), -0.5, 2.0)
+		mamba = m.spawn("transporter",        (0, 1500, 5000), -0.5, 2.0)
+		coriolis = m.spawn("coriolis_space_station",  (0, -1500, 5000), -0.5, 2.0)
 		asteroid0 = m.spawn("asteroid", (1500, -1500, -5000), -0.1, 1.0)
 		asteroid1 = m.spawn("asteroid", (-1500, 1500, -5000), 0.1, -1.0)
 		roll = 0.0
