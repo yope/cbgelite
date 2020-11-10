@@ -32,6 +32,7 @@ from quaternion import *
 class CBG:
 	def __init__(self):
 		self.charcodes = [chr(x) for x in range(0x2800, 0x2900)]
+		self.charcodes[0] = ' ' # Replace 0 with space. This is faster in some cases.
 		self.bitmasks = ((1, 8), (2, 16), (4, 32), (64, 128))
 		self.cheight, self.cwidth = (int(x) for x in os.popen('stty size', 'r').read().split())
 		self.curx = 5
@@ -208,12 +209,7 @@ class CBG:
 					if bg0 != bg:
 						bg0 = bg
 						print("\x1b[48;5;{}m".format(bg), end='')
-				# NOTE: This optimization significantly lower CPU load of the
-				# Terminal emulator (at least lxterminal):
-				if b:
-					u = chr(0x2800 + b)
-				else:
-					u = ' '
+				u = self.charcodes[b]
 				print(u, end='')
 		sys.stdout.flush()
 
