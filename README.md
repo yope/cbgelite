@@ -32,3 +32,17 @@ controls work as follows:
  * SPACE: Accelerate
  * Left-ALT: Brake
 
+### Copying ###
+
+All source files, except "chargen.rom" and "all_ships.ship" may be distributed
+under the terms and conditions of the GPL version 2 license.
+
+The ship data is extracted from the source code of "Elite The New Kind" as published
+here on github: https://github.com/fesh0r/newkind
+
+The "Elite The New Kind" repository and files don't contain any license, so
+it is possibly not allowed to distribute them.
+
+The file "chargen.rom" contains a data dump from the Commodore C64 character
+generator ROM, which is probably copyrighted and may not be distributed. OTOH,
+there are numerous places where this file can be downloaded.
