@@ -350,7 +350,6 @@ extra priviledges. You basically have two choices to make this work:
 			self.draw_background()
 			self.cbg.setclip(self.spaceclip)
 			m.set_roll_pitch(roll, pitch)
-			cobra.local_roll_pitch(0.0, cpitch)
 			coriolis.local_roll_pitch(0.005, 0.0)
 			m.draw()
 			self.cbg.setclip(None)
