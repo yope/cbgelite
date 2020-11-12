@@ -91,13 +91,17 @@ class CBG:
 	def exit(self, retcode):
 		self.enable_cursor()
 		self.enable_echo()
-		print("\x1b[0m", end='')
+		self.putcursor(0, self.cheight+self.log_h-1)
+		print("\x1b[0m")
 		print("Screen size: {}x{}".format(self.width, self.height))
 		print("Screen Char size: {}x{}".format(self.cwidth, self.cheight))
 		sys.exit(retcode)
 
 	def handle_sigint(self, sig, frm):
 		signal.signal(signal.SIGINT, self.orig_sigint)
+		self.cury = 0
+		self.putcursor(0, self.cheight+self.log_h-1)
+		print("\nBacktrace:")
 		traceback.print_stack()
 		self.exit(1)
 
