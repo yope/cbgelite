@@ -32,6 +32,7 @@ class BaseAi:
 		self.task = self.loop.create_task(self.task())
 		self.speed = 6
 		self.roll = 0.0
+		self.randpitch = 0.0
 		self.strat = self.MOVE_TO
 		self.dist = 10000.0
 		self.dn = 0.0
@@ -43,9 +44,9 @@ class BaseAi:
 		o.pos = o.scale_add(o.nosev, o.pos, self.speed)
 		self.dist = g.distv(o.pos)
 		hvec = g.normalize(tuple(-x for x in o.pos))
-		dnu = g.dot(g.normalize(g.add(o.nosev, o.roofv)), hvec)
-		dnd = g.dot(g.normalize(g.sub(o.nosev, o.roofv)), hvec)
-		self.dn = g.dot(o.nosev, hvec)
+		self.dn = dn = g.dot(o.nosev, hvec)
+		ds = g.dot(o.sidev, hvec)
+		dr = g.dot(o.roofv, hvec)
 		if self.dn > 0.95:
 			canshoot = True
 			cs = " can shoot"
@@ -55,21 +56,29 @@ class BaseAi:
 		p = 0.0
 		r = self.roll
 		if self.strat is self.MOVE_TO:
-			if self.dn < 0.0:
-				p = -0.01
-			elif dnu > dnd:
-				p = -0.02
-			else:
+			if dn > ds and dn > dr:
+				if dr > 0.0:
+					p = 0.02
+				else:
+					p = -0.02
+			elif ds > dn and ds > dr:
+				r = 0.02
+			elif dr > ds and dr > dn:
 				p = 0.02
 		elif self.strat is self.MOVE_AWAY:
 			if self.dn > -0.5:
 				p = 0.01
+		else: # MOVE_RANDOM
+			p = self.randpitch
+			#self.cbg.log(o.name + " move random {:6.1f}".format(self.dist))
 		if r or p:
 			o.local_roll_pitch(r, p)
-		#self.cbg.log("dist: {:6.1f} dnu: {:5.2f} dnd: {:5.2f} dn: {:5.2f} strat={}".format(self.dist, dnu, dnd, self.dn, self.strat) + cs)
+		if o.name == "KRAIT":
+			self.cbg.log("dist: {:6.1f} dn: {:5.2f} ds: {:5.2f} dr: {:5.2f} strat={}".format(self.dist, dn, ds, dr, self.strat) + cs)
 
 	async def task(self):
 		o = self.obj
+		ts = 0
 		while o.alive:
 			await asyncio.sleep(0.1)
 			x = random.random()
@@ -79,12 +88,31 @@ class BaseAi:
 				self.roll = 0.02
 			else:
 				self.roll = 0.0
-			if self.strat is self.MOVE_AWAY and self.dist >= 5000:
+			if x > 0.98 and self.strat is self.MOVE_TO:
+				self.strat = self.MOVE_RANDOM
+				self.speed = 14
+				ts = 0
+			elif self.strat is self.MOVE_RANDOM and x < 0.3:
+				self.strat = self.MOVE_TO
+				self.speed = 10
+				ts = 0
+			elif self.strat is self.MOVE_AWAY and self.dist >= 5000:
 				self.strat = self.MOVE_TO
 				self.speed = 8
+				ts = 0
 			elif self.strat is self.MOVE_TO and self.dist <= 2000:
 				self.strat = self.MOVE_AWAY
 				self.speed = 12
+				ts = 0
+			ts += 1
+			if ts > 500:
+				self.strat = self.MOVE_RANDOM
+				speed = 12
+				ts = 0
+			if self.strat is self.MOVE_RANDOM:
+				self.roll = random.uniform(-0.06, 0.06)
+				self.randpitch = random.uniform(-0.06, 0.06)
+				await asyncio.sleep(0.2)
 			if self.dn > 0.975:
 				self.obj.mv.set_flashtext(o.name + " can hit")
 			elif self.dn > 0.95:
