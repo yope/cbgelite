@@ -10,7 +10,7 @@ top of that reimplement the classic BBC micro (and C64, etc...) game ELITE.
 
  * Python3
  * Terminal program capable of displaying unicode and minimal 160x60 caracter size.
- * A mono-spaced font that contains braille characters in the same with as other characters.
+ * A mono-spaced font that contains braille characters in the same width as other characters.
 
 Tested working combinations:
 
