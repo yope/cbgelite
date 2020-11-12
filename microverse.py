@@ -36,8 +36,8 @@ class Object3D:
 		self.pos = pos
 		self.ship = ship
 		self.nosev = (0, 0, 1)
-		self.sidev = (1, 0, 0)
-		self.roofv = (0, 1, 0)
+		self.sidev = (0, 1, 0)
+		self.roofv = (1, 0, 0)
 		self.roll = 0.0
 		self.pitch = 0.0
 		self.qwroll = aangle2q((0, 0, 1), 0.0)
@@ -77,8 +77,8 @@ class Object3D:
 		self.qwtot = qmult(qmult(self.qwpitch, self.qwroll), self.qwtot)
 		self.qwcon = qconj(self.qwtot)
 		self.nosev = normalize(self._qrot((0, 0, 1)))
-		self.sidev = normalize(self._qrot((1, 0, 0)))
-		self.roofv = normalize(self._qrot((0, 1, 0)))
+		self.sidev = normalize(self._qrot((0, 1, 0)))
+		self.roofv = normalize(self._qrot((1, 0, 0)))
 
 	def _qlrot(self, p):
 		return qmult(qmult(self.qltot, (0.0, ) + p), self.qlcon)[1:]
