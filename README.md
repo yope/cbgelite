@@ -23,12 +23,10 @@ Currently the 3D engine has only some basic test code. A title screen is display
 with a rotating Cobra MK-III. If you press ESC, you get into the flight simulator.
 There are 6 objects arranged in space, and you can fly around them.
 There is one coriolis space station, which rotates slowly around its nose vector.
-There is also a second Cobra MK-III ship that also rolls constantly. The keybaord
-controls work as follows:
+There are also two enemy ships flying around you changing attack strategies.
 
  * I,K: Pitch nose up down.
  * J,L: Roll left or right.
- * W,S: Pitch the second cobra up or down (get close to it to observe).
  * SPACE: Accelerate
  * Left-ALT: Brake
 
