@@ -213,10 +213,9 @@ class Microverse:
 			self.flashtout -= 1
 
 	def move(self, dz):
-		dp = (0, 0, -dz)
 		for o in self.objects:
-			p = o.pos
-			o.pos = (p[0] + dp[0], p[1] + dp[1], p[2] + dp[2])
+			x, y, z = o.pos
+			o.pos = (x, y, z - dz)
 		for o in self.particles:
-			p = o.pos
-			o.pos = (p[0] + dp[0], p[1] + dp[1], p[2] + dp[2])
+			x, y, z = o.pos
+			o.pos = (x, y, z - dz)
