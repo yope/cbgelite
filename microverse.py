@@ -135,17 +135,14 @@ class Object3D:
 				g.line(p0, p1)
 
 class Particle:
-	def __init__(self, mv, init=False):
+	def __init__(self, mv):
 		self.mv = mv
 		self.g3d = mv.g3d
-		if init:
-			self.pos = (
-				random.uniform(-15, 15),
-				random.uniform(-15, 15),
-				random.uniform(1, 250)
-			)
-		else:
-			self.reset()
+		self.pos = (
+			random.uniform(-15, 15),
+			random.uniform(-15, 15),
+			random.uniform(1, 250)
+		)
 
 	def reset(self):
 		self.pos = (random.uniform(-15, 15), random.uniform(-15, 15), random.uniform(50.0, 250.0))
