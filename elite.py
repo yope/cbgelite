@@ -286,27 +286,25 @@ extra priviledges. You basically have two choices to make this work:
 		self.cbg.drawtext(tx, self.ystatus - 16, "Commander Jameson")
 
 	async def title_screen(self, showfps=False):
-		rx = 0.0001
-		ry = 0.0001
-		rz = 0.0001
-		dz = 550
+		dz = 20050
 		self.setup_screen()
+		tm = Microverse(self.cbg, self.g3d, None, self.ships, particles=0)
+		cobra = tm.spawn("cobra_mkiii", (0, 0, dz), 0.0, 0.0)
 		if showfps:
 			t0 = monotonic()
 			fr = 0
 			fps = 0.0
 		while True:
-			self.g3d.setRotQ(rx, ry, rz)
-			self.g3d.setTranslation((0, 0, dz))
+			if dz > 550:
+				dz -= 150
+				cobra.pos = (0.0, 0.0, dz)
 			self.cbg.clearmap()
 			self.draw_title()
 			self.cbg.setclip(self.spaceclip)
-			self.g3d.draw_ship_q(self.ships["cobra_mkiii"])
+			cobra.local_roll_pitch(0.1, 0.03)
+			tm.draw()
 			self.cbg.setclip(None)
 			self.cbg.redraw_screen()
-			rx += 0.1
-			rz += 0.03
-			self.bar_fs.set_value(0.5+0.5*sin(rz))
 			if 1 in self.input.keys_pressed():
 				break
 			if showfps:
