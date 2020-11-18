@@ -107,6 +107,14 @@ class Object3D:
 		vp = self.g3d.normalize(self.pos)
 		return not (-0.7 < self.g3d.dot(vp, (0, 0, 1)) < 0.7)
 
+	def on_target(self):
+		x, y, x = self.pos
+		r = self.ship.opt_target_area
+		if (x + r) > 0 and (x - r) < 0 and (y + r) > 0 and (y - r) < 0:
+			return True
+		else:
+			return False
+
 	def draw(self):
 		s = self.ship
 		g = self.g3d
