@@ -25,6 +25,27 @@ class ShipReader:
 		self.edge = []
 		self.face = {}
 		self.norm = []
+		self.optidx = 0
+		self.optorder = [
+				"can_on_demise",
+				"target_area",
+				None,
+				None,
+				None,
+				"gun_vertex",
+				"explosion_count",
+				None,
+				None,
+				"bounty",
+				None,
+				"vis_dist",
+				"max_energy",
+				"max_speed",
+				None,
+				None,
+				None,
+				"weapons"
+			]
 		self.parse(lines)
 
 	def parse(self, lines):
@@ -40,6 +61,8 @@ class ShipReader:
 				self.process_edge(w)
 			elif w[0] == "FACE":
 				self.process_face(w)
+			elif w[0] == "EQUB" or w[0] == "EQUW":
+				self.process_option(w)
 
 	def process_vert(self, w):
 		self.vert.append((int(w[1]), int(w[2]), int(w[3])))
@@ -55,6 +78,23 @@ class ShipReader:
 
 	def process_face(self, w):
 		self.norm.append((int(w[1]), int(w[2]), int(w[3])))
+
+	def process_option(self, w):
+		if w[1].startswith("&"):
+			val = int(w[1][1:], 16)
+		elif w[1].startswith("%"):
+			val = int(w[1][1:], 2)
+		else:
+			val = int(w[1])
+		optname = self.optorder[self.optidx]
+		self.optidx += 1
+		if not optname:
+			return
+		if optname == "weapons":
+			self.opt_missiles = val & 7
+			self.opt_laser_power = val >> 3
+		else:
+			setattr(self, "opt_" + optname, val)
 
 class AllShips:
 	def __init__(self, fname):
