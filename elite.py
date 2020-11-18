@@ -220,9 +220,9 @@ extra priviledges. You basically have two choices to make this work:
 		self.speedbar = BarGraph(self.cbg, rbx, self.ystatus + 4, 40, 7, 11, 0, ticks=8)
 		self.rlmeter = Meter(self.cbg, rbx, self.ystatus + 12, 40, 7, 14, 0, ticks=8)
 		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
-		self.m = Microverse(self.cbg, self.g3d, self.ships)
-		self.radar = Radar(self.cbg, self.m, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
 		self.laser = Laser(self.cbg, 0, 0, self.width, self.ystatus)
+		self.m = Microverse(self.cbg, self.g3d, self.laser, self.ships)
+		self.radar = Radar(self.cbg, self.m, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
 
 	def setup_screen(self):
 		self.cbg.colorrect(0, 0, self.width, self.height, 11, 0)

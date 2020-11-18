@@ -162,14 +162,15 @@ class Particle:
 		self.g3d.point(self.pos)
 
 class Microverse:
-	def __init__(self, cbg, g3d, ships):
+	def __init__(self, cbg, g3d, laser, ships, particles=20):
 		self.g3d = g3d
 		self.cbg = cbg
 		self.ships = ships
+		self.laser = laser
 		self.objects = []
 		self.particles = set()
-		for i in range(20):
-			self.particles.add(Particle(self, init=True))
+		for i in range(particles):
+			self.particles.add(Particle(self))
 		self.roll = 0.0
 		self.pitch = 0.0
 		self.set_roll_pitch(0.0, 0.0)
