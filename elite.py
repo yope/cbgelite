@@ -23,8 +23,8 @@ import sys
 from time import sleep, monotonic
 from math import sin, sqrt
 from microverse import Microverse
-from evdev import Input, find_keyboards
 from ai import BaseAi
+from control import Control
 
 class BarGraph:
 	def __init__(self, cbg, x, y, w, h, fg, bg, ticks=0):
@@ -187,24 +187,9 @@ class Elite:
 		if self.cbg.width < 320 or self.cbg.height < 240:
 			print("Screen is too small.")
 			print("Please resize your terminal to minimal 160x60 characters.")
-			sys.exit(2)
-		kbdname = find_keyboards()
-		if kbdname is None:
-			print("I couldn't find a keyboard connected to your computer, sorry.")
 			self.cbg.exit(2)
-		try:
-			self.input = Input(kbdname)
-		except PermissionError:
-			print("""
-There seems to be an issue with permissions, and I need your help.
-Look, this game is a bare console program, and as unfortunate as it
-seems, there is no way I can access a keyboard device without some
-extra priviledges. You basically have two choices to make this work:
-
- 1.- Add yourself to the 'input' group so I can access the keyboard. or...
- 2.- Try running this game with sudo.
-""")
-			self.cbg.exit(3)
+		ctrl = Control(self.cbg)
+		self.inputdev = ctrl.get_evdev()
 		self.ships = AllShips("all_ships.ship").ships
 		self.width = 320
 		self.height = 240
@@ -305,7 +290,8 @@ extra priviledges. You basically have two choices to make this work:
 			tm.draw()
 			self.cbg.setclip(None)
 			self.cbg.redraw_screen()
-			if 1 in self.input.keys_pressed():
+			self.inputdev.handle()
+			if 1 in self.inputdev.get_keys():
 				break
 			if showfps:
 				print("\x1b[2;2HFPS:{:.2f}".format(fps))
@@ -338,7 +324,6 @@ extra priviledges. You basically have two choices to make this work:
 		asteroid0 = m.spawn("asteroid", (1500, -1500, -5000), -0.1, 1.0)
 		asteroid1 = m.spawn("asteroid", (-1500, 1500, -5000), 0.1, -1.0)
 		roll = 0.0
-		cpitch = 0.0
 		pitch = 0.0
 		p1 = 0.005
 		ts = monotonic()
@@ -356,31 +341,12 @@ extra priviledges. You basically have two choices to make this work:
 			m.handle()
 			m.move(speed)
 			self.speedbar.set_value(speed / 15)
-			self.rlmeter.set_value(roll * 200)
-			self.dcmeter.set_value(pitch * 200)
-			keys = self.input.keys_pressed()
-			if 57 in keys:
-				speed = min(speed + 0.5, 15.0)
-			if 56 in keys:
-				speed = max(speed - 0.5, 0.0)
-			if 23 in keys:
-				pitch = min(pitch + 0.001, 0.02)
-			elif 37 in keys:
-				pitch = max(pitch - 0.001, -0.02)
-			else:
-				pitch = 0.0
-			if 38 in keys:
-				roll = max(roll - 0.001, -0.02)
-			elif 36 in keys:
-				roll = min(roll + 0.001, 0.02)
-			else:
-				roll = 0.0
-			if 17 in keys:
-				cpitch = min(cpitch + 0.001, 0.02)
-			elif 31 in keys:
-				cpitch = max(cpitch - 0.001, -0.02)
-			else:
-				cpitch = 0.0
+			self.rlmeter.set_value(roll * 33)
+			self.dcmeter.set_value(pitch * 33)
+			self.inputdev.handle()
+			roll = self.inputdev.get_roll() * 0.03
+			pitch = self.inputdev.get_pitch() * 0.03
+			speed = self.inputdev.get_throttle() * 15.0
 
 	async def startup(self, showfps=False):
 		mt = self.loop.create_task(self.run(showfps))
