@@ -279,6 +279,7 @@ class Elite:
 			t0 = monotonic()
 			fr = 0
 			fps = 0.0
+		ts = monotonic()
 		while True:
 			if dz > 550:
 				dz -= 150
@@ -296,7 +297,7 @@ class Elite:
 			if showfps:
 				print("\x1b[2;2HFPS:{:.2f}".format(fps))
 			else:
-				await asyncio.sleep(0.04)
+				ts = await self.framsleep(ts)
 				continue
 			fr += 1
 			if fr > 10:
