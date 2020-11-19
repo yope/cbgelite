@@ -181,6 +181,8 @@ class Microverse:
 		self.set_roll_pitch(0.0, 0.0)
 		self.flashtext = ""
 		self.flashtout = 0
+		self.subtext = ""
+		self.subtout = 0
 
 	def handle(self):
 		for o in self.objects:
@@ -210,9 +212,16 @@ class Microverse:
 		self.flashtext = s
 		self.flashtout = 50
 
+	def set_subtext(self, s):
+		self.subtext = s
+		self.subtout = 30
+
 	def draw(self):
+		trg = None
 		for o in self.objects:
 			o.draw()
+			if o.on_target():
+				trg = o
 		for p in self.particles:
 			p.draw()
 		if self.flashtout:
@@ -220,6 +229,13 @@ class Microverse:
 			x = (320 - slen) // 2
 			self.cbg.drawtext(x, 16, self.flashtext)
 			self.flashtout -= 1
+		if self.subtout:
+			slen = len(self.subtext) * 8
+			x = (320 - slen) // 2
+			self.cbg.drawtext(x, 160, self.subtext)
+			self.subtout -= 1
+		if self.laser:
+			self.laser.draw(self, trg)
 
 	def move(self, dz):
 		for o in self.objects:
