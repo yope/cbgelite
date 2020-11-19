@@ -108,7 +108,7 @@ class Object3D:
 		return not (-0.7 < self.g3d.dot(vp, (0, 0, 1)) < 0.7)
 
 	def on_target(self):
-		x, y, x = self.pos
+		x, y, z = self.pos
 		r = self.ship.opt_target_area
 		if (x + r) > 0 and (x - r) < 0 and (y + r) > 0 and (y - r) < 0:
 			return True
