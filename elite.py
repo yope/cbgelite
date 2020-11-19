@@ -164,17 +164,31 @@ class Laser:
 		self.cy = y + h // 2
 		self.w = w
 		self.h = h
+		self.trg = None
+		self.highlite_count = 0
+		self.highlite_count_max = 16
 
 	def set_type(self, t):
 		self.type = t
 
-	def draw(self):
+	def draw(self, m, trg):
+		if trg is not self.trg:
+			if trg:
+				m.set_subtext(trg.name)
+			self.trg = trg
+		if trg:
+			self.highlite_count -= 1
+			if self.highlite_count < 0:
+				self.highlite_count = self.highlite_count_max
+		else:
+			self.highlite_count = 0
 		getattr(self, "draw_" + self.type)()
 
 	def draw_pulse(self):
-		r0 = 10
+		p = int(4.0 / (self.highlite_count_max + 1 - self.highlite_count))
+		r0 = 10 + p
 		l = 12
-		r1 = 10 + l
+		r1 = 10 + l + p
 		self.cbg.fillrect(self.cx - r1, self.cy, l, 2)
 		self.cbg.fillrect(self.cx + r0, self.cy, l, 2)
 		self.cbg.fillrect(self.cx, self.cy - r1, 2, l)
@@ -260,7 +274,6 @@ class Elite:
 		self.rlmeter.redraw()
 		self.dcmeter.redraw()
 		self.radar.redraw()
-		self.laser.draw()
 
 	def draw_title(self):
 		self.draw_background()
