@@ -146,23 +146,28 @@ class Particle:
 	def __init__(self, mv):
 		self.mv = mv
 		self.g3d = mv.g3d
+		self.rad = 250
+		self.maxdist = self.rad
+		self.mindist = 50
 		self.pos = (
-			random.uniform(-15, 15),
-			random.uniform(-15, 15),
-			random.uniform(1, 250)
+			random.uniform(-self.rad, self.rad),
+			random.uniform(-self.rad, self.rad),
+			random.uniform(1, self.maxdist)
 		)
 
 	def reset(self):
-		self.pos = (random.uniform(-15, 15), random.uniform(-15, 15), random.uniform(50.0, 250.0))
+		self.pos = (random.uniform(-self.rad, self.rad), random.uniform(-self.rad, self.rad), random.uniform(self.mindist, self.maxdist))
 
 	def distance(self):
 		return sqrt(sum((n*n for n in self.pos)))
 
 	def draw(self):
 		self.g3d.point(self.pos)
+		if self.distance() > self.maxdist:
+			self.reset()
 
 class Microverse:
-	def __init__(self, cbg, g3d, laser, ships, particles=20):
+	def __init__(self, cbg, g3d, laser, ships, particles=400):
 		self.g3d = g3d
 		self.cbg = cbg
 		self.ships = ships
@@ -210,11 +215,9 @@ class Microverse:
 			o.draw()
 		for p in self.particles:
 			p.draw()
-			if p.distance() > 250:
-				p.reset()
 		if self.flashtout:
 			slen = len(self.flashtext) * 8
-			x = (self.cbg.width - slen) // 2
+			x = (320 - slen) // 2
 			self.cbg.drawtext(x, 16, self.flashtext)
 			self.flashtout -= 1
 
