@@ -44,6 +44,7 @@ class CBG:
 		self.setclip()
 		self.clearcolormap()
 		self.clearscreen()
+		print("\x1b[2J", end="")
 		self.font = FontData("chargen.rom")
 		self.font.optimize(self.bitmasks)
 		self.orig_sigint = signal.getsignal(signal.SIGINT)
