@@ -258,7 +258,7 @@ class CBG:
 		self.line(x, y+h, x+w, y+h, clear)
 		self.line(x+w, y, x+w, y+h, clear)
 
-	def ellipse(self, x, y, a, b, clear=False):
+	def ellipse(self, x, y, a, b, clear=False, fill=False):
 		x0 = x - a // 2
 		x1 = x + a // 2
 		y0 = y - b // 2
@@ -271,24 +271,42 @@ class CBG:
 		y1 = y0-b1
 		a *= 8*a
 		b1 = 8*b*b
-		while True:
-			self.putpixel(int(x1), int(y0), clear)
-			self.putpixel(int(x0), int(y0), clear)
-			self.putpixel(int(x0), int(y1), clear)
-			self.putpixel(int(x1), int(y1), clear)
-			e2 = 2 * err
-			if e2 <= dy:
-				y0 += 1
-				y1 -= 1
-				dy += a
-				err += dy
-			if e2 >= dx or 2*err > dy:
-				x0 += 1
-				x1 -= 1
-				dx += b1
-				err += dx
-			if x0 > x1:
-				break
+		if fill:
+			while True:
+				self.line(int(x0), int(y0), int(x1), int(y0), clear)
+				self.line(int(x0), int(y1), int(x1), int(y1), clear)
+				e2 = 2 * err
+				if e2 <= dy:
+					y0 += 1
+					y1 -= 1
+					dy += a
+					err += dy
+				if e2 >= dx or 2*err > dy:
+					x0 += 1
+					x1 -= 1
+					dx += b1
+					err += dx
+				if x0 > x1:
+					break
+		else:
+			while True:
+				self.putpixel(int(x1), int(y0), clear)
+				self.putpixel(int(x0), int(y0), clear)
+				self.putpixel(int(x0), int(y1), clear)
+				self.putpixel(int(x1), int(y1), clear)
+				e2 = 2 * err
+				if e2 <= dy:
+					y0 += 1
+					y1 -= 1
+					dy += a
+					err += dy
+				if e2 >= dx or 2*err > dy:
+					x0 += 1
+					x1 -= 1
+					dx += b1
+					err += dx
+				if x0 > x1:
+					break
 
 		while y0-y1 < b:
 			self.putpixel(x0-1, y0)
