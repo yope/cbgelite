@@ -129,7 +129,7 @@ class Radar:
 		if self.m.station:
 			pstation = self.m.station.pos
 			ds = self.m.g3d.distv(pstation)
-			if ds < 50000:
+			if ds < 75000:
 				pplanet = pstation
 				self.near_station = True
 			else:
