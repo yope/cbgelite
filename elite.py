@@ -109,6 +109,8 @@ class Radar:
 		self.srady = y - 6
 		self.cbg = cbg
 		self.m = m
+		self.pmaxdist = 200000
+		self.near_station = False
 
 	def setup(self):
 		self.cbg.colorrect(self.x + 2, self.y + 2, self.w - 4, self.h - 4, 1, 0)
@@ -120,6 +122,34 @@ class Radar:
 		a = self.sradw
 		b = self.sradh
 		self.cbg.ellipse(cx, cy, a, b)
+		if not self.m.planet:
+			pplanet = (0, 0, 1000)
+		else:
+			pplanet = self.m.planet.pos
+		if self.m.station:
+			pstation = self.m.station.pos
+			ds = self.m.g3d.distv(pstation)
+			if ds < 50000:
+				pplanet = pstation
+				self.near_station = True
+			else:
+				self.near_station = False
+		if self.near_station:
+			self.cbg.drawtext(cx, cy + 40, "S", fg=4)
+		pm = self.pmaxdist
+		px, py, pz = pplanet
+		dp = self.m.g3d.distv(pplanet)
+		px /= dp
+		py /= dp
+		pz /= dp
+		pxr = int(px * a / 2)
+		pyr = int(py * b / 2)
+		pxr += cx - 1
+		pyr += cy - 1
+		if pz > 0:
+			self.cbg.fillrect(pxr, pyr, 3, 3)
+		else:
+			self.cbg.rect(pxr, pyr, 2, 2)
 
 	def redraw(self):
 		cx = self.cx
@@ -333,8 +363,9 @@ class Elite:
 		cobra.add_ai(BaseAi)
 		viper = m.spawn("krait",       (1500, 0, 5000), -0.5, 2.0)
 		viper.add_ai(BaseAi)
-		mamba = m.spawn("transporter", (0, 1500, 5000), -0.5, 2.0)
-		coriolis = m.spawn("coriolis_space_station",  (0, -1500, 5000), -0.5, 2.0)
+		trans = m.spawn("transporter", (0, 1500, 5000), -0.5, 2.0)
+		fdl = m.spawn("fer-de-lance",  (0, -1500, 5000), -0.5, 2.0)
+		fdl.add_ai(BaseAi)
 		asteroid0 = m.spawn("asteroid", (1500, -1500, -5000), -0.1, 1.0)
 		asteroid1 = m.spawn("asteroid", (-1500, 1500, -5000), 0.1, -1.0)
 		roll = 0.0
@@ -347,7 +378,7 @@ class Elite:
 			self.draw_background()
 			self.cbg.setclip(self.spaceclip)
 			m.set_roll_pitch(roll, pitch)
-			coriolis.local_roll_pitch(0.005, 0.0)
+			self.m.station.local_roll_pitch(0.005, 0.0)
 			m.draw()
 			self.cbg.setclip(None)
 			self.cbg.redraw_screen()

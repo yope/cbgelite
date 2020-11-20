@@ -109,6 +109,8 @@ class Object3D:
 
 	def on_target(self):
 		x, y, z = self.pos
+		if z < 0:
+			return False
 		r = self.ship.opt_target_area
 		if (x + r) > 0 and (x - r) < 0 and (y + r) > 0 and (y - r) < 0:
 			return True
@@ -166,6 +168,39 @@ class Particle:
 		if self.distance() > self.maxdist:
 			self.reset()
 
+class Planet:
+	def __init__(self, mv, name, pos, dia):
+		self.mv = mv
+		self.g3d = mv.g3d
+		self.name = name
+		self.pos = pos
+		self.diameter = dia
+		self.fill = False
+
+	def draw(self):
+		x, y, z = self.pos
+		x0, y0 = self.g3d.project2d(x, y, z)
+		if x0 is None:
+			return
+		x1, y1 = self.g3d.project2d(x + self.diameter, y, z)
+		rp = int(x1 - x0)
+		if (x0 - rp) > 400 or (x0 + rp) < 0 or (y0 - rp) > 200 or (y0 + rp) < 0:
+			return
+		rp = min(rp, 1000)
+		self.g3d.cbg.ellipse(int(x0), int(y0), rp, rp, fill=self.fill)
+
+	def move_z(self, dz):
+		x, y, z = self.pos
+		self.pos = (x, y, z + dz)
+
+	def rotate_q(self):
+		self.pos = self.g3d.rotate_q(self.pos)
+
+class Sun(Planet):
+	def __init__(self, mv, name, pos, dia):
+		super().__init__(mv, name, pos, dia)
+		self.fill = True
+
 class Microverse:
 	def __init__(self, cbg, g3d, laser, ships, particles=400):
 		self.g3d = g3d
@@ -176,6 +211,17 @@ class Microverse:
 		self.particles = set()
 		for i in range(particles):
 			self.particles.add(Particle(self))
+		if particles:
+			pd = 300000
+			pr = 15000
+			dps = 1000000
+			self.planet = Planet(self, "Lave", (0, 0, pd), pr)
+			self.sun = Sun(self, "Lave's Sun", (0, 0, -dps + pd), 40000)
+			self.station = self.spawn("coriolis_space_station", (pr, pr, pd), 0.0, 0.0)
+		else:
+			self.planet = None
+			self.sun = None
+			self.station = None
 		self.roll = 0.0
 		self.pitch = 0.0
 		self.set_roll_pitch(0.0, 0.0)
@@ -200,6 +246,10 @@ class Microverse:
 			o.world_roll_pitch(roll, pitch)
 		for o in self.particles:
 			o.pos = self.g3d.rotate_q(o.pos)
+		if self.planet:
+			self.planet.rotate_q()
+		if self.sun:
+			self.sun.rotate_q()
 
 	def spawn(self, name, pos, roll, pitch):
 		s = self.ships[name]
@@ -224,6 +274,10 @@ class Microverse:
 				trg = o
 		for p in self.particles:
 			p.draw()
+		if self.planet:
+			self.planet.draw()
+		if self.sun:
+			self.sun.draw()
 		if self.flashtout:
 			slen = len(self.flashtext) * 8
 			x = (320 - slen) // 2
@@ -244,3 +298,7 @@ class Microverse:
 		for o in self.particles:
 			x, y, z = o.pos
 			o.pos = (x, y, z - dz)
+		if self.planet:
+			self.planet.move_z(-dz)
+		if self.sun:
+			self.sun.move_z(-dz)
