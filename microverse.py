@@ -217,7 +217,7 @@ class Microverse:
 			dps = 1000000
 			self.planet = Planet(self, "Lave", (0, 0, pd), pr)
 			self.sun = Sun(self, "Lave's Sun", (0, 0, -dps + pd), 40000)
-			self.station = self.spawn("coriolis_space_station", (pr, pr, pd), 0.0, 0.0)
+			self.station = self.spawn("coriolis_space_station", (pr*0.85, pr*0.85, pd), 0.0, 0.0)
 		else:
 			self.planet = None
 			self.sun = None
