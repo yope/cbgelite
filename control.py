@@ -17,13 +17,20 @@
 
 from evdev import Input, find_devices
 from time import sleep
+import json
 
 class BaseDev:
-	BTN_FIRE = 1
-	BTN_MISSILE1 = 2
-	BTN_MISSILE2 = 3
-	BTN_ECM = 4
-	BTN_JUMP = 5
+	BTN_UP = 0
+	BTN_DOWN = 1
+	BTN_LEFT = 2
+	BTN_RIGHT = 3
+	BTN_ACCELERATE = 4
+	BTN_BRAKE = 5
+	BTN_FIRE = 6
+	BTN_MISSILE1 = 7
+	BTN_MISSILE2 = 8
+	BTN_ECM = 9
+	BTN_JUMP = 10
 	def __init__(self):
 		self.roll = 0.0
 		self.pitch = 0.0
@@ -32,6 +39,24 @@ class BaseDev:
 		self.btns0 = set()
 		self.keys = set()
 		self.keys0 = set()
+		self.keymap = {} # FIMXE
+		self.joymap = {
+				288: self.BTN_FIRE,
+				289: self.BTN_ECM,
+				295: self.BTN_MISSILE1,
+				296: self.BTN_MISSILE2,
+				299: self.BTN_JUMP
+			}
+
+	def set_mapping(self, mapping):
+		self.joymap = {}
+		self.keymap = {}
+		for m in mapping:
+			c, k, b = m
+			if k is not None:
+				self.keymap[k] = c
+			if b is not None:
+				self.joymap[b] = c
 
 	def handle(self):
 		pass
@@ -71,13 +96,7 @@ class Joydev(BaseDev):
 		self.axis_min = {}
 		self.deadz = 15
 		self.ascale = (100.0 + self.deadz) / 100.0
-		self.joymap = {
-				288: self.BTN_FIRE,
-				289: self.BTN_ECM,
-				295: self.BTN_MISSILE1,
-				296: self.BTN_MISSILE2,
-				299: self.BTN_JUMP
-			}
+		self.throttle_axis = None
 
 	def calibrate(self):
 		print("Calibrating joystick...")
@@ -87,6 +106,9 @@ class Joydev(BaseDev):
 			sleep(0.05)
 		self.axis_center = {i:v for i,v in self.axis.items()}
 		# FIXME: Calibrate max and min also?
+
+	def set_throttle_axis(self, axis):
+		self.throttle_axis = axis
 
 	def _normalize(self, axis, index):
 		mid = self.axis_center.get(index, 128)
@@ -101,36 +123,43 @@ class Joydev(BaseDev):
 	def handle(self):
 		self.keys = self.kdev.keys_pressed()
 		self.btns = {self.joymap[x] for x in self.jdev.keys_pressed() if x in self.joymap}
+		for k in self.keys:
+			if k in self.keymap:
+				self.btns.add(self.keymap[k])
 		self.axis = axis = self.jdev.axis
 		if 0 in axis:
 			self.roll = -self._normalize(axis, 0)
 		if 1 in axis:
 			self.pitch = -self._normalize(axis, 1)
-		if 3 in axis:
-			self.throttle = (255 - axis[3]) / 255.0
+		if self.throttle_axis and self.throttle_axis in axis:
+			self.throttle = (255 - axis[self.throttle_axis]) / 255.0
+		else:
+			if self.BTN_ACCELERATE in self.btns:
+				self.throttle = min(self.throttle + 0.03, 1.0)
+			elif self.BTN_BRAKE in self.btns:
+				self.throttle = max(self.throttle - 0.03, 0.0)
 
 class Kbddev(BaseDev):
 	def __init__(self, kdev):
 		super().__init__()
 		self.kdev = kdev
-		self.keymap = {} # FIMXE
 
 	def handle(self):
 		self.keys = keys = self.kdev.keys_pressed()
 		self.btns = {self.keymap[x] for x in keys if x in self.keymap}
-		if 57 in keys:
+		if self.BTN_ACCELERATE in self.btns:
 			self.throttle = min(self.throttle + 0.03, 1.0)
-		if 56 in keys:
+		if self.BTN_BRAKE in self.btns:
 			self.throttle = max(self.throttle - 0.03, 0.0)
-		if 23 in keys:
+		if self.BTN_UP in self.btns:
 			self.pitch = min(self.pitch + 0.03, 1.0)
-		elif 37 in keys:
+		elif self.BTN_DOWN in self.btns:
 			self.pitch = max(self.pitch - 0.03, -1.0)
 		else:
 			self.pitch = 0.0
-		if 38 in keys:
+		if self.BTN_RIGHT in self.btns:
 			self.roll = max(self.roll - 0.03, -1.0)
-		elif 36 in keys:
+		elif self.BTN_LEFT in self.btns:
 			self.roll = min(self.roll + 0.03, 1.0)
 		else:
 			self.roll = 0.0
@@ -173,3 +202,90 @@ extra priviledges. You basically have two choices to make this work:
 
 	def get_evdev(self):
 		return self.evdev
+
+	def get_yes_no(self):
+		while True:
+			k = self.keyboard.keys_pressed().copy()
+			if 21 in k or 49 in k:
+				break
+			sleep(0.05)
+		while self.keyboard.keys_pressed():
+			sleep(0.05)
+		if 21 in k:
+			return True
+		return False
+
+	def save_mapping(self, mapping, jthrottle):
+		with open("input_mapping.conf", "w") as f:
+			txt = json.dumps({
+				"mapping": mapping,
+				"use_joystick_throttle": jthrottle
+			})
+			f.write(txt)
+
+	def load_mapping(self):
+		with open("input_mapping.conf", "r") as f:
+			txt = f.read()
+			obj = json.loads(txt)
+			self.evdev.set_mapping(obj["mapping"])
+			if obj["use_joystick_throttle"]:
+				self.evdev.set_throttle_axis(3)
+
+	def edit_controls(self):
+		ctrl = []
+		jt = False
+		if not self.joystick:
+			ctrl.append(("Up", BaseDev.BTN_UP))
+			ctrl.append(("Down", BaseDev.BTN_DOWN))
+			ctrl.append(("Left", BaseDev.BTN_LEFT))
+			ctrl.append(("Right", BaseDev.BTN_RIGHT))
+		else:
+			print("Joystick axis 0 is roll left right")
+			print("Joystick axis 1 is pitch up down")
+			print("Do you want to use the joystick for throttle? (y/n)", end="", flush=True)
+			jt = self.get_yes_no()
+			print("Y" if jt else "N")
+			if jt:
+				print("Joystick axis 3 is throttle")
+		if not jt:
+			ctrl.append(("Accelerate", BaseDev.BTN_ACCELERATE))
+			ctrl.append(("Brake", BaseDev.BTN_BRAKE))
+		ctrl.append(("Fire", BaseDev.BTN_FIRE))
+		ctrl.append(("Arm missile", BaseDev.BTN_MISSILE1))
+		ctrl.append(("Fire missile", BaseDev.BTN_MISSILE2))
+		ctrl.append(("Activate ECM", BaseDev.BTN_ECM))
+		ctrl.append(("Near space JUMP", BaseDev.BTN_JUMP))
+		m = []
+		for c in ctrl:
+			print("Press button or key for {}:".format(c[0]), end="", flush=True)
+			while True:
+				keys = self.keyboard.keys_pressed()
+				if self.joystick:
+					btns = self.joystick.keys_pressed()
+				else:
+					btns = set()
+				if keys or btns:
+					break
+				sleep(0.05)
+			if keys:
+				k = keys.pop()
+				b = None
+				print(" Key code {}".format(k))
+			else:
+				b = btns.pop()
+				k = None
+				print(" Joystick button {}".format(b))
+			m.append((c[1], k, b))
+			while True:
+				keys = self.keyboard.keys_pressed()
+				if self.joystick:
+					btns = self.joystick.keys_pressed()
+				else:
+					btns = set()
+				if not keys and not btns:
+					break
+				sleep(0.05)
+		self.evdev.set_mapping(m)
+		if jt:
+			self.evdev.set_throttle_axis(3)
+		self.save_mapping(m, jt)

@@ -225,7 +225,7 @@ class Laser:
 		self.cbg.fillrect(self.cx, self.cy + r0, 2, l)
 
 class Elite:
-	def __init__(self, loop=None):
+	def __init__(self, loop=None, config=False):
 		self.loop = loop or asyncio.get_event_loop()
 		self.cbg = CBG()
 		if self.cbg.width < 320 or self.cbg.height < 240:
@@ -233,6 +233,10 @@ class Elite:
 			print("Please resize your terminal to minimal 160x60 characters.")
 			self.cbg.exit(2)
 		ctrl = Control(self.cbg)
+		if config:
+			ctrl.edit_controls()
+		else:
+			ctrl.load_mapping()
 		self.inputdev = ctrl.get_evdev()
 		self.ships = AllShips("all_ships.ship").ships
 		self.width = 320
@@ -408,6 +412,7 @@ class Elite:
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
 	showfps = ("-fps" in sys.argv)
-	e = Elite()
+	config = ("-config" in sys.argv)
+	e = Elite(config=config)
 	loop.run_until_complete(e.startup(showfps=showfps))
 	loop.run_forever()
