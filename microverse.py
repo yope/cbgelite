@@ -19,9 +19,11 @@ from cbg import CBG, G3d
 from ship import ShipReader
 import random
 from time import monotonic
-from math import sqrt, pi
+from math import sqrt, pi, inf
 from quaternion import *
 from time import sleep
+
+import asyncio
 
 random.seed(monotonic())
 
@@ -157,16 +159,21 @@ class Particle:
 			random.uniform(1, self.maxdist)
 		)
 
-	def reset(self):
-		self.pos = (random.uniform(-self.rad, self.rad), random.uniform(-self.rad, self.rad), random.uniform(self.mindist, self.maxdist))
+	def reset(self, js=0.0):
+		self.pos = (random.uniform(-self.rad, self.rad), random.uniform(-self.rad, self.rad), random.uniform(self.mindist+js/4, self.maxdist+js))
 
 	def distance(self):
 		return sqrt(sum((n*n for n in self.pos)))
 
-	def draw(self):
-		self.g3d.point(self.pos)
+	def draw(self, js):
+		if js == 0.0:
+			self.g3d.point(self.pos)
+		else:
+			x, y, z = self.pos
+			z0 = min(max(5.0, z - js/20), z)
+			self.g3d.line((x, y, z), (x, y, z0))
 		if self.distance() > self.maxdist:
-			self.reset()
+			self.reset(js)
 
 class Planet:
 	def __init__(self, mv, name, pos, dia):
@@ -203,12 +210,14 @@ class Sun(Planet):
 
 class Microverse:
 	def __init__(self, cbg, g3d, laser, ships, particles=400):
+		self.loop = asyncio.get_event_loop()
 		self.g3d = g3d
 		self.cbg = cbg
 		self.ships = ships
 		self.laser = laser
 		self.objects = []
 		self.particles = set()
+		self.max_particles = particles
 		for i in range(particles):
 			self.particles.add(Particle(self))
 		if particles:
@@ -229,10 +238,26 @@ class Microverse:
 		self.flashtout = 0
 		self.subtext = ""
 		self.subtout = 0
+		self.speed = 0.0
+		self.jumpspeed = 0.0
+
+	def get_planet_dist(self):
+		if not self.planet:
+			return inf
+		return self.g3d.distv(self.planet.pos)
+
+	def get_station_dist(self):
+		if not self.station:
+			return inf
+		return self.g3d.distv(self.station.pos)
+
+	def set_speed(self, speed):
+		self.speed = speed
 
 	def handle(self):
 		for o in self.objects:
 			o.handle()
+		self.move(self.speed + self.jumpspeed)
 
 	def get_objects(self):
 		return self.objects
@@ -272,8 +297,12 @@ class Microverse:
 			o.draw()
 			if o.on_target():
 				trg = o
+		i = self.max_particles - int(self.jumpspeed * self.max_particles / 1000.0)
 		for p in self.particles:
-			p.draw()
+			p.draw(self.jumpspeed)
+			i -= 1
+			if i <= 0:
+				break
 		if self.planet:
 			self.planet.draw()
 		if self.sun:
@@ -302,3 +331,31 @@ class Microverse:
 			self.planet.move_z(-dz)
 		if self.sun:
 			self.sun.move_z(-dz)
+
+	def jump(self):
+		if self.get_planet_dist() < 80000:
+			self.set_subtext("Too Close")
+			return
+		j = self.loop.create_task(self.coro_jump())
+		j.add_done_callback(lambda f: f.result())
+
+	async def _check_jump_dist(self, ramp=0.0):
+		self.set_subtext("JUMP")
+		for t in range(10):
+			if self.get_planet_dist() < 80000:
+				self.jumpspeed = 0.0
+				return False
+			self.jumpspeed += ramp
+			await asyncio.sleep(0.1)
+		return True
+
+	async def coro_jump(self):
+		if not await self._check_jump_dist(20.0):
+			return
+		self.jumpspeed = 200.0
+		for i in range(5):
+			if not await self._check_jump_dist(0.0):
+				return
+		if not await self._check_jump_dist(-20.0):
+			return
+		self.jumpspeed = 0.0

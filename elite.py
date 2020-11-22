@@ -24,7 +24,7 @@ from time import sleep, monotonic
 from math import sin, sqrt
 from microverse import Microverse
 from ai import BaseAi
-from control import Control
+from control import Control, BaseDev
 
 class BarGraph:
 	def __init__(self, cbg, x, y, w, h, fg, bg, ticks=0):
@@ -374,6 +374,18 @@ class Elite:
 		ts = monotonic()
 		speed = 0.0
 		while True:
+			self.inputdev.handle()
+			roll = self.inputdev.get_roll() * 0.03
+			pitch = self.inputdev.get_pitch() * 0.03
+			speed = self.inputdev.get_throttle() * 15.0
+			nbtns = self.inputdev.get_new_buttons()
+			m.set_speed(speed)
+			if BaseDev.BTN_JUMP in nbtns:
+				m.jump()
+			m.handle()
+			self.speedbar.set_value(speed / 15)
+			self.rlmeter.set_value(roll * 33)
+			self.dcmeter.set_value(pitch * 33)
 			self.cbg.clearmap()
 			self.draw_background()
 			self.cbg.setclip(self.spaceclip)
@@ -383,15 +395,6 @@ class Elite:
 			self.cbg.setclip(None)
 			self.cbg.redraw_screen()
 			ts = await self.framsleep(ts)
-			m.handle()
-			m.move(speed)
-			self.speedbar.set_value(speed / 15)
-			self.rlmeter.set_value(roll * 33)
-			self.dcmeter.set_value(pitch * 33)
-			self.inputdev.handle()
-			roll = self.inputdev.get_roll() * 0.03
-			pitch = self.inputdev.get_pitch() * 0.03
-			speed = self.inputdev.get_throttle() * 15.0
 
 	async def startup(self, showfps=False):
 		mt = self.loop.create_task(self.run(showfps))
