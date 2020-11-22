@@ -57,6 +57,7 @@ class Joydev(BaseDev):
 		self.axis_max = {}
 		self.axis_min = {}
 		self.deadz = 15
+		self.ascale = (100.0 + self.deadz) / 100.0
 		self.joymap = {
 				288: self.BTN_FIRE,
 				289: self.BTN_ECM,
@@ -75,11 +76,12 @@ class Joydev(BaseDev):
 
 	def _normalize(self, axis, index):
 		mid = self.axis_center.get(index, 128)
-		ret = min(max(axis[index] - mid, -100), 100)
-		if ret < 0:
-			ret = min(0.0, ret + self.deadz)
+		raw = axis[index] - mid
+		if raw < 0:
+			ret = min(0.0, raw + self.deadz)
 		else:
-			ret = max(0.0, ret - self.deadz)
+			ret = max(0.0, raw - self.deadz)
+		ret = min(max(ret * self.ascale, -100), 100)
 		return ret / 100.0
 
 	def handle(self):
