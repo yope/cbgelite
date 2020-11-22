@@ -17,18 +17,49 @@ Tested working combinations:
  * Konsole with terminus TTF font
  * lxterminal with Inconsolata font.
 
+### invocation
+
+This game runs in a terminal, but a terminal program does not have support for
+low level input events as they are required for such a game as this one.
+Therefor this game needs access to the Linux input devices. Unfortunately a
+reguar user does not have access to input devices directly, so you may need to
+either add yourself to the "input" group on your machine, or run this game as
+root (using sudo).
+
+There are two possible command-line options:
+
+ * -fps: Run the title animation at maximum speed and display the achjieved FPS
+   value in the top left of the screen.
+ * -config: Start a rudimentary input config editor before the game starts, to
+   reconfigure the input devices. You can assign joystick buttons or keyboard
+   keys to the different functions. The configuration will be saved in the file
+   "input_mapping.conf". This file is read if the game is started without this
+   option.
+
 ### Basic test mode operation
 
 Currently the 3D engine has only some basic test code. A title screen is displayed,
 with a rotating Cobra MK-III. If you press ESC, you get into the flight simulator.
-There are 6 objects arranged in space, and you can fly around them.
-There is one coriolis space station, which rotates slowly around its nose vector.
-There are also two enemy ships flying around you changing attack strategies.
+There are several objects arranged in space, and you can fly around them.
+There is a planet, with an orbiting coriolis space station in the distance and
+a sun on the opposite side of you. Some enemy ships will fly around you and
+get into attacking position. Their ability to shoot or even hit you is displayed
+on the top of the screen, but no shots are actually fired yet.
+
+The default controls with the keyboard are:
 
  * I,K: Pitch nose up down.
  * J,L: Roll left or right.
  * SPACE: Accelerate
  * Left-ALT: Brake
+ * B: Short space jump
+ * E: Activate ECM (not implemented yet)
+ * M: Arm missile (not implemented yet)
+ * N: Fire missile (not implemented yet)
+
+All keys can be re-assigned if the "-config" option is used.
+If a joystick is detected, it will be used. The config editor permits to assign
+analog axis 3 of the joystick to the throttle optionally.
 
 ### Copying ###
 
