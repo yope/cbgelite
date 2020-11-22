@@ -23,6 +23,7 @@ class BaseDev:
 	BTN_MISSILE1 = 2
 	BTN_MISSILE2 = 3
 	BTN_ECM = 4
+	BTN_JUMP = 5
 	def __init__(self):
 		self.roll = 0.0
 		self.pitch = 0.0
@@ -75,6 +76,7 @@ class Joydev(BaseDev):
 				289: self.BTN_ECM,
 				295: self.BTN_MISSILE1,
 				296: self.BTN_MISSILE2,
+				299: self.BTN_JUMP
 			}
 
 	def calibrate(self):
