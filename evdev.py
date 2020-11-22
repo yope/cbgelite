@@ -54,10 +54,15 @@ class Input:
 		return code, value
 
 	def test(self):
+		a = repr(self.axis)
+		k = None
 		while True:
-			keys = self.keys_pressed()
-			print(repr(keys))
-			print(repr(self.axis))
+			keys = repr(self.keys_pressed())
+			a1 = repr(self.axis)
+			if a != a1 or k != keys:
+				print(keys, a1)
+				a = a1
+				k = keys
 			sleep(0.05)
 
 	def keys_pressed(self):
