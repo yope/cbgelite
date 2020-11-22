@@ -28,7 +28,9 @@ class BaseDev:
 		self.pitch = 0.0
 		self.throttle = 0.0
 		self.btns = set()
+		self.btns0 = set()
 		self.keys = set()
+		self.keys0 = set()
 
 	def handle(self):
 		pass
@@ -45,8 +47,18 @@ class BaseDev:
 	def get_buttons(self):
 		return self.btns
 
+	def get_new_buttons(self):
+		ret = self.btns - self.btns0
+		self.btns0 = self.btns.copy()
+		return ret
+
 	def get_keys(self):
 		return self.keys
+
+	def get_new_keys(self):
+		ret = self.keys - self.keys0
+		self.keys0 = self.keys.copy()
+		return ret
 
 class Joydev(BaseDev):
 	def __init__(self, jdev, kdev):
