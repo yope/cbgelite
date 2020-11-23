@@ -123,22 +123,22 @@ class Radar:
 		b = self.sradh
 		self.cbg.ellipse(cx, cy, a, b)
 		if not self.m.planet:
-			pplanet = (0, 0, 1000)
+			px, py, pz = (0, 0, 1000)
+			dp = 1000
 		else:
-			pplanet = self.m.planet.pos
+			px, py, pz = self.m.planet.pos
+			dp = self.m.get_planet_dist()
 		if self.m.station:
-			pstation = self.m.station.pos
-			ds = self.m.g3d.distv(pstation)
+			ds = self.m.get_station_dist()
 			if ds < 75000:
-				pplanet = pstation
+				px, py, pz = self.m.station.pos
 				self.near_station = True
+				dp = ds
 			else:
 				self.near_station = False
 		if self.near_station:
 			self.cbg.drawtext(cx, cy + 40, "S", fg=4)
 		pm = self.pmaxdist
-		px, py, pz = pplanet
-		dp = self.m.g3d.distv(pplanet)
 		px /= dp
 		py /= dp
 		pz /= dp
