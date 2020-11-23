@@ -116,8 +116,8 @@ class BaseAi:
 				self.roll = random.uniform(-0.06, 0.06)
 				self.randpitch = random.uniform(-0.06, 0.06)
 				await asyncio.sleep(0.2)
-			if self.dn > 0.975:
+			if self.dn > 0.975 and self.dist < 30000:
 				self.obj.mv.set_flashtext(o.name + " can hit")
-			elif self.dn > 0.95:
+			elif self.dn > 0.95 and self.dist < 25000:
 				self.obj.mv.set_flashtext(o.name + " can shoot")
 		self.obj.mv.set_flashtext(o.name + " disappeared")
