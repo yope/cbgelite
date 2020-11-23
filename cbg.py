@@ -252,6 +252,21 @@ class CBG:
 					err += dx
 					y0 += sy
 
+	def clipped_line(self, x0, y0, x1, y1, clear=False, pattern=None):
+		# Basic check to see if any part of the line is visible
+		if x0 < self.clxmin and x1 < self.clxmin:
+			return
+		if x0 > self.clxmax and x1 > self.clxmax:
+			return
+		if y0 < self.clymin and y1 < self.clymin:
+			return
+		if y0 > self.clymax and y1 > self.clymax:
+			return
+
+		# FIXME: Now we could do intersection checks to optimize the line drawing
+		# further, but this is already quite good, so let's just draw it.
+		self.line(x0, y0, x1, y1, clear=clear, pattern=pattern)
+
 	def rect(self, x, y, w, h, clear=False):
 		self.line(x, y, x+w, y, clear)
 		self.line(x, y, x, y+h, clear)
@@ -376,7 +391,7 @@ class G3d:
 		x1, y1 = self.project2d(*p1)
 		if x1 is None:
 			return
-		self.cbg.line(int(x0), int(y0), int(x1), int(y1), clear)
+		self.cbg.clipped_line(int(x0), int(y0), int(x1), int(y1), clear)
 
 	def setRotMat(self, rx, ry, rz, rotc=None):
 		if rotc is None:
