@@ -244,6 +244,7 @@ class Microverse:
 		self.subtout = 0
 		self.speed = 0.0
 		self.jumpspeed = 0.0
+		self.jumping = False
 
 	def get_planet_dist(self):
 		if not self.planet:
@@ -340,11 +341,14 @@ class Microverse:
 			self.sun.move_z(-dz)
 
 	def jump(self):
+		if self.jumping:
+			return
 		if self.get_planet_dist() < 80000:
 			self.set_subtext("Too Close")
 			return
 		j = self.loop.create_task(self.coro_jump())
 		j.add_done_callback(lambda f: f.result())
+		self.jumping = True
 
 	async def _check_jump_dist(self, ramp=0.0):
 		self.set_subtext("JUMP")
@@ -366,3 +370,4 @@ class Microverse:
 		if not await self._check_jump_dist(-20.0):
 			return
 		self.jumpspeed = 0.0
+		self.jumping = False
