@@ -30,7 +30,8 @@ class BaseAi:
 		self.cbg = obj.mv.cbg
 		self.loop = asyncio.get_event_loop()
 		self.task = self.loop.create_task(self.task())
-		self.speed = 6
+		self.max_speed = obj.ship.opt_max_speed / 2
+		self.speed = self.max_speed / 2
 		self.roll = 0.0
 		self.randpitch = 0.0
 		self.strat = self.MOVE_TO
@@ -93,24 +94,24 @@ class BaseAi:
 				self.roll = 0.0
 			if x > 0.98 and self.strat is self.MOVE_TO:
 				self.strat = self.MOVE_RANDOM
-				self.speed = 14
+				self.speed = self.max_speed
 				ts = 0
 			elif self.strat is self.MOVE_RANDOM and x < 0.3:
 				self.strat = self.MOVE_TO
-				self.speed = 10
+				self.speed = self.max_speed * 0.7
 				ts = 0
 			elif self.strat is self.MOVE_AWAY and self.dist >= 5000:
 				self.strat = self.MOVE_TO
-				self.speed = 8
+				self.speed = self.max_speed * 0.9
 				ts = 0
 			elif self.strat is self.MOVE_TO and self.dist <= 2000:
 				self.strat = self.MOVE_AWAY
-				self.speed = 12
+				self.speed = self.max_speed * 0.8
 				ts = 0
 			ts += 1
 			if ts > 500:
 				self.strat = self.MOVE_RANDOM
-				speed = 12
+				speed = self.max_speed * 0.85
 				ts = 0
 			if self.strat is self.MOVE_RANDOM:
 				self.roll = random.uniform(-0.06, 0.06)
