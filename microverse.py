@@ -49,6 +49,10 @@ class Object3D:
 		self.local_roll_pitch(0.0, 0.0)
 		self.world_roll_pitch(0.0, 0.0)
 
+	def vanish(self):
+		self.alive = False
+		self.mv.remove_object(self)
+
 	def add_ai(self, AiCls):
 		self.ai = AiCls(self)
 
@@ -282,6 +286,9 @@ class Microverse:
 		obj.local_roll_pitch(roll, pitch)
 		self.objects.append(obj)
 		return obj
+
+	def remove_object(self, obj):
+		self.objects.remove(obj)
 
 	def set_flashtext(self, s):
 		self.flashtext = s

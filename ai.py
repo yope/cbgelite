@@ -43,6 +43,9 @@ class BaseAi:
 		g = self.g3d
 		o.pos = o.scale_add(o.nosev, o.pos, self.speed)
 		self.dist = g.distv(o.pos)
+		if self.dist > 50000:
+			self.obj.vanish()
+			return
 		hvec = g.normalize(tuple(-x for x in o.pos))
 		self.dn = dn = g.dot(o.nosev, hvec)
 		ds = g.dot(o.sidev, hvec)
@@ -117,3 +120,4 @@ class BaseAi:
 				self.obj.mv.set_flashtext(o.name + " can hit")
 			elif self.dn > 0.95:
 				self.obj.mv.set_flashtext(o.name + " can shoot")
+		self.obj.mv.set_flashtext(o.name + " disappeared")
