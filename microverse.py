@@ -164,7 +164,8 @@ class Particle:
 		)
 
 	def reset(self, js=0.0):
-		self.pos = (random.uniform(-self.rad, self.rad), random.uniform(-self.rad, self.rad), random.uniform(self.mindist+js/4, self.maxdist+js))
+		r = self.rad + js
+		self.pos = (random.uniform(-r, r), random.uniform(-r, r), random.uniform(self.mindist+js/2, self.maxdist+js*2))
 
 	def distance(self):
 		return sqrt(sum((n*n for n in self.pos)))
@@ -174,7 +175,7 @@ class Particle:
 			self.g3d.point(self.pos)
 		else:
 			x, y, z = self.pos
-			z0 = min(max(5.0, z - js/20), z)
+			z0 = min(max(5.0, z - js/10), z)
 			self.g3d.line((x, y, z), (x, y, z0))
 		if self.distance() > self.maxdist:
 			self.reset(js)
@@ -305,12 +306,8 @@ class Microverse:
 			o.draw()
 			if o.on_target():
 				trg = o
-		i = self.max_particles - int(self.jumpspeed * self.max_particles / 1000.0)
 		for p in self.particles:
 			p.draw(self.jumpspeed)
-			i -= 1
-			if i <= 0:
-				break
 		if self.planet:
 			self.planet.draw()
 		if self.sun:
