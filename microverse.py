@@ -161,7 +161,6 @@ class Object3D:
 				gp = self.transform(s.vert[gvert])
 				gpd = g.distv(gp)
 				dp = self.scale_add(self.nosev, gp, gpd)
-				g.cbg.log(gp, dp)
 				g.line(gp, dp)
 			self.shot_time -= 1
 
