@@ -143,6 +143,9 @@ class CBG:
 	def putpixel(self, x, y, clear=False):
 		if x < self.clxmin or x > self.clxmax or y < self.clymin or y > self.clymax:
 			return
+		self.putpixel_nocheck(x, y, clear=clear)
+
+	def putpixel_nocheck(self, x, y, clear=False):
 		cpx = x >> 1
 		cpy = y >> 2
 		bmp = self.bitmasks[y & 3][x & 1]
@@ -228,7 +231,7 @@ class CBG:
 			i = 0
 			while True:
 				if pattern & (1 << i):
-					self.putpixel(x0, y0, clear)
+					self.putpixel_nocheck(x0, y0, clear)
 				if (x0 == x1) and (y0 == y1):
 					break
 				i = (i+1) & 0x0f
@@ -241,7 +244,7 @@ class CBG:
 					y0 += sy
 		else:
 			while True:
-				self.putpixel(x0, y0, clear)
+				self.putpixel_nocheck(x0, y0, clear)
 				if (x0 == x1) and (y0 == y1):
 					break
 				e2 = 2 * err
