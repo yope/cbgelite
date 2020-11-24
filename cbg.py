@@ -468,7 +468,7 @@ class G3d:
 		x1, y1 = self.project2d(*p1)
 		if x1 is None:
 			return
-		self.cbg.clipped_line(int(x0), int(y0), int(x1), int(y1), clear)
+		self.cbg.clipped_line(x0, y0, x1, y1, clear)
 
 	def setRotMat(self, rx, ry, rz, rotc=None):
 		if rotc is None:
