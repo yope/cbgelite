@@ -341,8 +341,8 @@ class CBG:
 		b1 = 8*b*b
 		if fill:
 			while True:
-				self.line(int(x0), int(y0), int(x1), int(y0), clear)
-				self.line(int(x0), int(y1), int(x1), int(y1), clear)
+				self.hline(int(x0), int(x1), int(y0), clear)
+				self.hline(int(x0), int(x1), int(y1), clear)
 				e2 = 2 * err
 				if e2 <= dy:
 					y0 += 1
