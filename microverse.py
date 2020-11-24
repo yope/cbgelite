@@ -187,7 +187,7 @@ class Planet:
 		self.name = name
 		self.pos = pos
 		self.diameter = dia
-		self.fill = False
+		self.fill = 0
 
 	def draw(self):
 		x, y, z = self.pos
@@ -211,7 +211,7 @@ class Planet:
 class Sun(Planet):
 	def __init__(self, mv, name, pos, dia):
 		super().__init__(mv, name, pos, dia)
-		self.fill = True
+		self.fill = 2 # Fuzzy fill
 
 class Microverse:
 	def __init__(self, cbg, g3d, laser, ships, particles=400):
