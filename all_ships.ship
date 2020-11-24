@@ -17,8 +17,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &00         \ Laser power              = 0
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   68,     0,      1,    2,     3,         31    \ Vertex 0
@@ -95,8 +95,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &1e         \ Laser power              = 3
+                        \ Missiles                 = 6
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  160,    0,  160,     0,      1,    2,     6,         31    \ Vertex 0
@@ -181,8 +181,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &00         \ Laser power              = 0
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   -7,    0,   36,     2,      1,    3,     3,         31    \ Vertex 0
@@ -223,8 +223,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &00         \ Laser power              = 0
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -15,  -22,   -9,    15,     15,   15,    15,         31    \ Vertex 0
@@ -260,8 +260,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &00         \ Laser power              = 0
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   24,   16,    0,     0,      1,    5,     5,         31    \ Vertex 0
@@ -320,8 +320,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &00         \ Laser power              = 0
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,   37,  -11,     1,      0,    9,     5,         31    \ Vertex 0
@@ -380,8 +380,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &00         \ Laser power              = 0
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,   80,    0,    15,     15,   15,    15,         31    \ Vertex 0
@@ -452,8 +452,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &00         \ Laser power              = 0
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -24,  -25,   16,     2,      1,    3,     3,         31    \ Vertex 0
@@ -494,8 +494,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &00         \ Laser power              = 0
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,  -17,   23,    15,     15,   15,    15,         31    \ Vertex 0
@@ -584,8 +584,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &00         \ Laser power              = 0
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,   10,  -26,     6,      0,    7,     7,         31    \ Vertex 0
@@ -709,7 +709,7 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
+ EQUB &4b         \ Laser power              = 9
                         \ Missiles                 = 3
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
@@ -816,7 +816,7 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
+ EQUB &6b         \ Laser power              = 13
                         \ Missiles                 = 3
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
@@ -894,8 +894,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &74         \ Laser power              = 14
+                        \ Missiles                 = 4
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   93,    15,     15,   15,    15,         31    \ Vertex 0
@@ -972,8 +972,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &ff         \ Laser power              = 31
+                        \ Missiles                 = 7
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    7,  -58,     1,      0,    5,     5,         30    \ Vertex 0
@@ -1052,8 +1052,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &0a         \ Laser power              = 1
+                        \ Missiles                 = 2
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,   80,    0,    15,     15,   15,    15,         31    \ Vertex 0
@@ -1124,8 +1124,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &41         \ Laser power              = 8
+                        \ Missiles                 = 1
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   72,     1,      2,    3,     4,         31    \ Vertex 0
@@ -1194,8 +1194,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &40         \ Laser power              = 8
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -32,    0,   36,     0,      1,    4,     5,         31    \ Vertex 0
@@ -1254,8 +1254,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &4a         \ Laser power              = 9
+                        \ Missiles                 = 2
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   64,     0,      1,    2,     3,         31    \ Vertex 0
@@ -1340,8 +1340,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &40         \ Laser power              = 8
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    0,   96,     1,      0,    3,     2,         31    \ Vertex 0
@@ -1412,8 +1412,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &40         \ Laser power              = 8
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,    0,   40,     1,      0,   12,    11,         31    \ Vertex 0
@@ -1502,8 +1502,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &40         \ Laser power              = 8
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -10,   -4,   47,     3,      0,    5,     4,         31    \ Vertex 0
@@ -1568,8 +1568,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &4a         \ Laser power              = 9
+                        \ Missiles                 = 2
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX  -18,   -1,   50,     1,      0,    3,     2,         31    \ Vertex 0
@@ -1635,8 +1635,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &20         \ Laser power              = 4
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   10,  -10,   35,     2,      0,    7,     7,         31    \ Vertex 0
@@ -1697,8 +1697,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &4a         \ Laser power              = 9
+                        \ Missiles                 = 2
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   32,    0,   76,    15,     15,   15,    15,         31    \ Vertex 0
@@ -1804,8 +1804,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &a1         \ Laser power              = 20
+                        \ Missiles                 = 1
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,  -18,    0,     1,      0,    2,     2,         22    \ Vertex 0
@@ -1891,7 +1891,7 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
+ EQUB &6b         \ Laser power              = 13
                         \ Missiles                 = 3
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
@@ -1969,8 +1969,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &4a         \ Laser power              = 9
+                        \ Missiles                 = 2
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,  -14,  108,     1,      0,    9,     5,         31    \ Vertex 0
@@ -2053,8 +2053,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &40         \ Laser power              = 8
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   15,    0,   65,     2,      0,    8,     7,         31    \ Vertex 0
@@ -2123,8 +2123,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &5e         \ Laser power              = 11
+                        \ Missiles                 = 6
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   32,  -48,   48,     0,      4,    8,     8,         31    \ Vertex 0
@@ -2207,8 +2207,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &40         \ Laser power              = 8
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   -9,    0,   40,     1,      0,    5,     5,         31    \ Vertex 0
@@ -2267,8 +2267,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &d4         \ Laser power              = 26
+                        \ Missiles                 = 4
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX   20,   -7,   80,     2,      0,    9,     9,         31    \ Vertex 0
@@ -2346,8 +2346,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &d4         \ Laser power              = 26
+                        \ Missiles                 = 4
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,    5,   67,     2,      0,    4,     4,         31    \ Vertex 0
@@ -2424,8 +2424,8 @@
  EQUB &00               \ Edges data offset (high) = &00BC
  EQUB &01               \ Faces data offset (high) = &0154
  EQUB 1                 \ Normals are scaled by    = 2^1 = 2
- EQUB %00010011         \ Laser power              = 2
-                        \ Missiles                 = 3
+ EQUB &00         \ Laser power              = 0
+                        \ Missiles                 = 0
 
 \VERTEX    x,    y,    z, face1, face2, face3, face4, visibility
  VERTEX    0,  150,  196,     1,      0,    5,     5,         31    \ Vertex 0
