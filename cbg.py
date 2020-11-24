@@ -24,6 +24,7 @@ import sys
 import signal
 import termios
 import traceback
+from random import randint
 
 from ship import ShipReader
 from text import FontData
@@ -326,7 +327,7 @@ class CBG:
 		self.line(x, y+h, x+w, y+h, clear)
 		self.line(x+w, y, x+w, y+h, clear)
 
-	def ellipse(self, x, y, a, b, clear=False, fill=False):
+	def ellipse(self, x, y, a, b, clear=False, fill=0):
 		x0 = x - a // 2
 		x1 = x + a // 2
 		y0 = y - b // 2
@@ -337,9 +338,9 @@ class CBG:
 		err = dx+dy+b1*a*a
 		y0 += (b+1)/2
 		y1 = y0-b1
-		a *= 8*a
+		a1 = 8*a*a
 		b1 = 8*b*b
-		if fill:
+		if fill == 1: # Smooth
 			while True:
 				self.hline(int(x0), int(x1), int(y0), clear)
 				self.hline(int(x0), int(x1), int(y1), clear)
@@ -347,7 +348,30 @@ class CBG:
 				if e2 <= dy:
 					y0 += 1
 					y1 -= 1
-					dy += a
+					dy += a1
+					err += dy
+				if e2 >= dx or 2*err > dy:
+					x0 += 1
+					x1 -= 1
+					dx += b1
+					err += dx
+				if x0 > x1:
+					break
+		elif fill == 2: # fuzzy
+			rmax = a // 40
+			rmin = -a // 40
+			while True:
+				f0 = randint(rmin, rmax)
+				f1 = randint(rmin, rmax)
+				f2 = randint(rmin, rmax)
+				f3 = randint(rmin, rmax)
+				self.hline(int(x0) + f0, int(x1) + f1, int(y0), clear)
+				self.hline(int(x0) + f2, int(x1) + f3, int(y1), clear)
+				e2 = 2 * err
+				if e2 <= dy:
+					y0 += 1
+					y1 -= 1
+					dy += a1
 					err += dy
 				if e2 >= dx or 2*err > dy:
 					x0 += 1
@@ -366,7 +390,7 @@ class CBG:
 				if e2 <= dy:
 					y0 += 1
 					y1 -= 1
-					dy += a
+					dy += a1
 					err += dy
 				if e2 >= dx or 2*err > dy:
 					x0 += 1
