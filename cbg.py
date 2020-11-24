@@ -304,6 +304,22 @@ class CBG:
 
 		self.line(int(x0), int(y0), int(x1), int(y1), clear=clear, pattern=pattern)
 
+	def hline(self, x0, x1, y, clear=False):
+		if y < self.clymin or y > self.clymax:
+			return
+		if x0 < self.clxmin and x1 < self.clxmin:
+			return
+		if x0 > self.clxmax and x1 > self.clxmax:
+			return
+		if x1 < x0:
+			x0, x1 = x1, x0
+		if x0 < self.clxmin:
+			x0 = self.clxmin
+		if x1 > self.clxmax:
+			x1 = self.clxmax
+		for x in range(x0, x1):
+			self.putpixel_nocheck(x, y, clear=clear)
+
 	def rect(self, x, y, w, h, clear=False):
 		self.line(x, y, x+w, y, clear)
 		self.line(x, y, x, y+h, clear)
