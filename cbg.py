@@ -253,19 +253,53 @@ class CBG:
 					y0 += sy
 
 	def clipped_line(self, x0, y0, x1, y1, clear=False, pattern=None):
-		# Basic check to see if any part of the line is visible
-		if x0 < self.clxmin and x1 < self.clxmin:
+		# Basic check to see if it isn't obviously outside
+		xmin = self.clxmin
+		xmax = self.clxmax-1
+		ymin = self.clymin
+		ymax = self.clymax-1
+		if x0 < xmin and x1 < xmin:
 			return
-		if x0 > self.clxmax and x1 > self.clxmax:
+		if x0 > xmax and x1 > xmax:
 			return
-		if y0 < self.clymin and y1 < self.clymin:
+		if y0 < ymin and y1 < ymin:
 			return
-		if y0 > self.clymax and y1 > self.clymax:
+		if y0 > ymax and y1 > ymax:
 			return
 
-		# FIXME: Now we could do intersection checks to optimize the line drawing
-		# further, but this is already quite good, so let's just draw it.
-		self.line(x0, y0, x1, y1, clear=clear, pattern=pattern)
+		# Intersect clipping rect
+		if x0 < xmin:
+			y0 = y0 + (y1 - y0)*(xmin - x0)/(x1 - x0)
+			x0 = xmin
+		elif x1 < xmin:
+			y1 = y0 + (y1 - y0)*(xmin - x0)/(x1 - x0)
+			x1 = xmin
+		if x0 > xmax:
+			y0 = y0 + (y1 - y0)*(xmax - x0)/(x1 - x0)
+			x0 = xmax
+		elif x1 > xmax:
+			y1 = y0 + (y1 - y0)*(xmax - x0)/(x1 - x0)
+			x1 = xmax
+		if y0 < ymin:
+			x0 = x0 + (x1 - x0)*(ymin - y0)/(y1 - y0)
+			y0 = ymin
+		elif y1 < ymin:
+			x1 = x0 + (x1 - x0)*(ymin - y0)/(y1 - y0)
+			y1 = ymin
+		if y0 > ymax:
+			x0 = x0 + (x1 - x0)*(ymax - y0)/(y1 - y0)
+			y0 = ymax
+		elif y1 > ymax:
+			x1 = x0 + (x1 - x0)*(ymax - y0)/(y1 - y0)
+			y1 = ymax
+
+		# See if the result is inside
+		if x0 < xmin or x1 < xmin:
+			return
+		if x0 > xmax or x1 > xmax:
+			return
+
+		self.line(int(x0), int(y0), int(x1), int(y1), clear=clear, pattern=pattern)
 
 	def rect(self, x, y, w, h, clear=False):
 		self.line(x, y, x+w, y, clear)
