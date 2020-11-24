@@ -419,22 +419,23 @@ class CBG:
 
 	def liney(self):
 		lines = deque(maxlen=40)
-		xa = self.width / 2
+		xa = self.width
 		xoff = self.width / 2
-		ya = self.height / 2
+		ya = self.height
 		yoff = self.height / 2
 		t = 0
 		while True:
 			if lines:
 				x0, y0, x1, y1 = lines[0]
-				self.line(x0, y0, x1, y1, True)
+				self.clipped_line(x0, y0, x1, y1, True)
 			x0 = int(xoff + xa * sin(0.077 * t))
 			x1 = int(xoff + xa * cos(0.037 * t))
 			y0 = int(yoff + ya * sin(0.079 * t))
 			y1 = int(yoff + ya * cos(0.101 * t))
 			lines.append((x0, y0, x1, y1))
-			self.line(x0, y0, x1, y1)
+			self.clipped_line(x0, y0, x1, y1)
 			t += 1
+			self.redraw_screen()
 			sleep(0.02)
 
 class G3d:
