@@ -415,7 +415,7 @@ class CBG:
 				self.putpixel(j, i, clear)
 
 	def end(self):
-		print("\x1b[{};{}H".format(self.cheight - 3, 0))
+		self.exit(0)
 
 	def liney(self):
 		lines = deque(maxlen=40)
