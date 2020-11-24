@@ -648,8 +648,8 @@ class G3d:
 
 def main():
 	c = CBG()
-	#c.liney()
-	d = G3d(c, cy=c.height / 2 - 40)
+	c.liney()
+	#d = G3d(c, cy=c.height / 2 - 40)
 	#d.spincube()
 	d.spinship(ShipReader("cobra_mk3.ship"))
 	c.end()
