@@ -90,10 +90,10 @@ def find_devices(joystick=False):
 		elif l.startswith("B: EV="):
 			ev = l.split("=",1)[-1]
 			if (ev == "120013" and not joystick) or (ev.endswith("1b") and joystick):
-				print("Found device: {}".format(name))
-				print("Handlers: {}".format(repr(handlers)))
 				if joystick and not "js0" in handlers:
 					continue
+				print("Found device: {}".format(name))
+				print("Handlers: {}".format(repr(handlers)))
 				for h in handlers:
 					if h.startswith("event"):
 						return "/dev/input/"+h, name
