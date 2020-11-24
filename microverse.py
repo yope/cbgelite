@@ -48,6 +48,7 @@ class Object3D:
 		self.qltot = qmult(self.qwpitch, self.qwroll)
 		self.local_roll_pitch(0.0, 0.0)
 		self.world_roll_pitch(0.0, 0.0)
+		self.shot_time = 0
 
 	def vanish(self):
 		self.alive = False
@@ -59,6 +60,11 @@ class Object3D:
 	def handle(self):
 		if self.ai:
 			self.ai.handle()
+
+	def shoot(self, hit):
+		if self.shot_time:
+			return
+		self.shot_time = 8
 
 	def local_roll_pitch(self, roll, pitch):
 		self.roll += roll
@@ -149,6 +155,15 @@ class Object3D:
 				p0 = self.transform(s.vert[e[0]])
 				p1 = self.transform(s.vert[e[1]])
 				g.line(p0, p1)
+		if self.shot_time > 0:
+			if self.shot_time > 4:
+				gvert = s.opt_gun_vertex // 4
+				gp = self.transform(s.vert[gvert])
+				gpd = g.distv(gp)
+				dp = self.scale_add(self.nosev, gp, gpd)
+				g.cbg.log(gp, dp)
+				g.line(gp, dp)
+			self.shot_time -= 1
 
 class Particle:
 	def __init__(self, mv):

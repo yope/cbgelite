@@ -119,6 +119,10 @@ class BaseAi:
 				await asyncio.sleep(0.2)
 			if self.dn > 0.975 and self.dist < 30000:
 				self.obj.mv.set_flashtext(o.name + " can hit")
+				if x < 0.3:
+					o.shoot(True)
 			elif self.dn > 0.95 and self.dist < 25000:
 				self.obj.mv.set_flashtext(o.name + " can shoot")
+				if x < 0.2:
+					o.shoot(False)
 		self.obj.mv.set_flashtext(o.name + " disappeared")
