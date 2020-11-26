@@ -22,13 +22,17 @@ from time import monotonic
 from math import sqrt, pi, inf
 from quaternion import *
 from time import sleep
+from sounds import SoundFX
 
 import asyncio
 
 random.seed(monotonic())
 
+soundfx = SoundFX()
+
 class Object3D:
 	def __init__(self, mv, pos, ship, name):
+		self.sfx = soundfx
 		self.debug = False
 		self.alive = True
 		self.ai = None
@@ -65,6 +69,12 @@ class Object3D:
 		if self.shot_time:
 			return
 		self.shot_time = 8
+		d = self.g3d.distv(self.pos)
+		pan = self.pos[0] / d
+		if hit:
+			self.sfx.play_hit(pan)
+		else:
+			self.sfx.play_shot(pan)
 
 	def local_roll_pitch(self, roll, pitch):
 		self.roll += roll
