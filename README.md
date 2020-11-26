@@ -24,7 +24,9 @@ low level input events as they are required for such a game as this one.
 Therefor this game needs access to the Linux input devices. Unfortunately a
 reguar user does not have access to input devices directly, so you may need to
 either add yourself to the "input" group on your machine, or run this game as
-root (using sudo).
+root (using sudo). Running as root is not really recommended, since most likely
+you won't be able to access sound if pulse audio isn't configured to allow access
+by other users than the one logged into the X/Wayland session.
 
 There are two possible command-line options:
 
