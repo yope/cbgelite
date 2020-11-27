@@ -183,9 +183,8 @@ class Object3D:
 			self.shot_time -= 1
 
 class Particle:
-	def __init__(self, mv):
-		self.mv = mv
-		self.g3d = mv.g3d
+	def __init__(self, g3d):
+		self.g3d = g3d
 		self.rad = 250
 		self.maxdist = self.rad
 		self.mindist = 50
@@ -257,7 +256,7 @@ class Microverse:
 		self.particles = set()
 		self.max_particles = particles
 		for i in range(particles):
-			self.particles.add(Particle(self))
+			self.particles.add(Particle(self.g3d))
 		if particles:
 			pd = 300000
 			pr = 15000
