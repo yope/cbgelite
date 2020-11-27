@@ -188,7 +188,7 @@ extra priviledges. You basically have two choices to make this work:
  1.- Add yourself to the 'input' group so I can access the keyboard. or...
  2.- Try running this game with sudo.
 """)
-			self.cbg.exit(4)
+			cbg.exit(4)
 		if self.joystick and self.keyboard:
 			print("Found a joystick and a keyboard, defaulting to joystick mode")
 			self.evdev = Joydev(self.joystick, self.keyboard)
