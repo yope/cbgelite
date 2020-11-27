@@ -320,7 +320,7 @@ class Cockpit(BaseScreen):
 		m.set_speed(speed)
 		if BaseDev.BTN_JUMP in nbtns:
 			m.jump()
-		m.handle()
+		ret = m.handle()
 		self.speedbar.set_value(speed / 15)
 		self.rlmeter.set_value(roll * 33)
 		self.dcmeter.set_value(pitch * 33)
@@ -330,7 +330,7 @@ class Cockpit(BaseScreen):
 		self.cbg.setclip(self.spaceclip)
 		m.draw()
 		self.cbg.setclip(None)
-
+		return ret
 
 class Elite:
 	def __init__(self, loop=None, config=False):
@@ -421,8 +421,7 @@ class Elite:
 		p1 = 0.005
 		ts = monotonic()
 		speed = 0.0
-		while True:
-			self.cockpit.main_iteration()
+		while self.cockpit.main_iteration():
 			self.cbg.redraw_screen()
 			ts = await self.framsleep(ts)
 

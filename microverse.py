@@ -41,6 +41,7 @@ class Object3D:
 		self.g3d = mv.g3d
 		self.pos = pos
 		self.ship = ship
+		self.energy = ship.opt_max_energy
 		self.nosev = (0, 0, 1)
 		self.sidev = (0, 1, 0)
 		self.roofv = (1, 0, 0)
@@ -54,6 +55,11 @@ class Object3D:
 		self.local_roll_pitch(0.0, 0.0)
 		self.world_roll_pitch(0.0, 0.0)
 		self.shot_time = 0
+
+	def die(self):
+		self.sfx.play_explosion()
+		self.vanish()
+		self.mv.spawn_explosion(self.pos, self.ship.opt_can_on_demise)
 
 	def vanish(self):
 		self.alive = False
@@ -211,6 +217,15 @@ class Particle:
 		if self.distance() > self.maxdist:
 			self.reset(js)
 
+class DustParticle(Particle):
+	def __init__(self, g3d, pos):
+		super().__init__(g3d)
+		self.rad = 10000
+		self.pos = pos
+
+	def draw(self, js):
+		self.g3d.point(self.pos)
+
 class Planet:
 	def __init__(self, mv, name, pos, dia):
 		self.mv = mv
@@ -277,6 +292,9 @@ class Microverse:
 		self.subtout = 0
 		self.speed = 0.0
 		self.jumpspeed = 0.0
+		self.energy = 1.0
+		self.front_shield = 1.0
+		self.aft_shield = 1.0
 		self.jumping = False
 
 	def get_planet_dist(self):
@@ -292,12 +310,34 @@ class Microverse:
 	def set_speed(self, speed):
 		self.speed = speed
 
+	def handle_collision_with(self, obj):
+		if obj.pos[2] < 0.0: # Object hit from behind
+			shield = self.aft_shield
+		else:
+			shield = self.front_shield
+		energy = 150*self.energy + 10*shield - obj.energy
+		if energy < 0:
+			self.die()
+			return False
+		self.energy = min(energy / 150, 1.0)
+		shield = max(0.0, energy / 150 - 1.0)
+		if obj.pos[2] < 0.0: # Object hit from behind
+			self.aft_shield = shield
+		else:
+			self.front_shield = shield
+		obj.die()
+		return True
+
 	def handle(self):
 		self.move(self.speed + self.jumpspeed)
 		for o in self.objects:
 			o.handle()
+			if o.check_collision(95): # Target area of Cobra MK III
+				if not self.handle_collision_with(o):
+					return False
 		if self.station:
 			self.station.local_roll_pitch(0.005, 0.0)
+		return True
 
 	def get_objects(self):
 		return self.objects
@@ -322,6 +362,23 @@ class Microverse:
 		obj.local_roll_pitch(roll, pitch)
 		self.objects.append(obj)
 		return obj
+
+	def _remove_particles(self, particles):
+		for p in particles:
+			self.particles.discard(p)
+
+	def spawn_explosion(self, pos, can_on_demise):
+		cans = random.randint(0, can_on_demise)
+		rnd = random.uniform
+		x, y, z = pos
+		for i in range(cans):
+			self.spawn("cargo_canister", (x + 50*i, y+20*i, z+40*i), rnd(0, 3), rnd(0, 3))
+		particles = []
+		for i in range(42):
+			p = DustParticle(self.g3d, (x + rnd(-200, 200), y + rnd(-200, 200), z + rnd(-200, 200)))
+			particles.append(p)
+			self.particles.add(p)
+		self.loop.call_later(10, self._remove_particles, particles)
 
 	def remove_object(self, obj):
 		self.objects.remove(obj)
