@@ -290,9 +290,9 @@ class Microverse:
 		self.speed = speed
 
 	def handle(self):
+		self.move(self.speed + self.jumpspeed)
 		for o in self.objects:
 			o.handle()
-		self.move(self.speed + self.jumpspeed)
 
 	def get_objects(self):
 		return self.objects
