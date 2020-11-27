@@ -224,26 +224,27 @@ class Laser:
 		self.cbg.fillrect(self.cx, self.cy - r1, 2, l)
 		self.cbg.fillrect(self.cx, self.cy + r0, 2, l)
 
-class Elite:
-	def __init__(self, loop=None, config=False):
-		self.loop = loop or asyncio.get_event_loop()
-		self.cbg = CBG()
-		if self.cbg.width < 320 or self.cbg.height < 240:
-			print("Screen is too small.")
-			print("Please resize your terminal to minimal 160x60 characters.")
-			self.cbg.exit(2)
-		ctrl = Control(self.cbg)
-		if config:
-			ctrl.edit_controls()
-		else:
-			ctrl.load_mapping()
-		self.inputdev = ctrl.get_evdev()
-		self.ships = AllShips("all_ships.ship").ships
+class BaseScreen:
+	def __init__(self, elite, cbg):
+		self.cbg = cbg
+		self.elite = elite
 		self.width = 320
 		self.height = 240
 		self.hstatus = 64
 		self.ystatus = self.height - self.hstatus - 1
 		self.spaceclip = (4, 4, self.width - 4, self.ystatus - 4)
+
+	def setup_screen(self):
+		self.cbg.colorrect(0, 0, self.width, self.height, 11, 0)
+		self.cbg.colorrect(2, 4, self.width-3, self.ystatus-4, 15, 0)
+
+	def draw_background(self):
+		self.cbg.rect(1, 2, self.width-2, self.height-4)
+
+class Cockpit(BaseScreen):
+	def __init__(self, elite, cbg, inputdev):
+		super().__init__(elite, cbg)
+		self.inputdev = inputdev
 		self.sboxw = 64
 		self.radarw = self.width-2*self.sboxw
 		self.g3d = G3d(self.cbg, cx = self.width // 2, cy = self.ystatus // 2)
@@ -254,12 +255,11 @@ class Elite:
 		self.rlmeter = Meter(self.cbg, rbx, self.ystatus + 12, 40, 7, 14, 0, ticks=8)
 		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
 		self.laser = Laser(self.cbg, 0, 0, self.width, self.ystatus)
-		self.m = Microverse(self.cbg, self.g3d, self.laser, self.ships)
+		self.m = Microverse(self.cbg, self.g3d, self.laser, self.elite.ships)
 		self.radar = Radar(self.cbg, self.m, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
 
 	def setup_screen(self):
-		self.cbg.colorrect(0, 0, self.width, self.height, 11, 0)
-		self.cbg.colorrect(2, 4, self.width-3, self.ystatus-4, 15, 0)
+		super().setup_screen()
 		bglen = 40
 		bgcolors = [5, 5, 3, 1, 1, 10]
 		bgticks = [0, 0, 6, 5, 6, 5]
@@ -286,7 +286,7 @@ class Elite:
 		self.radar.setup()
 
 	def draw_background(self):
-		self.cbg.rect(1, 2, self.width-2, self.height-4)
+		super().draw_background()
 		self.cbg.line(1, self.ystatus, self.width-1, self.ystatus)
 		self.cbg.line(self.sboxw, self.ystatus, self.sboxw, self.height-2)
 		self.cbg.line(self.sboxw + self.radarw + 1, self.ystatus, self.sboxw + self.radarw + 1, self.height-2)
@@ -309,18 +309,58 @@ class Elite:
 		self.dcmeter.redraw()
 		self.radar.redraw()
 
-	def draw_title(self):
+	def main_iteration(self):
+		m = self.m
+		inp = self.inputdev
+		inp.handle()
+		roll = inp.get_roll() * 0.03
+		pitch = inp.get_pitch() * 0.03
+		speed = inp.get_throttle() * 15.0
+		nbtns = inp.get_new_buttons()
+		m.set_speed(speed)
+		if BaseDev.BTN_JUMP in nbtns:
+			m.jump()
+		m.handle()
+		self.speedbar.set_value(speed / 15)
+		self.rlmeter.set_value(roll * 33)
+		self.dcmeter.set_value(pitch * 33)
+		self.cbg.clearmap()
 		self.draw_background()
-		sw = self.width
+		m.set_roll_pitch(roll, pitch)
+		self.cbg.setclip(self.spaceclip)
+		m.draw()
+		self.cbg.setclip(None)
+
+
+class Elite:
+	def __init__(self, loop=None, config=False):
+		self.loop = loop or asyncio.get_event_loop()
+		self.cbg = CBG()
+		if self.cbg.width < 320 or self.cbg.height < 240:
+			print("Screen is too small.")
+			print("Please resize your terminal to minimal 160x60 characters.")
+			self.cbg.exit(2)
+		ctrl = Control(self.cbg)
+		if config:
+			ctrl.edit_controls()
+		else:
+			ctrl.load_mapping()
+		self.inputdev = ctrl.get_evdev()
+		self.ships = AllShips("all_ships.ship").ships
+		self.cockpit = Cockpit(self, self.cbg, self.inputdev)
+
+	def draw_title(self):
+		self.cockpit.draw_background()
+		sw = self.cockpit.width
 		tx = sw // 2 - 80
 		self.cbg.drawtext(tx, 8, "---- E L I T E ----")
 		tx = sw // 2 - 80
-		self.cbg.drawtext(tx, self.ystatus - 16, "Commander Jameson")
+		self.cbg.drawtext(tx, self.cockpit.ystatus - 16, "Commander Jameson")
 
 	async def title_screen(self, showfps=False):
 		dz = 20050
-		self.setup_screen()
-		tm = Microverse(self.cbg, self.g3d, None, self.ships, particles=0)
+		self.cockpit.setup_screen()
+		tm = Microverse(self.cbg, self.cockpit.g3d, None, self.ships, particles=0)
 		cobra = tm.spawn("cobra_mkiii", (0, 0, dz), 0.0, 0.0)
 		if showfps:
 			t0 = monotonic()
@@ -333,7 +373,7 @@ class Elite:
 				cobra.pos = (0.0, 0.0, dz)
 			self.cbg.clearmap()
 			self.draw_title()
-			self.cbg.setclip(self.spaceclip)
+			self.cbg.setclip(self.cockpit.spaceclip)
 			cobra.local_roll_pitch(0.1, 0.03)
 			tm.draw()
 			self.cbg.setclip(None)
@@ -361,8 +401,8 @@ class Elite:
 		return now
 
 	async def microtest(self):
-		self.setup_screen()
-		m = self.m
+		self.cockpit.setup_screen()
+		m = self.cockpit.m
 		cobra = m.spawn("cobra_mkiii", (-500, 0, 10000), 0.0, 0.0)
 		cobra.add_ai(BaseAi)
 		viper = m.spawn("krait",       (1500, 0, 5000), -0.5, 2.0)
@@ -382,25 +422,7 @@ class Elite:
 		ts = monotonic()
 		speed = 0.0
 		while True:
-			self.inputdev.handle()
-			roll = self.inputdev.get_roll() * 0.03
-			pitch = self.inputdev.get_pitch() * 0.03
-			speed = self.inputdev.get_throttle() * 15.0
-			nbtns = self.inputdev.get_new_buttons()
-			m.set_speed(speed)
-			if BaseDev.BTN_JUMP in nbtns:
-				m.jump()
-			m.handle()
-			self.speedbar.set_value(speed / 15)
-			self.rlmeter.set_value(roll * 33)
-			self.dcmeter.set_value(pitch * 33)
-			self.cbg.clearmap()
-			self.draw_background()
-			self.cbg.setclip(self.spaceclip)
-			m.set_roll_pitch(roll, pitch)
-			self.m.station.local_roll_pitch(0.005, 0.0)
-			m.draw()
-			self.cbg.setclip(None)
+			self.cockpit.main_iteration()
 			self.cbg.redraw_screen()
 			ts = await self.framsleep(ts)
 

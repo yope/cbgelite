@@ -293,6 +293,8 @@ class Microverse:
 		self.move(self.speed + self.jumpspeed)
 		for o in self.objects:
 			o.handle()
+		if self.station:
+			self.station.local_roll_pitch(0.005, 0.0)
 
 	def get_objects(self):
 		return self.objects
