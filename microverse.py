@@ -377,7 +377,7 @@ class Microverse:
 
 	async def _check_jump_dist(self, ramp=0.0):
 		self.set_subtext("JUMP")
-		for t in range(10):
+		for t in range(20):
 			if self.get_planet_dist() < 80000:
 				self.jumpspeed = 0.0
 				return False
@@ -386,13 +386,13 @@ class Microverse:
 		return True
 
 	async def coro_jump(self):
-		if not await self._check_jump_dist(20.0):
+		if not await self._check_jump_dist(15.0):
 			return
-		self.jumpspeed = 200.0
-		for i in range(5):
+		self.jumpspeed = 300.0
+		for i in range(2):
 			if not await self._check_jump_dist(0.0):
 				return
-		if not await self._check_jump_dist(-20.0):
+		if not await self._check_jump_dist(-15.0):
 			return
 		self.jumpspeed = 0.0
 		self.jumping = False
