@@ -218,6 +218,11 @@ class SoundFX:
 		j23 = self.synth.gen_square(330, 33, 0.1, adsr_j3, noise=True)
 		self.jump1 = self.synth.mix_s16le_2ch(
 				j11 + j12 + j13, j21 + j22 + j23, vol0=0.1, vol1=0.08, pan0=-0.5, pan1=0.5)
+		adsr_exp1 = ADSR(0.0, 0.0, 2.0, 0.1, 2.0, 2.0)
+		adsr_exp2 = ADSR(0.0, 0.0, 1.0, 0.1, 3.0, 2.0)
+		exp1 = self.synth.gen_square(80, 50, 0.5, adsr_exp1, noise=True)
+		exp2 = self.synth.gen_square(220, 40, 0.5, adsr_exp2, noise=True)
+		self.exp = self.synth.mix_s16le_2ch(exp1, exp2, vol0=1.0, vol1=0.5, pan0=-0.2, pan1=0.2)
 
 	def play_shot(self, pan=0.0):
 		pan0 = max(-1.0, pan - 0.2)
@@ -239,6 +244,9 @@ class SoundFX:
 
 	def play_jump(self):
 		self.play(self.jump1)
+
+	def play_explosion(self):
+		self.play(self.exp)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
