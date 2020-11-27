@@ -370,6 +370,10 @@ class Elite:
 		trans = m.spawn("transporter", (0, 1500, 5000), -0.5, 2.0)
 		fdl = m.spawn("fer-de-lance",  (0, -1500, 5000), -0.5, 2.0)
 		fdl.add_ai(BaseAi)
+		mam = m.spawn("mamba",  (1000, 4000, 3000), 0.5, 2.0)
+		mam.add_ai(BaseAi)
+		boa = m.spawn("boa",  (-1000, 3000, 3000), 0.5, 2.0)
+		boa.add_ai(BaseAi)
 		asteroid0 = m.spawn("asteroid", (1500, -1500, -5000), -0.1, 1.0)
 		asteroid1 = m.spawn("asteroid", (-1500, 1500, -5000), 0.1, -1.0)
 		roll = 0.0
