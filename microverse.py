@@ -44,6 +44,7 @@ class Object3D:
 		self.nosev = (0, 0, 1)
 		self.sidev = (0, 1, 0)
 		self.roofv = (1, 0, 0)
+		self.distance = self.g3d.distv(self.pos)
 		self.roll = 0.0
 		self.pitch = 0.0
 		self.qwroll = aangle2q((0, 0, 1), 0.0)
@@ -64,13 +65,13 @@ class Object3D:
 	def handle(self):
 		if self.ai:
 			self.ai.handle()
+		self.distance = self.g3d.distv(self.pos)
 
 	def shoot(self, hit):
 		if self.shot_time:
 			return
 		self.shot_time = 8
-		d = self.g3d.distv(self.pos)
-		pan = self.pos[0] / d
+		pan = self.pos[0] / self.distance
 		if hit:
 			self.sfx.play_hit(pan)
 		else:
@@ -282,7 +283,7 @@ class Microverse:
 	def get_station_dist(self):
 		if not self.station:
 			return inf
-		return self.g3d.distv(self.station.pos)
+		return self.station.distance
 
 	def set_speed(self, speed):
 		self.speed = speed
