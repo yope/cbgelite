@@ -243,6 +243,7 @@ class Sun(Planet):
 
 class Microverse:
 	def __init__(self, cbg, g3d, laser, ships, particles=400):
+		self.sfx = soundfx
 		self.loop = asyncio.get_event_loop()
 		self.g3d = g3d
 		self.cbg = cbg
@@ -386,6 +387,7 @@ class Microverse:
 		return True
 
 	async def coro_jump(self):
+		self.sfx.play_jump()
 		if not await self._check_jump_dist(15.0):
 			return
 		self.jumpspeed = 300.0

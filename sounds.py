@@ -140,11 +140,11 @@ class SynthVoice:
 		adsr.process(buf)
 		return buf
 
-	def render_s16le_2ch(self, buf, pan=0.0):
+	def render_s16le_2ch(self, buf, vol=1.0, pan=0.0):
 		pack_into = struct.Struct('<hh').pack_into
 		out = bytearray(4*len(buf))
-		vl = min(1.0, 1.0-pan)
-		vr = min(1.0, 1.0+pan)
+		vl = min(1.0, 1.0-pan) * vol
+		vr = min(1.0, 1.0+pan) * vol
 		for i,v in enumerate(buf):
 			pack_into(out, i*4, int(vl * v), int(vr * v))
 		return out
@@ -207,6 +207,17 @@ class SoundFX:
 		self.laser2 = self.synth.gen_square(330, 55, 0.5, adsr)
 		self.laser_long = self.synth.gen_square(440, 55, 0.35, adsr_long)
 		self.damage = self.synth.gen_square(660, 110, 0.5, adsr_dlay, noise=True)
+		adsr_j1 = ADSR(0.0, 2.0, 0.0, 1.0, 0.0, 0.0) # Frist 2 seconds
+		adsr_j2 = ADSR(0.0, 0.0, 0.0, 1.0, 4.0, 0.0) # Middle 4 seconds
+		adsr_j3 = ADSR(0.0, 0.0, 2.0, 0.0, 0.0, 0.0) # Last 2 seconds
+		j11 = self.synth.gen_square(55, 220, 0.5, adsr_j1, noise=True)
+		j12 = self.synth.gen_square(220, 220, 0.5, adsr_j2, noise=True)
+		j13 = self.synth.gen_square(220, 55, 0.5, adsr_j3, noise=True)
+		j21 = self.synth.gen_square(33, 330, 0.1, adsr_j1, noise=True)
+		j22 = self.synth.gen_square(330, 330, 0.1, adsr_j2, noise=True)
+		j23 = self.synth.gen_square(330, 33, 0.1, adsr_j3, noise=True)
+		self.jump1 = self.synth.mix_s16le_2ch(
+				j11 + j12 + j13, j21 + j22 + j23, vol0=0.1, vol1=0.08, pan0=-0.5, pan1=0.5)
 
 	def play_shot(self, pan=0.0):
 		pan0 = max(-1.0, pan - 0.2)
@@ -225,6 +236,9 @@ class SoundFX:
 		pan1 = min(1.0, pan + 0.2)
 		buf = self.synth.mix_s16le_2ch(self.laser_long, self.damage, 0.5, 1.0, pan0, pan1)
 		self.play(buf)
+
+	def play_jump(self):
+		self.play(self.jump1)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
