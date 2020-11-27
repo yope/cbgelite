@@ -63,7 +63,8 @@ class SoundPlayer:
 			self.stop_play()
 
 class ADSR:
-	def __init__(self, a, d, sl, st, r):
+	def __init__(self, delay, a, d, sl, st, r):
+		self.delay = delay
 		self.a = a
 		self.d = d
 		self.sl = sl
@@ -72,7 +73,7 @@ class ADSR:
 			r = 0
 		self.st = st
 		self.r = r
-		self.time = a + d + st + r
+		self.time = delay + a + d + st + r
 		self.rate = 44100 # FIXME
 
 	def nsamples(self, time):
@@ -80,8 +81,10 @@ class ADSR:
 
 	def process(self, buf):
 		p = 0
+		if self.delay:
+			p = self.ramp(buf, 0, self.delay, 0.0, 0.0)
 		if self.a:
-			p = self.ramp(buf, 0, self.a, 0.0, 1.0)
+			p = self.ramp(buf, p, self.a, 0.0, 1.0)
 		if self.d:
 			p = self.ramp(buf, p, self.d, 1.0, self.sl)
 		if self.sl and self.st:
@@ -161,7 +164,8 @@ class SynthVoice:
 
 	async def test(self, loop):
 		s = SoundPlayer(loop)
-		adsr = ADSR(0.0, 0.2, 0.1, 0.05, 0.05)
+		s2= SoundPlayer(loop)
+		adsr = ADSR(0.0, 0.0, 0.2, 0.1, 0.05, 0.05)
 		buf0 = self.gen_square(330.0, 55, 0.3, adsr, noise=True)
 		buf1 = self.gen_square(330.0, 55, 0.3, adsr)
 		while True:
@@ -169,7 +173,10 @@ class SynthVoice:
 			out = self.mix_s16le_2ch(buf0, buf1, 1.0, 0.6, -0.2, 0.2)
 			dt = monotonic() - t0
 			print(repr(dt))
+			out2 = self.mix_s16le_2ch(buf0, buf1, 1.0, 0.6, -0.8, 0.4)
 			s.start_play(out)
+			await asyncio.sleep(0.05)
+			s2.start_play(out2)
 			while s.busy:
 				await asyncio.sleep(0.02)
 			out = self.mix_s16le_2ch(buf0, buf1, 0.0, 1.0, -0.2, 0.2)
@@ -184,27 +191,40 @@ class SynthVoice:
 class SoundFX:
 	def __init__(self, loop=None):
 		self.loop = loop or asyncio.get_event_loop()
-		self.player = SoundPlayer(self.loop)
+		self.players = [
+				SoundPlayer(self.loop),
+				SoundPlayer(self.loop),
+				SoundPlayer(self.loop)
+			]
 		self.synth = SynthVoice()
 		self.generate_samples()
 
 	def generate_samples(self):
-		adsr = ADSR(0.0, 0.2, 0.1, 0.05, 0.1)
+		adsr = ADSR(0.0, 0.0, 0.2, 0.1, 0.05, 0.1)
+		adsr_long = ADSR(0.0, 0.0, 0.3, 0.2, 0.1, 0.2)
+		adsr_dlay = ADSR(0.20, 0.0, 0.2, 0.1, 0.1, 0.1)
 		self.laser1 = self.synth.gen_square(440, 55, 0.35, adsr)
 		self.laser2 = self.synth.gen_square(330, 55, 0.5, adsr)
-		self.damage = self.synth.gen_square(330, 55, 0.5, adsr, noise=True)
+		self.laser_long = self.synth.gen_square(440, 55, 0.35, adsr_long)
+		self.damage = self.synth.gen_square(660, 110, 0.5, adsr_dlay, noise=True)
 
 	def play_shot(self, pan=0.0):
 		pan0 = max(-1.0, pan - 0.2)
 		pan1 = min(1.0, pan + 0.2)
 		buf = self.synth.mix_s16le_2ch(self.laser1, self.laser2, 0.1, 0.1, pan0, pan1)
-		self.player.start_play(buf)
+		self.play(buf)
+
+	def play(self, buf):
+		for p in self.players:
+			if not p.busy:
+				p.start_play(buf)
+				break
 
 	def play_hit(self, pan=0.0):
 		pan0 = max(-1.0, pan - 0.2)
 		pan1 = min(1.0, pan + 0.2)
-		buf = self.synth.mix_s16le_2ch(self.laser1, self.damage, 0.5, 1.0, pan0, pan1)
-		self.player.start_play(buf)
+		buf = self.synth.mix_s16le_2ch(self.laser_long, self.damage, 0.5, 1.0, pan0, pan1)
+		self.play(buf)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
