@@ -67,6 +67,10 @@ class Object3D:
 			self.ai.handle()
 		self.distance = self.g3d.distv(self.pos)
 
+	def check_collision(self, d):
+		d = self.distance - d - self.ship.opt_target_area
+		return d <= 0.0
+
 	def shoot(self, hit):
 		if self.shot_time:
 			return
