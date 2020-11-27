@@ -166,12 +166,15 @@ class Object3D:
 				p1 = self.transform(s.vert[e[1]])
 				g.line(p0, p1)
 		if self.shot_time > 0:
-			if self.shot_time > 4:
+			if self.shot_time > 2:
 				gvert = s.opt_gun_vertex // 4
 				gp = self.transform(s.vert[gvert])
-				gpd = g.distv(gp)
-				dp = self.scale_add(self.nosev, gp, gpd)
-				g.line(gp, dp)
+				gpd = g.distv(gp) / 14
+				d0 = gpd * (16 - self.shot_time * 2)
+				d1 = gpd * (19 - self.shot_time * 2)
+				sp = self.scale_add(self.nosev, gp, d0)
+				dp = self.scale_add(self.nosev, gp, d1)
+				g.line(sp, dp)
 			self.shot_time -= 1
 
 class Particle:
