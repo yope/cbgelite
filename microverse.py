@@ -502,8 +502,8 @@ class Microverse:
 	def shot_fired(self, target):
 		if target:
 			self.sfx.play_myhit()
-			if target.energy > 10:
-				target.energy -= 10
+			if target.energy > 20:
+				target.energy -= 20
 			else:
 				target.die()
 		else:
