@@ -307,7 +307,7 @@ class Microverse:
 	def die(self):
 		self.spawn_explosion((0,0,0), 4)
 		self.sfx.play_explosion()
-		self.move(-300)
+		self.move(-500)
 		self.dead = True
 		self.speed = 0
 		self.jumping = False
