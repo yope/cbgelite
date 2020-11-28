@@ -345,6 +345,8 @@ class Cockpit(BaseScreen):
 
 	def main_iteration(self):
 		m = self.m
+		if m.dead: # If we die by AI coroutine...
+			return False
 		inp = self.inputdev
 		inp.handle()
 		roll = inp.get_roll() * 0.03
