@@ -230,7 +230,7 @@ class DustParticle(Particle):
 		self.g3d.point(self.pos)
 		x, y, z = self.pos
 		rnd = random.uniform
-		self.pos = x + rnd(-3, 3), y + rnd(-3, 3), z + rnd(-3, 3)
+		self.pos = x + rnd(-1, 1), y + rnd(-1, 1), z + rnd(-1, 1)
 
 class Planet:
 	def __init__(self, mv, name, pos, dia):
