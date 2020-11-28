@@ -81,7 +81,7 @@ class Object3D:
 		return d <= 0.0
 
 	def shoot(self, hit):
-		if self.shot_time:
+		if self.shot_time or self.mv.dead:
 			return
 		self.shot_time = 8
 		pan = self.pos[0] / self.distance
