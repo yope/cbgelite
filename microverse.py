@@ -460,3 +460,13 @@ class Microverse:
 			return
 		self.jumpspeed = 0.0
 		self.jumping = False
+
+	def shot_fired(self, target):
+		if target:
+			self.sfx.play_myhit()
+			if target.energy > 10:
+				target.energy -= 10
+			else:
+				target.die()
+		else:
+			self.sfx.play_myshot()

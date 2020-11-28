@@ -351,13 +351,18 @@ class Cockpit(BaseScreen):
 		pitch = inp.get_pitch() * 0.03
 		speed = inp.get_throttle() * 15.0
 		nbtns = inp.get_new_buttons()
+		btns = inp.get_buttons()
 		m.set_speed(speed)
 		if BaseDev.BTN_JUMP in nbtns:
 			m.jump()
+		self.laser.set_shooting(BaseDev.BTN_FIRE in btns)
 		ret = m.handle()
 		self.speedbar.set_value(speed / 15)
 		self.rlmeter.set_value(roll * 33)
 		self.dcmeter.set_value(pitch * 33)
+		self.battery.set_value(m.energy)
+		self.bar_as.set_value(m.aft_shield)
+		self.bar_fs.set_value(m.front_shield)
 		self.cbg.clearmap()
 		self.draw_background()
 		m.set_roll_pitch(roll, pitch)
@@ -365,6 +370,9 @@ class Cockpit(BaseScreen):
 		m.draw()
 		self.cbg.setclip(None)
 		return ret
+
+	def shot_fired(self, target):
+		self.m.shot_fired(target)
 
 class Elite:
 	def __init__(self, loop=None, config=False):
