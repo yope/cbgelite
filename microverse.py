@@ -363,12 +363,12 @@ class Microverse:
 		if self.station:
 			self.station.local_roll_pitch(0.005, 0.0)
 		if not self.dead:
-			if self.front_shield < 1.0:
-				self.front_shield += 0.001
+			if self.energy < 1.0:
+				self.energy += 0.0002
 			elif self.aft_shield < 1.0:
-				self.aft_shield += 0.001
-			elif self.energy < 1.0:
-				self.energy += 0.001
+				self.aft_shield += 0.0005
+			elif self.front_shield < 1.0:
+				self.front_shield += 0.0005
 		return not self.dead
 
 	def get_objects(self):
