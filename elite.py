@@ -371,6 +371,15 @@ class Cockpit(BaseScreen):
 		self.cbg.setclip(None)
 		return ret
 
+	def game_over_iteration(self):
+		m = self.m
+		ret = m.handle()
+		self.cbg.clearmap()
+		self.cbg.setclip(self.spaceclip)
+		m.draw()
+		self.cbg.setclip(None)
+		return ret
+
 	def shot_fired(self, target):
 		self.m.shot_fired(target)
 
@@ -464,6 +473,10 @@ class Elite:
 		ts = monotonic()
 		speed = 0.0
 		while self.cockpit.main_iteration():
+			self.cbg.redraw_screen()
+			ts = await self.framsleep(ts)
+		while True:
+			self.cockpit.game_over_iteration()
 			self.cbg.redraw_screen()
 			ts = await self.framsleep(ts)
 

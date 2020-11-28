@@ -300,6 +300,16 @@ class Microverse:
 		self.front_shield = 1.0
 		self.aft_shield = 1.0
 		self.jumping = False
+		self.dead = False
+
+	def die(self):
+		self.spawn_explosion((0,0,0), 4)
+		self.sfx.play_explosion()
+		self.move(-300)
+		self.dead = True
+		self.speed = 0
+		self.jumping = False
+		self.jumpspeed = 0.0
 
 	def get_planet_dist(self):
 		if not self.planet:
@@ -336,7 +346,7 @@ class Microverse:
 		self.move(self.speed + self.jumpspeed)
 		for o in self.objects:
 			o.handle()
-			if o.check_collision(95): # Target area of Cobra MK III
+			if not self.dead and o.check_collision(95): # Target area of Cobra MK III
 				if not self.handle_collision_with(o):
 					return False
 		if self.station:
@@ -408,6 +418,8 @@ class Microverse:
 			self.planet.draw()
 		if self.sun:
 			self.sun.draw()
+		if self.dead:
+			return self.draw_dead()
 		if self.flashtout:
 			slen = len(self.flashtext) * 8
 			x = (320 - slen) // 2
@@ -420,6 +432,9 @@ class Microverse:
 			self.subtout -= 1
 		if self.laser:
 			self.laser.draw(self, trg)
+
+	def draw_dead(self):
+		self.cbg.drawtext(120, 100, "GAME OVER!")
 
 	def move(self, dz):
 		for o in self.objects:
@@ -446,7 +461,7 @@ class Microverse:
 	async def _check_jump_dist(self, ramp=0.0):
 		self.set_subtext("JUMP")
 		for t in range(20):
-			if self.get_planet_dist() < 80000:
+			if self.get_planet_dist() < 80000 or self.dead:
 				self.jumpspeed = 0.0
 				return False
 			self.jumpspeed += ramp
