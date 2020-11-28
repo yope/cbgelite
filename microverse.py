@@ -315,7 +315,7 @@ class Microverse:
 		self.jumpspeed = 0.0
 
 	def get_hit(self, power, pos):
-		self._handle_hit(power, pos)
+		self._handle_hit(power / 2, pos)
 
 	def get_planet_dist(self):
 		if not self.planet:
