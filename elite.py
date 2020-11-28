@@ -17,6 +17,7 @@
 # along with CBGElite.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
+from random import randint
 from cbg import CBG, G3d
 from ship import AllShips
 import sys
@@ -187,16 +188,23 @@ class Radar:
 				self.cbg.fillrect(x - 2, y + bh - 1, 4, 2)
 
 class Laser:
-	def __init__(self, cbg, x, y, w, h):
-		self.cbg = cbg
+	def __init__(self, cp, x, y, w, h):
+		self.cp = cp
+		self.cbg = cp.cbg
+		self.g3d = cp.g3d
 		self.type = "pulse"
 		self.cx = x + w // 2
 		self.cy = y + h // 2
+		self.lcpos = (-40, 20, 20)
+		self.rcpos = (40, 20, 20)
 		self.w = w
 		self.h = h
 		self.trg = None
 		self.highlite_count = 0
 		self.highlite_count_max = 16
+		self.shooting = False
+		self.fire = False
+		self.shot_timer = 0
 
 	def set_type(self, t):
 		self.type = t
@@ -223,6 +231,32 @@ class Laser:
 		self.cbg.fillrect(self.cx + r0, self.cy, l, 2)
 		self.cbg.fillrect(self.cx, self.cy - r1, 2, l)
 		self.cbg.fillrect(self.cx, self.cy + r0, 2, l)
+		if not self.shooting and not self.fire:
+			return
+		self.shooting = True
+		i = self.shot_timer
+		if i == 0:
+			self._xm = self.cx + randint(-2, 2)
+			self._ym = self.cy + randint(-2, 2)
+			self.cp.shot_fired(self.trg)
+		if i < 6:
+			i0 = max(0, i - 1)
+			x, y, z = self.lcpos
+			self.g3d.line((x, y, z + i0*1000), (x, y, z + i*1000+1500))
+			x += 10
+			self.g3d.line((x, y, z + i0*1000), (x, y, z + i*1000+1500))
+			x, y, z = self.rcpos
+			self.g3d.line((x, y, z + i0*1000), (x, y, z + i*1000+1500))
+			x -= 10
+			self.g3d.line((x, y, z + i0*1000), (x, y, z + i*1000+1500))
+		self.shot_timer += 1
+		if self.shot_timer >= 20:
+			self.shot_timer = 0
+			if not self.fire:
+				self.shooting = False
+
+	def set_shooting(self, shooting):
+		self.fire = shooting
 
 class BaseScreen:
 	def __init__(self, elite, cbg):
@@ -254,7 +288,7 @@ class Cockpit(BaseScreen):
 		self.speedbar = BarGraph(self.cbg, rbx, self.ystatus + 4, 40, 7, 11, 0, ticks=8)
 		self.rlmeter = Meter(self.cbg, rbx, self.ystatus + 12, 40, 7, 14, 0, ticks=8)
 		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
-		self.laser = Laser(self.cbg, 0, 0, self.width, self.ystatus)
+		self.laser = Laser(self, 0, 0, self.width, self.ystatus)
 		self.m = Microverse(self.cbg, self.g3d, self.laser, self.elite.ships)
 		self.radar = Radar(self.cbg, self.m, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
 
