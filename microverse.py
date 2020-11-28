@@ -87,6 +87,7 @@ class Object3D:
 		pan = self.pos[0] / self.distance
 		if hit:
 			self.sfx.play_hit(pan)
+			self.mv.get_hit(self.ship.opt_laser_power, self.pos)
 		else:
 			self.sfx.play_shot(pan)
 
@@ -312,6 +313,9 @@ class Microverse:
 		self.speed = 0
 		self.jumping = False
 		self.jumpspeed = 0.0
+
+	def get_hit(self, power, pos):
+		self._handle_hit(power, pos)
 
 	def get_planet_dist(self):
 		if not self.planet:
