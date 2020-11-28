@@ -126,3 +126,17 @@ class BaseAi:
 				if x < 0.2:
 					o.shoot(False)
 		self.obj.mv.set_flashtext(o.name + " disappeared")
+
+class CanisterAi:
+	def __init__(self, obj):
+		self.obj = obj
+		rnd = random.uniform
+		self.vec = (rnd(-1, 1), rnd(-1, 1), rnd(-1, 1))
+		self.roll = rnd(-0.01, 0.01)
+		self.pitch = rnd(-0.01, 0.01)
+		self.speed = rnd(1.0, 2.0)
+
+	def handle(self):
+		o = self.obj
+		o.local_roll_pitch(self.roll, self.pitch)
+		o.pos = o.scale_add(self.vec, o.pos, self.speed)
