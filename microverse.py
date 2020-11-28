@@ -73,6 +73,8 @@ class Object3D:
 		if self.ai:
 			self.ai.handle()
 		self.distance = self.g3d.distv(self.pos)
+		if self.energy < self.ship.opt_max_energy:
+			self.energy += 0.1
 
 	def check_collision(self, d):
 		d = self.distance - d - self.ship.opt_target_area
