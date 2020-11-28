@@ -205,6 +205,13 @@ class SoundFX:
 		adsr_dlay = ADSR(0.20, 0.0, 0.2, 0.1, 0.1, 0.1)
 		self.laser1 = self.synth.gen_square(440, 55, 0.35, adsr)
 		self.laser2 = self.synth.gen_square(330, 55, 0.5, adsr)
+		laser3 = self.synth.gen_square(880, 110, 0.5, adsr)
+		myhit = self.synth.gen_square(330, 110, 0.5, adsr, noise=True)
+		shexp1 = self.synth.gen_square(110, 55, 0.5, adsr_long, noise=True)
+		shexp2 = self.synth.gen_square(150, 110, 0.5, adsr_long, noise=True)
+		self.exp_short = self.synth.mix_s16le_2ch(shexp1, shexp2, 0.8, 0.8, -0.5, 0.5)
+		self.myshot = self.synth.mix_s16le_2ch(laser3, self.laser2, 0.6, 0.4, -0.5, 0.5)
+		self.myhit = self.synth.mix_s16le_2ch(laser3, myhit, 0.6, 1.0, -0.3, 0.3)
 		self.laser_long = self.synth.gen_square(440, 55, 0.35, adsr_long)
 		self.damage = self.synth.gen_square(660, 110, 0.5, adsr_dlay, noise=True)
 		adsr_j1 = ADSR(0.0, 2.0, 0.0, 1.0, 0.0, 0.0) # Frist 2 seconds
@@ -230,6 +237,12 @@ class SoundFX:
 		buf = self.synth.mix_s16le_2ch(self.laser1, self.laser2, 0.1, 0.1, pan0, pan1)
 		self.play(buf)
 
+	def play_myshot(self):
+		self.play(self.myshot)
+
+	def play_myhit(self):
+		self.play(self.myhit)
+
 	def play(self, buf):
 		for p in self.players:
 			if not p.busy:
@@ -247,6 +260,9 @@ class SoundFX:
 
 	def play_explosion(self):
 		self.play(self.exp)
+
+	def play_short_explosion(self):
+		self.play(self.exp_short)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
