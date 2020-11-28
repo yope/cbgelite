@@ -57,7 +57,7 @@ class Object3D:
 		self.shot_time = 0
 
 	def die(self):
-		self.sfx.play_explosion()
+		self.sfx.play_short_explosion()
 		self.vanish()
 		self.mv.spawn_explosion(self.pos, self.ship.opt_can_on_demise)
 
