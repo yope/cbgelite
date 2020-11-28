@@ -326,23 +326,28 @@ class Microverse:
 	def set_speed(self, speed):
 		self.speed = speed
 
-	def handle_collision_with(self, obj):
-		if obj.pos[2] < 0.0: # Object hit from behind
+	def _handle_hit(self, amount, pos):
+		if pos[2] < 0.0: # Hit from behind
 			shield = self.aft_shield
 		else:
 			shield = self.front_shield
-		energy = 150*self.energy + 10*shield - obj.energy
+		energy = 150*self.energy + 20*shield - amount
 		if energy < 0:
 			self.die()
 			return False
 		self.energy = min(energy / 150, 1.0)
 		shield = max(0.0, energy / 150 - 1.0)
-		if obj.pos[2] < 0.0: # Object hit from behind
+		if pos[2] < 0.0:
 			self.aft_shield = shield
 		else:
 			self.front_shield = shield
-		obj.die()
 		return True
+
+	def handle_collision_with(self, obj):
+		if self._handle_hit(obj.energy, obj.pos):
+			obj.die()
+			return True
+		return False
 
 	def handle(self):
 		self.move(self.speed + self.jumpspeed)
