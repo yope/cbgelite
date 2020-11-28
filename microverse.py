@@ -23,6 +23,7 @@ from math import sqrt, pi, inf
 from quaternion import *
 from time import sleep
 from sounds import SoundFX
+from ai import CanisterAi
 
 import asyncio
 
@@ -375,7 +376,8 @@ class Microverse:
 		rnd = random.uniform
 		x, y, z = pos
 		for i in range(cans):
-			self.spawn("cargo_canister", (x + 50*i, y+20*i, z+40*i), rnd(0, 3), rnd(0, 3))
+			can = self.spawn("cargo_canister", (x + 50*i, y+20*i, z+40*i), rnd(0, 3), rnd(0, 3))
+			can.add_ai(CanisterAi)
 		particles = []
 		for i in range(42):
 			p = DustParticle(self.g3d, (x + rnd(-200, 200), y + rnd(-200, 200), z + rnd(-200, 200)))
