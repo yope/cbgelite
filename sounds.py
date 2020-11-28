@@ -243,11 +243,13 @@ class SoundFX:
 	def play_myhit(self):
 		self.play(self.myhit)
 
-	def play(self, buf):
+	def play(self, buf, force=False):
 		for p in self.players:
 			if not p.busy:
 				p.start_play(buf)
-				break
+				return
+		if force:
+			self.players[-1].start_play(buf)
 
 	def play_hit(self, pan=0.0):
 		pan0 = max(-1.0, pan - 0.2)
@@ -259,7 +261,7 @@ class SoundFX:
 		self.play(self.jump1)
 
 	def play_explosion(self):
-		self.play(self.exp)
+		self.play(self.exp, force=True)
 
 	def play_short_explosion(self):
 		self.play(self.exp_short)
