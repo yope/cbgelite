@@ -134,7 +134,7 @@ class CanisterAi:
 		self.vec = (rnd(-1, 1), rnd(-1, 1), rnd(-1, 1))
 		self.roll = rnd(-0.01, 0.01)
 		self.pitch = rnd(-0.01, 0.01)
-		self.speed = rnd(1.0, 2.0)
+		self.speed = rnd(0.0, 0.6)
 
 	def handle(self):
 		o = self.obj
