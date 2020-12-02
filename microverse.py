@@ -304,6 +304,7 @@ class Microverse:
 		self.aft_shield = 1.0
 		self.jumping = False
 		self.dead = False
+		self.docked = False
 
 	def stop(self):
 		for o in self.objects:
@@ -355,6 +356,9 @@ class Microverse:
 			self.front_shield = shield
 		return True
 
+	def handle_docking(self):
+		self.docked = True
+
 	def handle_collision_with(self, obj):
 		if self._handle_hit(obj.energy, obj.pos):
 			obj.die()
@@ -366,6 +370,16 @@ class Microverse:
 		for o in self.objects:
 			o.handle()
 			if not self.dead and o.check_collision(95): # Target area of Cobra MK III
+				if o is self.station:
+					alignn = self.g3d.dot(o.nosev, (0, 0, 1))
+					alignr = abs(self.g3d.dot(o.roofv, (0, 1, 0)))
+					dx = abs(o.pos[0])
+					dy = abs(o.pos[1])
+					if alignn < -0.97 and dx < 25 and dy < 15 and alignr > 0.85:
+						self.cbg.log("DOCKED!", alignn, alignr, dx, dy)
+						self.handle_docking()
+						return False
+					self.cbg.log("NOT DOCKED!", alignn, alignr, dx, dy)
 				if not self.handle_collision_with(o):
 					return False
 		if self.station:

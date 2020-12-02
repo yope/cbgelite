@@ -586,10 +586,13 @@ class Elite:
 		while self.cockpit.main_iteration():
 			self.cbg.redraw_screen()
 			ts = await self.framsleep(ts)
-		while True:
-			self.cockpit.game_over_iteration()
-			self.cbg.redraw_screen()
-			ts = await self.framsleep(ts)
+		if m.dead:
+			while True:
+				self.cockpit.game_over_iteration()
+				self.cbg.redraw_screen()
+				ts = await self.framsleep(ts)
+		elif m.docked:
+			await self.cockpit.launch_animation()
 
 	async def startup(self, showfps=False):
 		mt = self.loop.create_task(self.run(showfps))
