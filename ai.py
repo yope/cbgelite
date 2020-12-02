@@ -125,7 +125,6 @@ class BaseAi:
 				self.obj.mv.set_flashtext(o.name + " can shoot")
 				if x < 0.2:
 					o.shoot(False)
-		self.obj.mv.set_flashtext(o.name + " disappeared")
 
 class CanisterAi:
 	def __init__(self, obj):
