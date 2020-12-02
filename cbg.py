@@ -462,14 +462,14 @@ class G3d:
 		if x is not None:
 			self.cbg.putpixel(int(x), int(y), clear)
 
-	def line(self, p0, p1, clear=False):
+	def line(self, p0, p1, clear=False, pattern=None):
 		x0, y0 = self.project2d(*p0)
 		if x0 is None:
 			return
 		x1, y1 = self.project2d(*p1)
 		if x1 is None:
 			return
-		self.cbg.clipped_line(x0, y0, x1, y1, clear)
+		self.cbg.clipped_line(x0, y0, x1, y1, clear=clear, pattern=pattern)
 
 	def setRotMat(self, rx, ry, rz, rotc=None):
 		if rotc is None:
