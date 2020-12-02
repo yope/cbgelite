@@ -26,6 +26,7 @@ from math import sin, sqrt
 from microverse import Microverse
 from ai import BaseAi
 from control import Control, BaseDev
+from collections import deque
 
 class BarGraph:
 	def __init__(self, cbg, x, y, w, h, fg, bg, ticks=0):
@@ -385,6 +386,114 @@ class Cockpit(BaseScreen):
 	def shot_fired(self, target):
 		self.m.shot_fired(target)
 
+	async def launch_animation(self):
+		cbg = self.cbg
+		g3d = self.g3d
+		circles = []
+		for i in range(4):
+			circles.append(i*12)
+		for i in range(8):
+			circles.append(i*30 + 50)
+		for i in range(4):
+			circles.append(i*12 + 290)
+		cbg.setclip(self.spaceclip)
+		xc, yc = g3d.project2d(0, 0, 1000)
+		dz = 400
+		acc = 1.0
+		self.m.sfx.play_launch()
+		while dz > 0:
+			cbg.clearmap()
+			for c in circles:
+				z = dz - c
+				if z < 4:
+					continue
+				r = g3d.project2d(10, 0, z * 2)[0]
+				if not r:
+					continue
+				cbg.ellipse(xc, yc, int(r - xc), int(r - xc))
+			cbg.redraw_screen()
+			await asyncio.sleep(0.03)
+			dz -= acc
+			acc += 0.1
+		cbg.setclip(None)
+
+	async def hyperspace_animation_start(self):
+		cbg = self.cbg
+		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, particles=0)
+		m.sfx.play_hyperspace_start()
+		cobs = []
+		for i in range(5):
+			cobs.append(m.spawn("cobra_mkiii", (0, 80, 800), 3.1415, 0.2))
+		ang = deque([0], maxlen=5)
+		pos = deque([0], maxlen=5)
+		i = 0
+		roll = 0.0
+		alpha = 0.0
+		pats = [0xffff, 0xaaaa, 0x9248, 0x8888, 0x8420]
+		zp = 400
+		cbg.setclip(self.spaceclip)
+		while i < 80:
+			if alpha < 6.28 and (20 < i < 70):
+				roll += 0.01
+			else:
+				roll = 0.0
+			if i > 60:
+				pos.appendleft(i - 60)
+			ang.appendleft(roll)
+			cbg.clearmap()
+			for t, c in enumerate(cobs):
+				if t >= len(ang):
+					continue
+				if t < len(pos):
+					y = pos[t]
+				else:
+					y = 0.0
+				pitch = 0.01 if i < 20 else 0.0
+				c.pos = (0, c.pos[1] - y*4, zp)
+				c.local_roll_pitch(ang[t], pitch)
+				c.draw(pats[t])
+			cbg.redraw_screen()
+			i += 1
+			alpha += roll
+			if zp < 800:
+				zp += 10
+			await asyncio.sleep(0.01)
+		cbg.setclip(None)
+
+	async def hyperspace_animation_end(self):
+		cbg = self.cbg
+		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, particles=0)
+		m.sfx.play_hyperspace_end()
+		cobs = []
+		for i in range(5):
+			cobs.append(m.spawn("cobra_mkiii", (0, -500, 800), 3.1415, 0.5))
+		pos = deque([-500], maxlen=5)
+		i = 0
+		pats = [0xffff, 0xaaaa, 0x9248, 0x8888, 0x8420]
+		cbg.setclip(self.spaceclip)
+		while i < 50:
+			if i < 11:
+				pos.appendleft(i * 10)
+			elif i < 16:
+				pos.appendleft(100 + (i - 10) * 5)
+			elif i < 21:
+				pos.appendleft(125)
+			else:
+				pos = [125]
+			cbg.clearmap()
+			for t, c in enumerate(cobs):
+				if t >= len(pos):
+					continue
+				y = pos[t]
+				pitch = 0.01 if i < 20 else 0.0
+				c.pos = (c.pos[0], -100 + y, c.pos[2] - (0 if i < 17 else 10))
+				c.local_roll_pitch(0.0, pitch)
+				c.draw(pats[t])
+			cbg.redraw_screen()
+			i += 1
+			await asyncio.sleep(0.01)
+		cbg.setclip(None)
+
 class Elite:
 	def __init__(self, loop=None, config=False):
 		self.loop = loop or asyncio.get_event_loop()
@@ -488,6 +597,10 @@ class Elite:
 
 	async def run(self, showfps=False):
 		await self.title_screen(showfps)
+		await self.cockpit.launch_animation()
+		#await self.cockpit.hyperspace_animation_start()
+		#await asyncio.sleep(1)
+		#await self.cockpit.hyperspace_animation_end()
 		await self.microtest()
 		return 0
 

@@ -154,7 +154,7 @@ class Object3D:
 		else:
 			return False
 
-	def draw(self):
+	def draw(self, pattern=None):
 		s = self.ship
 		g = self.g3d
 
@@ -179,7 +179,7 @@ class Object3D:
 				e = s.edge[ei]
 				p0 = self.transform(s.vert[e[0]])
 				p1 = self.transform(s.vert[e[1]])
-				g.line(p0, p1)
+				g.line(p0, p1, pattern=pattern)
 		if self.shot_time > 0:
 			if self.shot_time > 2:
 				gvert = s.opt_gun_vertex // 4
@@ -304,6 +304,14 @@ class Microverse:
 		self.aft_shield = 1.0
 		self.jumping = False
 		self.dead = False
+
+	def stop(self):
+		for o in self.objects:
+			o.vanish()
+
+	def restart(self):
+		for p in self.particles:
+			p.reset()
 
 	def die(self):
 		self.spawn_explosion((0,0,0), 4)
