@@ -244,6 +244,18 @@ class SoundFX:
 		exp1 = self.synth.gen_square(80, 50, 0.5, adsr_exp1, noise=True, ac0=-0.95)
 		exp2 = self.synth.gen_square(220, 40, 0.5, adsr_exp2, noise=True, ac0=-0.92)
 		self.exp = self.synth.mix_s16le_2ch(exp1, exp2, vol0=1.0, vol1=0.5, pan0=-0.2, pan1=0.2)
+		launch1 = self.synth.gen_square(500, 500, 0.5, adsr_exp1, noise=True)
+		launch2 = self.synth.gen_square(400, 400, 0.5, adsr_exp2, noise=True)
+		self.launch = self.synth.mix_s16le_2ch(launch1, launch2, 1.0, 1.0, -0.5, 0.5)
+		adsr_hyp1 = ADSR(0, 0.3, 1.0, 0.5, 0.3, 1.0)
+		hyper11 = self.synth.gen_square(110, 880, 0.5, adsr_hyp1, noise=True)
+		hyper12 = self.synth.gen_square(2200, 8800, 0.3, adsr_hyp1)
+		self.hyp1 = self.synth.mix_s16le_2ch(hyper11, hyper12, 0.5, 0.07, -0.3, 0.4)
+		adsr_hyp21 = ADSR(0, 0.5, 0.0, 0.1, 0.1, 1.3)
+		adsr_hyp22 = ADSR(0.35, 0.0, 0.5, 0.05, 0.5, 0.3)
+		hyper21 = self.synth.gen_square(440, 880, 0.5, adsr_hyp21, noise=True)
+		hyper22 = self.synth.gen_square(60, 30, 0.5, adsr_hyp22, noise=True, ac0=-0.985)
+		self.hyp2 = self.synth.mix_s16le_2ch(hyper21, hyper22, 0.1, 1.0, 0.4, -0.1)
 
 	def play_shot(self, pan=0.0):
 		pan0 = max(-1.0, pan - 0.2)
@@ -279,6 +291,15 @@ class SoundFX:
 
 	def play_short_explosion(self):
 		self.play(self.exp_short)
+
+	def play_launch(self):
+		self.play(self.launch)
+
+	def play_hyperspace_start(self):
+		self.play(self.hyp1, force=True)
+
+	def play_hyperspace_end(self):
+		self.play(self.hyp2, force=True)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
