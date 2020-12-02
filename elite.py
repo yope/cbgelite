@@ -132,7 +132,7 @@ class Radar:
 			dp = self.m.get_planet_dist()
 		if self.m.station:
 			ds = self.m.get_station_dist()
-			if ds < 75000:
+			if ds < 55000:
 				px, py, pz = self.m.station.pos
 				self.near_station = True
 				dp = ds

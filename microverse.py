@@ -477,7 +477,7 @@ class Microverse:
 	def jump(self):
 		if self.jumping:
 			return
-		if self.get_planet_dist() < 80000:
+		if self.get_planet_dist() < 60000:
 			self.set_subtext("Too Close")
 			return
 		j = self.loop.create_task(self.coro_jump())
@@ -487,7 +487,7 @@ class Microverse:
 	async def _check_jump_dist(self, ramp=0.0):
 		self.set_subtext("JUMP")
 		for t in range(20):
-			if self.get_planet_dist() < 80000 or self.dead:
+			if self.get_planet_dist() < 60000 or self.dead:
 				self.jumpspeed = 0.0
 				return False
 			self.jumpspeed += ramp
