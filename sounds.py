@@ -110,7 +110,7 @@ class SynthVoice:
 	def nsamples(self, time):
 		return int(self.rate * time)
 
-	def gen_square(self, fstart, fend, dc, adsr, noise=False):
+	def gen_square(self, fstart, fend, dc, adsr, noise=False, ac0=None):
 		if noise:
 			fstart *= 4
 			fend *= 4
@@ -138,7 +138,21 @@ class SynthVoice:
 					l0 = random.randint(-v, v)
 					l1 = random.randint(-v, v)
 		adsr.process(buf)
+		if ac0 is not None:
+			self.filter_lp(buf, ac0)
 		return buf
+
+	def filter_lp(self, buf, ac0):
+		gain = 2/(1+ac0)
+		xv1 = xv0 = 0
+		yv1 = yv0 = 0
+		for i in range(len(buf)):
+			xv0 = xv1
+			xv1 = buf[i] / gain
+			yv0 = yv1
+			out = xv0 + xv1 - yv0 * ac0
+			yv1 = out
+			buf[i] = out
 
 	def render_s16le_2ch(self, buf, vol=1.0, pan=0.0):
 		pack_into = struct.Struct('<hh').pack_into
@@ -203,17 +217,17 @@ class SoundFX:
 		adsr = ADSR(0.0, 0.0, 0.2, 0.1, 0.05, 0.1)
 		adsr_long = ADSR(0.0, 0.0, 0.3, 0.2, 0.1, 0.2)
 		adsr_dlay = ADSR(0.20, 0.0, 0.2, 0.1, 0.1, 0.1)
-		self.laser1 = self.synth.gen_square(440, 55, 0.35, adsr)
-		self.laser2 = self.synth.gen_square(330, 55, 0.5, adsr)
-		laser3 = self.synth.gen_square(880, 110, 0.5, adsr)
+		self.laser1 = self.synth.gen_square(440, 55, 0.35, adsr, ac0=-0.8)
+		self.laser2 = self.synth.gen_square(330, 55, 0.5, adsr, ac0=-0.85)
+		laser3 = self.synth.gen_square(880, 110, 0.5, adsr, ac0=-0.75)
 		myhit = self.synth.gen_square(330, 110, 0.5, adsr, noise=True)
 		shexp1 = self.synth.gen_square(110, 55, 0.5, adsr_long, noise=True)
 		shexp2 = self.synth.gen_square(150, 110, 0.5, adsr_long, noise=True)
 		self.exp_short = self.synth.mix_s16le_2ch(shexp1, shexp2, 0.8, 0.8, -0.5, 0.5)
 		self.myshot = self.synth.mix_s16le_2ch(laser3, self.laser2, 0.6, 0.4, -0.5, 0.5)
 		self.myhit = self.synth.mix_s16le_2ch(laser3, myhit, 0.6, 1.0, -0.3, 0.3)
-		self.laser_long = self.synth.gen_square(440, 55, 0.35, adsr_long)
-		self.damage = self.synth.gen_square(660, 110, 0.5, adsr_dlay, noise=True)
+		self.laser_long = self.synth.gen_square(440, 55, 0.35, adsr_long, ac0=-0.3)
+		self.damage = self.synth.gen_square(660, 110, 0.5, adsr_dlay, noise=True, ac0=-0.94)
 		adsr_j1 = ADSR(0.0, 2.0, 0.0, 1.0, 0.0, 0.0) # Frist 2 seconds
 		adsr_j2 = ADSR(0.0, 0.0, 0.0, 1.0, 4.0, 0.0) # Middle 4 seconds
 		adsr_j3 = ADSR(0.0, 0.0, 2.0, 0.0, 0.0, 0.0) # Last 2 seconds
@@ -227,8 +241,8 @@ class SoundFX:
 				j11 + j12 + j13, j21 + j22 + j23, vol0=0.1, vol1=0.08, pan0=-0.5, pan1=0.5)
 		adsr_exp1 = ADSR(0.0, 0.0, 2.0, 0.1, 2.0, 2.0)
 		adsr_exp2 = ADSR(0.0, 0.0, 1.0, 0.1, 3.0, 2.0)
-		exp1 = self.synth.gen_square(80, 50, 0.5, adsr_exp1, noise=True)
-		exp2 = self.synth.gen_square(220, 40, 0.5, adsr_exp2, noise=True)
+		exp1 = self.synth.gen_square(80, 50, 0.5, adsr_exp1, noise=True, ac0=-0.95)
+		exp2 = self.synth.gen_square(220, 40, 0.5, adsr_exp2, noise=True, ac0=-0.92)
 		self.exp = self.synth.mix_s16le_2ch(exp1, exp2, vol0=1.0, vol1=0.5, pan0=-0.2, pan1=0.2)
 
 	def play_shot(self, pan=0.0):
