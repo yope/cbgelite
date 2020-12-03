@@ -62,13 +62,13 @@ class BaseAi:
 		if self.strat is self.MOVE_TO:
 			if dn > ds and dn > dr:
 				if dr > 0.0:
-					p = 0.02
-				else:
 					p = -0.02
+				else:
+					p = 0.02
 			elif ds > dn and ds > dr:
 				r = 0.02
 			elif dr > ds and dr > dn:
-				p = 0.02
+				p = -0.02
 		elif self.strat is self.MOVE_AWAY:
 			if self.dn > -0.5:
 				p = 0.01
