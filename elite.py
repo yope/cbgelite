@@ -17,7 +17,7 @@
 # along with CBGElite.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
-from random import randint
+from random import randint, uniform
 from cbg import CBG, G3d
 from ship import AllShips
 import sys
@@ -529,14 +529,19 @@ class Elite:
 			fr = 0
 			fps = 0.0
 		ts = monotonic()
+		i = 131
 		while True:
+			if i > 130:
+				i = 0
+				roll = uniform(-0.04, 0.04)
+			i += 1
 			if dz > 550:
 				dz -= 150
 				cobra.pos = (0.0, 0.0, dz)
 			self.cbg.clearmap()
 			self.draw_title()
 			self.cbg.setclip(self.cockpit.spaceclip)
-			cobra.local_roll_pitch(0.1, 0.03)
+			cobra.local_roll_pitch(roll, -0.0513)
 			tm.draw()
 			self.cbg.setclip(None)
 			self.cbg.redraw_screen()
