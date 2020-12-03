@@ -44,8 +44,10 @@ class Object3D:
 		self.ship = ship
 		self.energy = ship.opt_max_energy
 		self.nosev = (0, 0, 1)
-		self.sidev = (0, 1, 0)
-		self.roofv = (1, 0, 0)
+		self.lnosev = (0, 0, 1)
+		self.sidev = (1, 0, 0)
+		self.lsidev = (1, 0, 0)
+		self.roofv = (0, 1, 0)
 		self.distance = self.g3d.distv(self.pos)
 		self.roll = 0.0
 		self.pitch = 0.0
@@ -92,21 +94,12 @@ class Object3D:
 			self.sfx.play_shot(pan)
 
 	def local_roll_pitch(self, roll, pitch):
-		self.roll += roll
-		self.pitch += pitch
-		pi2 = pi * 2
-		if self.roll > pi2:
-			self.roll -= pi2
-		elif self.roll < 0.0:
-			self.roll += pi2
-		if self.pitch > pi2:
-			self.pitch -= pi2
-		elif self.pitch < 0.0:
-			self.pitch += pi2
-		qroll = aangle2q((0, 0, 1), self.roll)
-		qpitch = aangle2q((1, 0, 0), self.pitch)
-		self.qltot = qmult(qpitch, qroll)
+		qroll = aangle2q(self.lnosev, roll)
+		qpitch = aangle2q(self.lsidev, pitch)
+		self.qltot = qmult(qmult(qpitch, qroll), self.qltot)
 		self.qlcon = qconj(self.qltot)
+		self.lsidev = self._qlrot((1, 0, 0))
+		self.lnosev = self._qlrot((0, 0, 1))
 
 	def world_roll_pitch(self, roll, pitch):
 		self.qwroll = aangle2q((0, 0, 1), roll)
@@ -114,8 +107,8 @@ class Object3D:
 		self.qwtot = qmult(qmult(self.qwpitch, self.qwroll), self.qwtot)
 		self.qwcon = qconj(self.qwtot)
 		self.nosev = normalize(self._qrot((0, 0, 1)))
-		self.sidev = normalize(self._qrot((0, 1, 0)))
-		self.roofv = normalize(self._qrot((1, 0, 0)))
+		self.sidev = normalize(self._qrot((1, 0, 0)))
+		self.roofv = normalize(self._qrot((0, 1, 0)))
 
 	def _qlrot(self, p):
 		return qmult(qmult(self.qltot, (0.0, ) + p), self.qlcon)[1:]
@@ -377,10 +370,10 @@ class Microverse:
 			if not self.dead and o.check_collision(95): # Target area of Cobra MK III
 				if o is self.station:
 					alignn = self.g3d.dot(o.nosev, (0, 0, 1))
-					alignr = abs(self.g3d.dot(o.roofv, (0, 1, 0)))
+					alignr = abs(self.g3d.dot(o.sidev, (0, 1, 0)))
 					dx = abs(o.pos[0])
 					dy = abs(o.pos[1])
-					if alignn < -0.97 and dx < 25 and dy < 15 and alignr > 0.85:
+					if alignn < -0.96 and dx < 40 and dy < 30 and alignr > 0.85:
 						self.cbg.log("DOCKED!", alignn, alignr, dx, dy)
 						self.handle_docking()
 						return False
