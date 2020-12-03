@@ -226,12 +226,17 @@ class DustParticle(Particle):
 		super().__init__(g3d)
 		self.rad = 10000
 		self.pos = pos
+		self.vec = (0, 0, 0)
+
+	def set_dir(self, vx, vy, vz):
+		self.vec = (vx / 15, vy / 15, vz / 15)
 
 	def draw(self, js):
 		self.g3d.point(self.pos)
 		x, y, z = self.pos
+		vx, vy, vz = self.vec
 		rnd = random.uniform
-		self.pos = x + rnd(-1, 1), y + rnd(-1, 1), z + rnd(-1, 1)
+		self.pos = x + vx + rnd(-1, 1), y + vy + rnd(-1, 1), z + vz + rnd(-1, 1)
 
 class Planet:
 	def __init__(self, mv, name, pos, dia):
@@ -430,7 +435,10 @@ class Microverse:
 			can.add_ai(CanisterAi)
 		particles = []
 		for i in range(42):
-			p = DustParticle(self.g3d, (x + rnd(-200, 200), y + rnd(-200, 200), z + rnd(-200, 200)))
+			xp, yp, zp = x + rnd(-20, 20), y + rnd(-20, 20), z + rnd(-20, 20)
+			vx, vy, vz = xp - x, yp - y, zp - z
+			p = DustParticle(self.g3d, (xp, yp, zp))
+			p.set_dir(vx, vy, vz)
 			particles.append(p)
 			self.particles.add(p)
 		self.loop.call_later(10, self._remove_particles, particles)
