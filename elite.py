@@ -24,6 +24,7 @@ import sys
 from time import sleep, monotonic
 from math import sin, sqrt
 from microverse import Microverse
+from universe import Universe
 from ai import BaseAi
 from control import Control, BaseDev
 from collections import deque
