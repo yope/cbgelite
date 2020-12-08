@@ -494,6 +494,54 @@ class Cockpit(BaseScreen):
 			await asyncio.sleep(0.01)
 		cbg.setclip(None)
 
+class CommanderData:
+	def __init__(self):
+		self.bitcoin = 10.0
+		self.kills = 0
+		self.nrank = 0
+		self.status = 0
+		self.galaxy = 0
+		self.planet = 0
+		self.mission = None
+		self.fuel = 7.0
+		self.missiles = 0
+		self.laser_front = 0
+		self.laser_rear = None
+		self.laser_left = None
+		self.laser_right = None
+		self.cargo_bay = False
+		self.scoops = False
+		self.ecm = False
+		self.docking = False
+		self.energy = False
+
+class Commander:
+	def __init__(self):
+		self.data = CommanderData()
+		self.fname = "~/.cbgeliterc"
+
+	def load_game(self):
+		try:
+			with open(self.fname, "r") as f:
+				txt = f.read()
+		except OSError:
+			return False
+		try:
+			obj = json.loads(txt)
+		except json.JSONDecodeError:
+			return False
+		for item in obj:
+			if hasattr(self.data, item):
+				setattr(self.data, item, obj[item])
+		return True
+
+	def save_game(self):
+		try:
+			with open(self.fname, "w") as f:
+				f.write(json.dumps(self.data))
+		except OSError:
+			return False
+
 class Elite:
 	def __init__(self, loop=None, config=False):
 		self.loop = loop or asyncio.get_event_loop()
