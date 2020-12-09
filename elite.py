@@ -634,7 +634,7 @@ class Commander:
 	def save_game(self):
 		try:
 			with open(self.fname, "w") as f:
-				f.write(json.dumps(self.data))
+				f.write(json.dumps(self.data, indent="\t"))
 		except OSError:
 			return False
 
