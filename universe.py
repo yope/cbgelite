@@ -215,14 +215,41 @@ class Universe:
 				return s
 		return None
 
+	def get_system_by_name(self, name):
+		for j in range(8):
+			g = self.galaxies[j]
+			for i in range(256):
+				s = g[i]
+				if name == s.name:
+					return j,i
+		return None
+
 	def test(self):
-		g0 = self.galaxies[3]
+		g0 = self.galaxies[0]
 		for i in range(256):
 			s = g0[i]
-			print(s.name, s.x, s.y, s.government, s.economy, s.techlevel, s.description)
+			print(i, s.name, s.x, s.y, s.government, s.economy, s.techlevel, s.description)
 		s = self.get_system_near(0, 21, 172)
 		print(s.name, s.x, s.y, s.government, s.economy, s.techlevel, s.description)
+		print(repr(s))
+		s = self.get_system_near(0, 13, 186)
+		print(s.name, s.x, s.y, s.government, s.economy, s.techlevel, s.description)
+		print(repr(s))
 		s = self.get_system_near(2, 171, 179)
+		print(s.name, s.x, s.y, s.government, s.economy, s.techlevel, s.description)
+		print(repr(s))
+		s = self.get_system_near(0, 11, 174)
+		print(s.name, s.x, s.y, s.government, s.economy, s.techlevel, s.description)
+		print(repr(s))
+		s = self.get_system_near(0, 22, 231)
+		print(s.name, s.x, s.y, s.government, s.economy, s.techlevel, s.description)
+		print(repr(s))
+		s = self.get_system_near(0, 30, 230)
+		print(s.name, s.x, s.y, s.government, s.economy, s.techlevel, s.description)
+		print(repr(s))
+		i, j = self.get_system_by_name("Atgeaner")
+		print("At galaxy {} system {}".format(i, j))
+		s = self.get_system_by_index(i,j)
 		print(s.name, s.x, s.y, s.government, s.economy, s.techlevel, s.description)
 		print(repr(s))
 
