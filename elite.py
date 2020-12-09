@@ -595,7 +595,8 @@ class CommanderData:
 		self.nrank = 0
 		self.status = 0
 		self.galaxy = 0
-		self.system = 0
+		self.system = 7 # Default start at Lave
+		self.target = 7
 		self.mission = None
 		self.fuel = 7.0
 		self.missiles = 0
@@ -606,6 +607,7 @@ class CommanderData:
 		self.cargo_bay = False
 		self.scoops = False
 		self.ecm = False
+		self.ebomb = False
 		self.docking = False
 		self.energy = False
 
