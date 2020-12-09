@@ -745,12 +745,30 @@ class Elite:
 		elif m.docked:
 			await self.cockpit.launch_animation()
 
+	async def menu(self):
+		cd = self.commander.data
+		m = StatusScreen(self, self.cbg, cd)
+		m.setup_screen()
+		inp = self.inputdev
+		ts = self.loop.time()
+		while True:
+			inp.handle()
+			nbtn = m.handle(inp)
+			if 5 in nbtn:
+				m = GalaxyMap(self, self.cbg, cd)
+			elif 6 in nbtn:
+				m = ShortRangeMap(self, self.cbg, cd)
+			elif 9 in nbtn:
+				m = StatusScreen(self, self.cbg, cd)
+			ts = await self.framesleep(ts)
+
 	async def startup(self, showfps=False):
 		mt = self.loop.create_task(self.run(showfps))
 		mt.add_done_callback(lambda fut: self.cbg.exit(fut.result()))
 
 	async def run(self, showfps=False):
 		await self.title_screen(showfps)
+		await self.menu()
 		await self.cockpit.launch_animation()
 		#await self.cockpit.hyperspace_animation_start()
 		#await asyncio.sleep(1)
