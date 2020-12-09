@@ -514,6 +514,79 @@ class Cockpit(BaseScreen):
 			await asyncio.sleep(0.01)
 		cbg.setclip(None)
 
+class GalaxyMap(MenuScreen):
+	TITLE = "GALACTIC CHART"
+	def __init__(self, elite, cbg, cd):
+		super().__init__(elite, cbg)
+		self.cd = cd
+		self.galaxy = cd.galaxy
+
+	def get_position(self, s):
+		return s.x + 32, (s.y >> 1) + 32
+
+	def draw(self):
+		tsys = self.cd.system
+		self.cbg.drawtext(self.width-32, 8, "{}/8".format(self.galaxy + 1))
+		for i in range(256):
+			s = self.universe.get_system_by_index(self.galaxy, i)
+			self.cbg.putpixel(*self.get_position(s))
+		s = self.universe.get_system_by_index(self.galaxy, tsys)
+		r = int(self.cd.fuel * 5)
+		self.cbg.ellipse(*self.get_position(s), r, r)
+
+class ShortRangeMap(GalaxyMap):
+	TITLE = "SHORT RANGE CHART"
+	def __init__(self, elite, cbg, cd):
+		super().__init__(elite, cbg, cd)
+		self.system = cd.system
+		s = self.universe.get_system_by_index(cd.galaxy, self.system)
+		self.cx = s.x
+		self.cy = s.y
+
+	def get_position(self, s):
+		x = (s.x - self.cx) * 4 + 160
+		y = (s.y - self.cy) * 2 + 100
+		return x, y
+
+	def draw(self):
+		texty = set()
+		for i in range(256):
+			s = self.universe.get_system_by_index(self.galaxy, i)
+			x, y = self.get_position(s)
+			if 64 < x < 256 and 32 < y < 182:
+				r = s.radius // 1024
+				self.cbg.ellipse(x, y, r, r, fill=1)
+				ty = (y) // 8
+				if ty in texty:
+					ty += 1
+				texty.add(ty)
+				self.cbg.drawtext(x + 4, ty * 8, s.name)
+		s = self.universe.get_system_by_index(self.galaxy, self.system)
+		r = int(self.cd.fuel * 20)
+		self.cbg.ellipse(*self.get_position(s), r, r)
+
+class StatusScreen(MenuScreen):
+	def __init__(self, elite, cbg, cd):
+		self.TITLE = "COMMANDER "+cd.name.upper()
+		super().__init__(elite, cbg)
+		self.cd = cd
+		self.statustext = ["clean", "offender", "fugutive", "wanted"]
+		self.ranktext = ["Harmless", "Mostly Harmless", "Poor", "Average",
+				"Above Average", "Competent", "Dangerous", "Deadly", "---- E L I T E ----"]
+
+	def draw(self):
+		c = self.cbg
+		cd = self.cd
+		sy = self.universe.get_system_by_index(cd.galaxy, cd.system)
+		tsy = self.universe.get_system_by_index(cd.galaxy, cd.target)
+		c.drawtext(16, 32, "Present System      : {}".format(sy.name))
+		c.drawtext(16, 40, "Hyperspace System   : {}".format(tsy.name))
+		c.drawtext(16, 48, "Condition           : Docked")
+		c.drawtext(16, 56, "Fuel: {:.1f} Light Years".format(cd.fuel))
+		c.drawtext(16, 64, "Cash: {:.6f} Bitcoin".format(cd.bitcoin))
+		c.drawtext(16, 72, "Legal Status: {}".format(self.statustext[cd.status]))
+		c.drawtext(16, 80, "Rating: {}".format(self.ranktext[cd.nrank]))
+
 class CommanderData:
 	def __init__(self):
 		self.bitcoin = 10.0
