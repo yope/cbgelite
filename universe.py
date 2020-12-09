@@ -133,12 +133,12 @@ class SeedProcessor:
 						name = name[:-1]
 					ret += name + "ian"
 				elif 0xb2:
-					n = self.fast_rand() & 3
+					n = (self.fast_rand() & 3) + 1
 					for i in range(n):
 						x = self.fast_rand() & 0x3e
 						if self.pairs0[x] != '.':
 							ret += self.pairs0[x]
-						if i and (self.pairs0[x + 1] != '.'):
+						if self.pairs0[x + 1] != '.':
 							ret += self.pairs0[x + 1]
 				else:
 					print("Bad char in data [%x]".format(c))
