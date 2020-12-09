@@ -277,6 +277,25 @@ class BaseScreen:
 	def draw_background(self):
 		self.cbg.rect(1, 2, self.width-2, self.height-4)
 
+class MenuScreen(BaseScreen):
+	TITLE = "Base Menu"
+	def __init__(self, elite, cbg):
+		super().__init__(elite, cbg)
+		self.universe = elite.universe
+		self.tx = self.width // 2 - len(self.TITLE) * 4
+
+	def handle(self, inp):
+		self.cbg.clearmap()
+		self.draw_background()
+		self.draw()
+		self.cbg.redraw_screen()
+		return inp.get_new_keys()
+
+	def draw_background(self):
+		super().draw_background()
+		self.cbg.line(1, 20, self.width-2, 20)
+		self.cbg.drawtext(self.tx, 8, self.TITLE)
+
 class Cockpit(BaseScreen):
 	def __init__(self, elite, cbg, inputdev):
 		super().__init__(elite, cbg)
