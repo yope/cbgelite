@@ -589,6 +589,7 @@ class StatusScreen(MenuScreen):
 
 class CommanderData:
 	def __init__(self):
+		self.name = "Jameson"
 		self.bitcoin = 10.0
 		self.kills = 0
 		self.nrank = 0
