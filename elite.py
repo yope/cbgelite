@@ -502,7 +502,7 @@ class CommanderData:
 		self.nrank = 0
 		self.status = 0
 		self.galaxy = 0
-		self.planet = 0
+		self.system = 0
 		self.mission = None
 		self.fuel = 7.0
 		self.missiles = 0
