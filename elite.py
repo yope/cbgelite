@@ -692,7 +692,7 @@ class Elite:
 			self.cbg.setclip(None)
 			self.cbg.redraw_screen()
 			self.inputdev.handle()
-			if 1 in self.inputdev.get_keys():
+			if 1 in self.inputdev.get_new_keys():
 				break
 			if showfps:
 				print("\x1b[2;2HFPS:{:.2f}".format(fps))
@@ -760,6 +760,8 @@ class Elite:
 				m = ShortRangeMap(self, self.cbg, cd)
 			elif 9 in nbtn:
 				m = StatusScreen(self, self.cbg, cd)
+			elif 1 in nbtn: # FIXME: launch
+				break
 			ts = await self.framesleep(ts)
 
 	async def startup(self, showfps=False):
