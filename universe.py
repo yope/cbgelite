@@ -162,6 +162,14 @@ class System:
 		self.population /= 10
 		self.radius = 256 * (((s[2] >> 8) & 0x0f) + 11) + self.x
 		sp.set_fastseed(s[1] & 0xff, s[1] >> 8, s[2] & 0xff, s[2] >> 8)
+		if s[2] & 0x80:
+			self.species = ["Large ", "Fierce ", "Small ", "", "", "", "", ""][(s[2] >> 10) & 7]
+			self.species += ["Green ", "Red ", "Yellow ", "Blue ", "Black ", "Hamless ", "", ""][(s[2] >> 13) & 7]
+			aidx = ((s[0] ^ s[1]) >> 8) & 7
+			self.species += ["Slimy ", "Bug-Eyed ", "Horned ", "Bony ", "Fat ", "Furry ", "", ""][aidx]
+			self.species += ["Rodents", "Frogs", "Lizards", "Lobsters", "Birds", "Humanoids", "Felines", "Insects"][(aidx + ((s[2]>>8) & 3)) & 7]
+		else:
+			self.species = "Human Colonials"
 		self.name = sp.get_name(s).lower().capitalize()
 		self.description = sp.make_goatsoup("\x8F is \x97.", self)
 		self.str_economy = ["Rich Industrial", "Average Industrial", "Poor Industrial", "Mainly Industrial",
@@ -171,9 +179,10 @@ class System:
 		sp.set_seed(s)
 
 	def __repr__(self):
-		s = f'Economy: {self.str_economy}\n\nGovernment: {self.str_government}\n\n' + \
-				f'Tech. Level: {self.techlevel + 1}\n\nPopulation: {self.population} Billion\n\n' + \
-				f'Gross Productivity: {self.productivity} M CR\n\nAverage Radius: {self.radius} km\n\n' + \
+		s = f'Economy: {self.str_economy}\nGovernment: {self.str_government}\n' + \
+				f'Tech. Level: {self.techlevel + 1}\nPopulation: {self.population} Billion\n' + \
+				f'({self.species})\n' + \
+				f'Gross Productivity: {self.productivity} M CR\nAverage Radius: {self.radius} km\n' + \
 				f'{self.description}\n'
 		return s
 
