@@ -35,7 +35,7 @@ class SeedProcessor:
 			0x8B: ["juice", "brandy", "water", "brew", "gargle blasters"],
 			0x8C: ["\xB2", "\xB1 \x99", "\xB1 \xB2", "\xB1 \x9B", "\x9B \xB2"],
 			0x8D: ["fabulous", "exotic", "hoopy", "unusual", "exciting"],
-			0x8E: ["cuisine", "night life", "casinos", "sit coms", " \xA1 "],
+			0x8E: ["cuisine", "night life", "casinos", "sit coms", "\xA1"],
 			0x8F: ["\xB0", "The planet \xB0", "The world \xB0", "This planet", "This world"],
 			0x90: ["n unremarkable", " boring", " dull", " tedious", " revolting"],
 			0x91: ["planet", "world", "place", "little planet", "dump"],
