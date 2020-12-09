@@ -158,7 +158,8 @@ class System:
 		if self.government & 1:
 			self.techlevel += 1
 		self.population = 4 * self.techlevel + self.economy + self.government + 1
-		self.productivity = ((self.economy ^ 7) + 3) * (self.government + 4) + self.population * 8
+		self.productivity = ((self.economy ^ 7) + 3) * (self.government + 4) * self.population * 8
+		self.population /= 10
 		self.radius = 256 * (((s[2] >> 8) & 0x0f) + 11) + self.x
 		sp.set_fastseed(s[1] & 0xff, s[1] >> 8, s[2] & 0xff, s[2] >> 8)
 		self.name = sp.get_name(s).lower().capitalize()
