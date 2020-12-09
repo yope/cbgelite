@@ -697,7 +697,7 @@ class Elite:
 			if showfps:
 				print("\x1b[2;2HFPS:{:.2f}".format(fps))
 			else:
-				ts = await self.framsleep(ts)
+				ts = await self.framesleep(ts)
 				continue
 			fr += 1
 			if fr > 10:
@@ -707,7 +707,7 @@ class Elite:
 				fr = 0
 			await asyncio.sleep(0)
 
-	async def framsleep(self, ts):
+	async def framesleep(self, ts):
 		now = self.loop.time()
 		dt = max(0.0, ts + 0.04 - now)
 		await asyncio.sleep(dt)
@@ -736,12 +736,12 @@ class Elite:
 		speed = 0.0
 		while self.cockpit.main_iteration():
 			self.cbg.redraw_screen()
-			ts = await self.framsleep(ts)
+			ts = await self.framesleep(ts)
 		if m.dead:
 			while True:
 				self.cockpit.game_over_iteration()
 				self.cbg.redraw_screen()
-				ts = await self.framsleep(ts)
+				ts = await self.framesleep(ts)
 		elif m.docked:
 			await self.cockpit.launch_animation()
 
