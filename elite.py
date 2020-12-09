@@ -652,6 +652,8 @@ class Elite:
 		else:
 			ctrl.load_mapping()
 		self.inputdev = ctrl.get_evdev()
+		self.universe = Universe()
+		self.commander = Commander()
 		self.ships = AllShips("all_ships.ship").ships
 		self.cockpit = Cockpit(self, self.cbg, self.inputdev)
 
