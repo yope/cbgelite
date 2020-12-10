@@ -587,6 +587,52 @@ class StatusScreen(MenuScreen):
 		c.drawtext(16, 72, "Legal Status: {}".format(self.statustext[cd.status]))
 		c.drawtext(16, 80, "Rating: {}".format(self.ranktext[cd.nrank]))
 
+class SystemData(MenuScreen):
+	def __init__(self, elite, cbg, cd):
+		s = elite.universe.get_system_by_index(cd.galaxy, cd.system)
+		self.TITLE = "DATA ON "+s.name.upper()
+		super().__init__(elite, cbg)
+		self.system = s
+
+	def _txt_align(self, l, n):
+		words = l.split()
+		line = []
+		x = 0
+		for w in words:
+			if line and x + len(w) > n:
+				if len(line) == 1:
+					yield line[0]
+				else:
+					d, m = divmod(n - x - 1, len(line) - 1)
+					minsp = ' ' * (d + 1)
+					if m:
+						yield (' ' * (d + 2)).join(line[:m] + [minsp.join(line[m:])])
+					else:
+						yield minsp.join(line)
+				x = 0
+				line = []
+			line.append(w)
+			x += len(w) + 1
+		if line:
+			yield " ".join(line)
+
+	def draw(self):
+		c = self.cbg
+		s = self.system
+		txt = repr(s)
+		lines = txt.split('\n')
+		y = 32
+		for l in lines:
+			if len(l) <= 36:
+				c.drawtext(16, y, l)
+				y += 8
+			else:
+				xlines = self._txt_align(l, 36)
+				for xl in xlines:
+					c.drawtext(16, y, xl)
+					y += 8
+			y += 8 # Extra line between paragraphs.
+
 class CommanderData:
 	def __init__(self):
 		self.name = "Jameson"
@@ -758,6 +804,8 @@ class Elite:
 				m = GalaxyMap(self, self.cbg, cd)
 			elif 6 in nbtn:
 				m = ShortRangeMap(self, self.cbg, cd)
+			elif 7 in nbtn:
+				m = SystemData(self, self.cbg, cd)
 			elif 9 in nbtn:
 				m = StatusScreen(self, self.cbg, cd)
 			elif 1 in nbtn: # FIXME: launch
