@@ -264,6 +264,7 @@ class BaseScreen:
 	def __init__(self, elite, cbg):
 		self.cbg = cbg
 		self.elite = elite
+		self.universe = elite.universe
 		self.width = 320
 		self.height = 240
 		self.hstatus = 64
@@ -281,7 +282,6 @@ class MenuScreen(BaseScreen):
 	TITLE = "Base Menu"
 	def __init__(self, elite, cbg):
 		super().__init__(elite, cbg)
-		self.universe = elite.universe
 		self.tx = self.width // 2 - len(self.TITLE) * 4
 
 	def handle(self, inp):
