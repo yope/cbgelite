@@ -52,6 +52,15 @@ class CBG:
 		signal.signal(signal.SIGINT, self.handle_sigint)
 		self.disable_cursor()
 		self.disable_echo()
+		self._putpixel = self.putpixel_nocheck
+
+	def set_putpixel(self, mode=0):
+		if not mode:
+			self._putpixel = self.putpixel_nocheck
+		elif mode == 1:
+			self._putpixel = self.clrpixel_nocheck
+		elif mode == 2:
+			self._putpixel = self.xorpixel_nocheck
 
 	def set_log_area(self, h):
 		self.cheight -= h
@@ -141,22 +150,31 @@ class CBG:
 	def putcode(self, x, y, code):
 		self.map[x + y * self.cwidth] = code
 
-	def putpixel(self, x, y, clear=False):
+	def putpixel(self, x, y):
 		if x < self.clxmin or x > self.clxmax or y < self.clymin or y > self.clymax:
 			return
-		self.putpixel_nocheck(x, y, clear=clear)
+		self._putpixel(x, y)
 
-	def putpixel_nocheck(self, x, y, clear=False):
+	def putpixel_nocheck(self, x, y):
 		cpx = x >> 1
 		cpy = y >> 2
 		bmp = self.bitmasks[y & 3][x & 1]
 		idx = cpx + cpy * self.cwidth
-		b = self.map[idx]
-		if clear:
-			b &= ~bmp
-		else:
-			b |= bmp
-		self.map[idx] = b
+		self.map[idx] |= bmp
+
+	def clrpixel_nocheck(self, x, y):
+		cpx = x >> 1
+		cpy = y >> 2
+		bmp = self.bitmasks[y & 3][x & 1]
+		idx = cpx + cpy * self.cwidth
+		self.map[idx] &= ~bmp
+
+	def xorpixel_nocheck(self, x, y):
+		cpx = x >> 1
+		cpy = y >> 2
+		bmp = self.bitmasks[y & 3][x & 1]
+		idx = cpx + cpy * self.cwidth
+		self.map[idx] ^= bmp
 
 	def drawglyph(self, x, y, char):
 		data = self.font.getchar(char)
@@ -222,7 +240,8 @@ class CBG:
 				print(u, end='')
 		sys.stdout.flush()
 
-	def line(self, x0, y0, x1, y1, clear=False, pattern=None):
+	def line(self, x0, y0, x1, y1, mode=0, pattern=None):
+		self.set_putpixel(mode)
 		dx = abs(x1 - x0)
 		sx = 1 if (x0 < x1) else -1
 		dy = -abs(y1 - y0)
@@ -232,7 +251,7 @@ class CBG:
 			i = 0
 			while True:
 				if pattern & (1 << i):
-					self.putpixel_nocheck(x0, y0, clear)
+					self._putpixel(x0, y0)
 				if (x0 == x1) and (y0 == y1):
 					break
 				i = (i+1) & 0x0f
@@ -245,7 +264,7 @@ class CBG:
 					y0 += sy
 		else:
 			while True:
-				self.putpixel_nocheck(x0, y0, clear)
+				self._putpixel(x0, y0)
 				if (x0 == x1) and (y0 == y1):
 					break
 				e2 = 2 * err
@@ -256,7 +275,7 @@ class CBG:
 					err += dx
 					y0 += sy
 
-	def clipped_line(self, x0, y0, x1, y1, clear=False, pattern=None):
+	def clipped_line(self, x0, y0, x1, y1, mode=0, pattern=None):
 		# Basic check to see if it isn't obviously outside
 		xmin = self.clxmin
 		xmax = self.clxmax-1
@@ -303,9 +322,10 @@ class CBG:
 		if x0 > xmax or x1 > xmax:
 			return
 
-		self.line(int(x0), int(y0), int(x1), int(y1), clear=clear, pattern=pattern)
+		self.line(int(x0), int(y0), int(x1), int(y1), mode=mode, pattern=pattern)
 
-	def hline(self, x0, x1, y, clear=False):
+	def hline(self, x0, x1, y, mode=0):
+		self.set_putpixel(mode)
 		if y < self.clymin or y > self.clymax:
 			return
 		if x0 < self.clxmin and x1 < self.clxmin:
@@ -319,15 +339,16 @@ class CBG:
 		if x1 > self.clxmax:
 			x1 = self.clxmax
 		for x in range(x0, x1):
-			self.putpixel_nocheck(x, y, clear=clear)
+			self._putpixel(x, y)
 
-	def rect(self, x, y, w, h, clear=False):
-		self.line(x, y, x+w, y, clear)
-		self.line(x, y, x, y+h, clear)
-		self.line(x, y+h, x+w, y+h, clear)
-		self.line(x+w, y, x+w, y+h, clear)
+	def rect(self, x, y, w, h, mode=0):
+		self.line(x, y, x+w, y, mode)
+		self.line(x, y, x, y+h, mode)
+		self.line(x, y+h, x+w, y+h, mode)
+		self.line(x+w, y, x+w, y+h, mode)
 
-	def ellipse(self, x, y, a, b, clear=False, fill=0):
+	def ellipse(self, x, y, a, b, mode=0, fill=0):
+		self.set_putpixel(mode)
 		x0 = x - a // 2
 		x1 = x + a // 2
 		y0 = y - b // 2
@@ -342,8 +363,8 @@ class CBG:
 		b1 = 8*b*b
 		if fill == 1: # Smooth
 			while True:
-				self.hline(int(x0), int(x1), int(y0), clear)
-				self.hline(int(x0), int(x1), int(y1), clear)
+				self.hline(int(x0), int(x1), int(y0))
+				self.hline(int(x0), int(x1), int(y1))
 				e2 = 2 * err
 				if e2 <= dy:
 					y0 += 1
@@ -365,8 +386,8 @@ class CBG:
 				f1 = randint(rmin, rmax)
 				f2 = randint(rmin, rmax)
 				f3 = randint(rmin, rmax)
-				self.hline(int(x0) + f0, int(x1) + f1, int(y0), clear)
-				self.hline(int(x0) + f2, int(x1) + f3, int(y1), clear)
+				self.hline(int(x0) + f0, int(x1) + f1, int(y0))
+				self.hline(int(x0) + f2, int(x1) + f3, int(y1))
 				e2 = 2 * err
 				if e2 <= dy:
 					y0 += 1
@@ -382,10 +403,10 @@ class CBG:
 					break
 		else:
 			while True:
-				self.putpixel(int(x1), int(y0), clear)
-				self.putpixel(int(x0), int(y0), clear)
-				self.putpixel(int(x0), int(y1), clear)
-				self.putpixel(int(x1), int(y1), clear)
+				self.putpixel(int(x1), int(y0))
+				self.putpixel(int(x0), int(y0))
+				self.putpixel(int(x0), int(y1))
+				self.putpixel(int(x1), int(y1))
 				e2 = 2 * err
 				if e2 <= dy:
 					y0 += 1
@@ -408,11 +429,12 @@ class CBG:
 			self.putpixel(x1+1, y1)
 			y1 -= 1
 
-	def fillrect(self, x, y, w, h, clear=False):
+	def fillrect(self, x, y, w, h, mode=0):
+		self.set_putpixel(mode)
 		# FIXME: Optimize this.
 		for i in range(y, y+h):
 			for j in range(x, x+w):
-				self.putpixel(j, i, clear)
+				self.putpixel(j, i)
 
 	def end(self):
 		self.exit(0)
@@ -427,13 +449,13 @@ class CBG:
 		while True:
 			if lines:
 				x0, y0, x1, y1 = lines[0]
-				self.clipped_line(x0, y0, x1, y1, True)
+				self.clipped_line(x0, y0, x1, y1, mode=2)
 			x0 = int(xoff + xa * sin(0.077 * t))
 			x1 = int(xoff + xa * cos(0.037 * t))
 			y0 = int(yoff + ya * sin(0.079 * t))
 			y1 = int(yoff + ya * cos(0.101 * t))
 			lines.append((x0, y0, x1, y1))
-			self.clipped_line(x0, y0, x1, y1)
+			self.clipped_line(x0, y0, x1, y1, mode=2)
 			t += 1
 			self.redraw_screen()
 			sleep(0.02)
@@ -457,19 +479,19 @@ class G3d:
 		y = self.persp * y / z
 		return x + self.cx, y + self.cy
 
-	def point(self, p, clear=False):
+	def point(self, p):
 		x, y = self.project2d(*p)
 		if x is not None:
-			self.cbg.putpixel(int(x), int(y), clear)
+			self.cbg.putpixel(int(x), int(y))
 
-	def line(self, p0, p1, clear=False, pattern=None):
+	def line(self, p0, p1, mode=0, pattern=None):
 		x0, y0 = self.project2d(*p0)
 		if x0 is None:
 			return
 		x1, y1 = self.project2d(*p1)
 		if x1 is None:
 			return
-		self.cbg.clipped_line(x0, y0, x1, y1, clear=clear, pattern=pattern)
+		self.cbg.clipped_line(x0, y0, x1, y1, mode=mode, pattern=pattern)
 
 	def setRotMat(self, rx, ry, rz, rotc=None):
 		if rotc is None:
