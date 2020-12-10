@@ -573,6 +573,7 @@ class StatusScreen(MenuScreen):
 		self.statustext = ["clean", "offender", "fugutive", "wanted"]
 		self.ranktext = ["Harmless", "Mostly Harmless", "Poor", "Average",
 				"Above Average", "Competent", "Dangerous", "Deadly", "---- E L I T E ----"]
+		self.lasertext = ["Pulse", "Mining", "Beam", "Military"]
 
 	def draw(self):
 		c = self.cbg
@@ -586,6 +587,31 @@ class StatusScreen(MenuScreen):
 		c.drawtext(16, 64, "Cash: {:.6f} Bitcoin".format(cd.bitcoin))
 		c.drawtext(16, 72, "Legal Status: {}".format(self.statustext[cd.status]))
 		c.drawtext(16, 80, "Rating: {}".format(self.ranktext[cd.nrank]))
+		c.drawtext(16, 96, "EQUIPMENT:")
+		y = 104
+		if cd.scoops:
+			c.drawtext(56, y, "Fuel Scoops")
+			y += 8
+		if cd.ecm:
+			c.drawtext(56, y, "E.C.M. System")
+			y += 8
+		if cd.ebomb:
+			c.drawtext(56, y, "Energy Bomb")
+			y += 8
+		if cd.energy:
+			c.drawtext(56, y, "Extra Energy Unit")
+			y += 8
+		if cd.docking:
+			c.drawtext(56, y, "Docking Computers")
+			y += 8
+		if cd.gdrive:
+			c.drawtext(56, y, "Galactic Hyperspace Drive")
+			y += 8
+		for d in ["Front", "Rear", "Left", "Right"]:
+			l = getattr(cd, "laser_" + d.lower())
+			if l is not None:
+				c.drawtext(56, y, " ".join([d, self.lasertext[l], "Laser"]))
+				y += 8
 
 class SystemData(MenuScreen):
 	def __init__(self, elite, cbg, cd):
