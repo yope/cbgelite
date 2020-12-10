@@ -278,6 +278,12 @@ class BaseScreen:
 	def draw_background(self):
 		self.cbg.rect(1, 2, self.width-2, self.height-4)
 
+	def draw(self):
+		pass
+
+	def exit(self):
+		pass
+
 class MenuScreen(BaseScreen):
 	TITLE = "Base Menu"
 	def __init__(self, elite, cbg):
@@ -855,12 +861,16 @@ class Elite:
 			inp.handle()
 			nbtn = m.handle(inp)
 			if 5 in nbtn:
+				m.exit()
 				m = GalaxyMap(self, self.cbg, cd)
 			elif 6 in nbtn:
+				m.exit()
 				m = ShortRangeMap(self, self.cbg, cd)
 			elif 7 in nbtn:
+				m.exit()
 				m = SystemData(self, self.cbg, cd)
 			elif 9 in nbtn:
+				m.exit()
 				m = StatusScreen(self, self.cbg, cd)
 			elif 1 in nbtn: # FIXME: launch
 				break
