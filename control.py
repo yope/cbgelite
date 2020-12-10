@@ -31,6 +31,7 @@ class BaseDev:
 	BTN_MISSILE2 = 8
 	BTN_ECM = 9
 	BTN_JUMP = 10
+	BTN_HYPERSPACE = 11
 	def __init__(self):
 		self.roll = 0.0
 		self.pitch = 0.0
@@ -255,6 +256,7 @@ extra priviledges. You basically have two choices to make this work:
 		ctrl.append(("Fire missile", BaseDev.BTN_MISSILE2))
 		ctrl.append(("Activate ECM", BaseDev.BTN_ECM))
 		ctrl.append(("Near space JUMP", BaseDev.BTN_JUMP))
+		ctrl.append(("Hyperspace Jump", BaseDev.BTN_HYPERSPACE))
 		m = []
 		for c in ctrl:
 			print("Press button or key for {}:".format(c[0]), end="", flush=True)
