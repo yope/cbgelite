@@ -146,8 +146,10 @@ class SeedProcessor:
 
 
 class System:
-	def __init__(self, sp):
+	def __init__(self, sp, galaxy, index):
 		s = self.seed = sp.copy_seed()
+		self.galaxy = galaxy
+		self.index = index
 		self.x = s[1] >> 8
 		self.y = s[0] >> 8
 		self.government = (s[1] >> 3) & 7
@@ -196,7 +198,7 @@ class Universe:
 			sg = self.sp.copy_seed()
 			sl = []
 			for i in range(256):
-				syst = System(self.sp)
+				syst = System(self.sp, j, i)
 				sl.append(syst)
 			self.galaxies.append(sl)
 			self.sp.set_seed(self.sp.next_galaxy(sg))
