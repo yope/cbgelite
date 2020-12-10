@@ -294,8 +294,7 @@ class MenuScreen(BaseScreen):
 		self.cbg.clearmap()
 		self.draw_background()
 		self.draw()
-		self.cbg.redraw_screen()
-		return inp.get_new_keys()
+		return inp.get_new_keys(), True
 
 	def draw_background(self):
 		super().draw_background()
@@ -303,9 +302,9 @@ class MenuScreen(BaseScreen):
 		self.cbg.drawtext(self.tx, 8, self.TITLE)
 
 class Cockpit(BaseScreen):
-	def __init__(self, elite, cbg, inputdev):
+	def __init__(self, elite, cbg, cd):
 		super().__init__(elite, cbg)
-		self.inputdev = inputdev
+		self.cd = cd
 		self.sboxw = 64
 		self.radarw = self.width-2*self.sboxw
 		self.g3d = G3d(self.cbg, cx = self.width // 2, cy = self.ystatus // 2)
@@ -316,8 +315,9 @@ class Cockpit(BaseScreen):
 		self.rlmeter = Meter(self.cbg, rbx, self.ystatus + 12, 40, 7, 14, 0, ticks=8)
 		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
 		self.laser = Laser(self, 0, 0, self.width, self.ystatus)
-		self.m = Microverse(self.cbg, self.g3d, self.laser, self.elite.ships)
+		self.m = Microverse(self.cbg, self.g3d, self.laser, self.elite.ships, cd, self.universe)
 		self.radar = Radar(self.cbg, self.m, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
+		self.setup_screen()
 
 	def setup_screen(self):
 		super().setup_screen()
@@ -370,12 +370,11 @@ class Cockpit(BaseScreen):
 		self.dcmeter.redraw()
 		self.radar.redraw()
 
-	def main_iteration(self):
+	def handle(self, inp):
 		m = self.m
+		nkeys = inp.get_new_keys()
 		if m.dead: # If we die by AI coroutine...
-			return False
-		inp = self.inputdev
-		inp.handle()
+			return nkeys, False
 		roll = inp.get_roll() * 0.03
 		pitch = inp.get_pitch() * 0.03
 		speed = inp.get_throttle() * 15.0
@@ -384,6 +383,8 @@ class Cockpit(BaseScreen):
 		m.set_speed(speed)
 		if BaseDev.BTN_JUMP in nbtns:
 			m.jump()
+		elif BaseDev.BTN_HYPERSPACE in nbtns:
+			m.hyperspace()
 		self.laser.set_shooting(BaseDev.BTN_FIRE in btns)
 		ret = m.handle()
 		self.speedbar.set_value(speed / 15)
@@ -398,7 +399,11 @@ class Cockpit(BaseScreen):
 		self.cbg.setclip(self.spaceclip)
 		m.draw()
 		self.cbg.setclip(None)
-		return ret
+		return nkeys, ret
+
+	def hyperspace(self):
+		self.m.stop()
+		self.m = Microverse(self.cbg, self.g3d, self.laser, self.elite.ships, self.cd, self.universe, hyperspace=True)
 
 	def game_over_iteration(self):
 		m = self.m
@@ -445,7 +450,7 @@ class Cockpit(BaseScreen):
 
 	async def hyperspace_animation_start(self):
 		cbg = self.cbg
-		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, particles=0)
+		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, self.cd, self.universe, particles=0)
 		m.sfx.play_hyperspace_start()
 		cobs = []
 		for i in range(5):
@@ -488,7 +493,7 @@ class Cockpit(BaseScreen):
 
 	async def hyperspace_animation_end(self):
 		cbg = self.cbg
-		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, particles=0)
+		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, self.cd, self.universe, particles=0)
 		m.sfx.play_hyperspace_end()
 		cobs = []
 		for i in range(5):
@@ -649,7 +654,7 @@ class StatusScreen(MenuScreen):
 
 class SystemData(MenuScreen):
 	def __init__(self, elite, cbg, cd):
-		s = elite.universe.get_system_by_index(cd.galaxy, cd.system)
+		s = elite.universe.get_system_by_index(cd.galaxy, cd.target)
 		self.TITLE = "DATA ON "+s.name.upper()
 		super().__init__(elite, cbg)
 		self.system = s
@@ -663,7 +668,7 @@ class SystemData(MenuScreen):
 				if len(line) == 1:
 					yield line[0]
 				else:
-					d, m = divmod(n - x - 1, len(line) - 1)
+					d, m = divmod(n - x + 1, len(line) - 1)
 					minsp = ' ' * (d + 1)
 					if m:
 						yield (' ' * (d + 2)).join(line[:m] + [minsp.join(line[m:])])
@@ -716,6 +721,7 @@ class CommanderData:
 		self.ebomb = False
 		self.docking = False
 		self.energy = False
+		self.gdrive = False
 
 class Commander:
 	def __init__(self):
@@ -761,20 +767,19 @@ class Elite:
 		self.universe = Universe()
 		self.commander = Commander()
 		self.ships = AllShips("all_ships.ship").ships
-		self.cockpit = Cockpit(self, self.cbg, self.inputdev)
 
 	def draw_title(self):
-		self.cockpit.draw_background()
-		sw = self.cockpit.width
+		sw = 320
 		tx = sw // 2 - 80
 		self.cbg.drawtext(tx, 8, "---- E L I T E ----")
 		tx = sw // 2 - 80
-		self.cbg.drawtext(tx, self.cockpit.ystatus - 16, "Commander Jameson")
+		self.cbg.drawtext(tx, 176 - 16, "Press ESC to start")
 
 	async def title_screen(self, showfps=False):
 		dz = 20050
-		self.cockpit.setup_screen()
-		tm = Microverse(self.cbg, self.cockpit.g3d, None, self.ships, particles=0)
+		cockpit = Cockpit(self, self.cbg, self.commander.data)
+		cockpit.setup_screen()
+		tm = Microverse(self.cbg, cockpit.g3d, None, self.ships, self.commander.data, self.universe, particles=0)
 		cobra = tm.spawn("cobra_mkiii", (0, 0, dz), 0.0, 0.0)
 		if showfps:
 			t0 = monotonic()
@@ -791,8 +796,9 @@ class Elite:
 				dz -= 150
 				cobra.pos = (0.0, 0.0, dz)
 			self.cbg.clearmap()
+			cockpit.draw_background()
 			self.draw_title()
-			self.cbg.setclip(self.cockpit.spaceclip)
+			self.cbg.setclip(cockpit.spaceclip)
 			cobra.local_roll_pitch(roll, -0.0513)
 			tm.draw()
 			self.cbg.setclip(None)
@@ -820,8 +826,9 @@ class Elite:
 		return now
 
 	async def microtest(self):
-		self.cockpit.setup_screen()
-		m = self.cockpit.m
+		cockpit = Cockpit(self, self.cbg, self.commander.data)
+		cockpit.setup_screen()
+		m = cockpit.m
 		cobra = m.spawn("cobra_mkiii", (-500, 0, 10000), 0.0, 0.0)
 		cobra.add_ai(BaseAi)
 		viper = m.spawn("krait",       (1500, 0, 5000), -0.5, 2.0)
@@ -835,21 +842,21 @@ class Elite:
 		boa.add_ai(BaseAi)
 		asteroid0 = m.spawn("asteroid", (1500, -1500, -5000), -0.1, 1.0)
 		asteroid1 = m.spawn("asteroid", (-1500, 1500, -5000), 0.1, -1.0)
-		roll = 0.0
-		pitch = 0.0
-		p1 = 0.005
 		ts = monotonic()
-		speed = 0.0
-		while self.cockpit.main_iteration():
+		inp = self.inputdev
+		while True:
+			nkey, ret = cockpit.handle(inp)
+			if not ret:
+				break
 			self.cbg.redraw_screen()
 			ts = await self.framesleep(ts)
 		if m.dead:
 			while True:
-				self.cockpit.game_over_iteration()
+				cockpit.game_over_iteration()
 				self.cbg.redraw_screen()
 				ts = await self.framesleep(ts)
 		elif m.docked:
-			await self.cockpit.launch_animation()
+			await cockpit.launch_animation()
 
 	async def menu(self):
 		cd = self.commander.data
@@ -857,23 +864,55 @@ class Elite:
 		m.setup_screen()
 		inp = self.inputdev
 		ts = self.loop.time()
+		docked = True
+		cockpit = None
 		while True:
 			inp.handle()
-			nbtn = m.handle(inp)
-			if 5 in nbtn:
+			nkey, ret = m.handle(inp)
+			if not ret and not docked:
+				if m.m.docked:
+					await m.launch_animation()
+					docked = True
+					m.exit()
+					m = StatusScreen(self, self.cbg, cd)
+				elif m.m.dead:
+					for i in range(500):
+						inp.handle()
+						if 1 in inp.get_new_keys():
+							break
+						cockpit.game_over_iteration()
+						self.cbg.redraw_screen()
+						ts = await self.framesleep(ts)
+					self.commander = Commander()
+					m.exit()
+					m = StatusScreen(self, self.cbg, cd)
+				elif m.m.hyperspacing:
+					await m.hyperspace_animation_start()
+					await asyncio.sleep(1)
+					await m.hyperspace_animation_end()
+					cd.system = cd.target
+					m.hyperspace()
+			self.cbg.redraw_screen()
+			if 5 in nkey:
 				m.exit()
 				m = GalaxyMap(self, self.cbg, cd)
-			elif 6 in nbtn:
+			elif 6 in nkey:
 				m.exit()
 				m = ShortRangeMap(self, self.cbg, cd)
-			elif 7 in nbtn:
+			elif 7 in nkey:
 				m.exit()
 				m = SystemData(self, self.cbg, cd)
-			elif 9 in nbtn:
+			elif 9 in nkey:
 				m.exit()
 				m = StatusScreen(self, self.cbg, cd)
-			elif 1 in nbtn: # FIXME: launch
-				break
+			elif 2 in nkey: # FIXME: launch
+				m.exit()
+				if docked:
+					m = cockpit = Cockpit(self, self.cbg, cd)
+					await m.launch_animation()
+					docked = False
+				else:
+					m = cockpit
 			ts = await self.framesleep(ts)
 
 	async def startup(self, showfps=False):
@@ -883,7 +922,7 @@ class Elite:
 	async def run(self, showfps=False):
 		await self.title_screen(showfps)
 		await self.menu()
-		await self.cockpit.launch_animation()
+		#await self.cockpit.launch_animation()
 		#await self.cockpit.hyperspace_animation_start()
 		#await asyncio.sleep(1)
 		#await self.cockpit.hyperspace_animation_end()
