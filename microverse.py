@@ -265,25 +265,33 @@ class Sun(Planet):
 		self.fill = 2 # Fuzzy fill
 
 class Microverse:
-	def __init__(self, cbg, g3d, laser, ships, particles=400):
+	def __init__(self, cbg, g3d, laser, ships, cd, universe, particles=400, hyperspace=False):
 		self.sfx = soundfx
 		self.loop = asyncio.get_event_loop()
 		self.g3d = g3d
 		self.cbg = cbg
 		self.ships = ships
 		self.laser = laser
+		self.cd = cd
+		self.universe = universe
 		self.objects = []
 		self.particles = set()
 		self.max_particles = particles
 		for i in range(particles):
 			self.particles.add(Particle(self.g3d))
 		if particles:
-			pd = 300000
-			pr = 15000
+			s = self.universe.get_system_by_index(self.cd.galaxy, self.cd.system)
 			dps = 1000000
-			self.planet = Planet(self, "Lave", (0, 0, pd), pr)
-			self.sun = Sun(self, "Lave's Sun", (0, 0, -dps + pd), 40000)
-			self.station = self.spawn("coriolis_space_station", (pr*0.85, pr*0.85, pd), 0.0, 0.0)
+			pr = s.radius * 3
+			if hyperspace:
+				pd = 300000
+				self.sun = Sun(self, s.name+"'s Sun", (0, 0, -dps + pd), 40000)
+				self.station = self.spawn("coriolis_space_station", (pr*0.85, pr*0.85, pd), 0.0, 0.0)
+			else:
+				pd = pr * 0.84
+				self.sun = Sun(self, s.name + "'s Sun", (dps, 0, pd), 40000)
+				self.station = self.spawn("coriolis_space_station", (0, 0, -256), 0.0, 0.0)
+			self.planet = Planet(self, s.name, (0, 0, pd), pr)
 		else:
 			self.planet = None
 			self.sun = None
@@ -303,6 +311,8 @@ class Microverse:
 		self.jumping = False
 		self.dead = False
 		self.docked = False
+		self.countdown = False
+		self.hyperspacing = False
 
 	def stop(self):
 		for o in self.objects:
@@ -311,6 +321,26 @@ class Microverse:
 	def restart(self):
 		for p in self.particles:
 			p.reset()
+
+	def hyperspace(self):
+		if self.countdown:
+			return
+		if self.cd.target == self.cd.system:
+			return
+		st = self.universe.get_system_by_index(self.cd.galaxy, self.cd.target)
+		hct = self.loop.create_task(self.hyperspace_countdown(st))
+		hct.add_done_callback(lambda fut: fut.result())
+		self.countdown = True
+
+	async def hyperspace_countdown(self, st):
+		t = 9
+		while not self.dead and t > 0:
+			self.set_subtext("Hyperspace to {} {}".format(st.name, t))
+			await asyncio.sleep(1)
+			t -= 1
+		self.countdown = False
+		if t == 0:
+			self.hyperspacing = True
 
 	def die(self):
 		self.spawn_explosion((0,0,0), 4)
@@ -389,7 +419,7 @@ class Microverse:
 				self.aft_shield += 0.0005
 			elif self.front_shield < 1.0:
 				self.front_shield += 0.0005
-		return not self.dead
+		return not self.dead and not self.hyperspacing
 
 	def get_objects(self):
 		return self.objects
