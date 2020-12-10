@@ -540,13 +540,35 @@ class ShortRangeMap(GalaxyMap):
 		super().__init__(elite, cbg, cd)
 		self.system = cd.system
 		s = self.universe.get_system_by_index(cd.galaxy, self.system)
+		st = self.universe.get_system_by_index(cd.galaxy, cd.target)
 		self.cx = s.x
 		self.cy = s.y
+		self.curx = st.x
+		self.cury = st.y
+
+	def _coord(self, x, y):
+		x = int((x - self.cx) * 4 + 160)
+		y = int((y - self.cy) * 2 + 100)
+		return x, y
 
 	def get_position(self, s):
-		x = (s.x - self.cx) * 4 + 160
-		y = (s.y - self.cy) * 2 + 100
-		return x, y
+		return self._coord(s.x, s.y)
+
+	def handle(self, inp):
+		dx = -inp.get_roll()
+		dy = -inp.get_pitch()
+		x, y = self._coord(self.curx + dx, self.cury + dy)
+		if 64 < x < 256:
+			self.curx += dx
+		if 32 < y < 182:
+			self.cury += dy
+		return super().handle(inp)
+
+	def exit(self):
+		st = self.universe.get_system_near(self.cd.galaxy, self.curx, self.cury)
+		if st:
+			self.cd.target = st.index
+		return super().exit()
 
 	def draw(self):
 		texty = set()
@@ -563,7 +585,13 @@ class ShortRangeMap(GalaxyMap):
 				self.cbg.drawtext(x + 4, ty * 8, s.name)
 		s = self.universe.get_system_by_index(self.galaxy, self.system)
 		r = int(self.cd.fuel * 20)
-		self.cbg.ellipse(*self.get_position(s), r, r)
+		x, y, = self.get_position(s)
+		self.cbg.ellipse(x, y, r, r)
+		self.cbg.line(x, y - 16, x, y + 16, mode=2)
+		self.cbg.line(x - 16, y, x + 16, y, mode=2)
+		curx, cury = self._coord(self.curx, self.cury)
+		self.cbg.line(curx, cury - 8, curx, cury + 8, mode=2)
+		self.cbg.line(curx - 8, cury, curx + 8, cury, mode=2)
 
 class StatusScreen(MenuScreen):
 	def __init__(self, elite, cbg, cd):
