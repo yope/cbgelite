@@ -95,11 +95,12 @@ class Battery:
 			b.redraw()
 
 class Radar:
-	def __init__(self, cbg, m, x, y, w, h):
+	def __init__(self, cbg, cockpit, x, y, w, h):
 		self.x = x
 		self.y = y
 		self.w = w
 		self.h = h
+		self.cockpit = cockpit
 		self.cx = self.x + self.w // 2
 		self.cy = self.y + self.h // 2
 		self.rradx = self.w // 2 - 12
@@ -111,7 +112,6 @@ class Radar:
 		self.sradx = x + w - self.sradw
 		self.srady = y - 6
 		self.cbg = cbg
-		self.m = m
 		self.pmaxdist = 200000
 		self.near_station = False
 
@@ -125,16 +125,17 @@ class Radar:
 		a = self.sradw
 		b = self.sradh
 		self.cbg.ellipse(cx, cy, a, b)
-		if not self.m.planet:
+		m = self.cockpit.m
+		if not m.planet:
 			px, py, pz = (0, 0, 1000)
 			dp = 1000
 		else:
-			px, py, pz = self.m.planet.pos
-			dp = self.m.get_planet_dist()
-		if self.m.station:
-			ds = self.m.get_station_dist()
+			px, py, pz = m.planet.pos
+			dp = m.get_planet_dist()
+		if m.station:
+			ds = m.get_station_dist()
 			if ds < 55000:
-				px, py, pz = self.m.station.pos
+				px, py, pz = m.station.pos
 				self.near_station = True
 				dp = ds
 			else:
@@ -172,7 +173,7 @@ class Radar:
 		self.redraw_objects()
 
 	def redraw_objects(self):
-		objs = self.m.get_objects()
+		objs = self.cockpit.m.get_objects()
 		for o in objs:
 			p = o.get_viewpos()
 			d = sqrt(sum([n*n for n in p]))
@@ -316,7 +317,7 @@ class Cockpit(BaseScreen):
 		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
 		self.laser = Laser(self, 0, 0, self.width, self.ystatus)
 		self.m = Microverse(self.cbg, self.g3d, self.laser, self.elite.ships, cd, self.universe)
-		self.radar = Radar(self.cbg, self.m, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
+		self.radar = Radar(self.cbg, self, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
 		self.setup_screen()
 
 	def setup_screen(self):
