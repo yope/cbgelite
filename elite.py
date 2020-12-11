@@ -726,6 +726,7 @@ class CommanderData:
 		self.docking = False
 		self.energy = False
 		self.gdrive = False
+		self.docked = True
 
 class Commander:
 	def __init__(self):
@@ -859,7 +860,7 @@ class Elite:
 				cockpit.game_over_iteration()
 				self.cbg.redraw_screen()
 				ts = await self.framesleep(ts)
-		elif m.docked:
+		elif self.commander.data.docked:
 			await cockpit.launch_animation()
 
 	async def menu(self):
@@ -868,17 +869,16 @@ class Elite:
 		m.setup_screen()
 		inp = self.inputdev
 		ts = self.loop.time()
-		docked = True
+		cd.docked = True
 		cockpit = None
 		while True:
 			inp.handle()
 			nkey, ret = m.handle(inp)
 			if cockpit and m is not cockpit:
 				cockpit.handle_hidden()
-			if not ret and not docked:
-				if m.m.docked:
+			if not ret:
+				if cd.docked: # Docking
 					await m.launch_animation()
-					docked = True
 					m.exit()
 					m = StatusScreen(self, self.cbg, cd)
 					cockpit = None
@@ -915,10 +915,9 @@ class Elite:
 				m = StatusScreen(self, self.cbg, cd)
 			elif 2 in nkey: # FIXME: launch
 				m.exit()
-				if docked:
+				if cd.docked:
 					m = cockpit = Cockpit(self, self.cbg, cd)
 					await m.launch_animation()
-					docked = False
 				else:
 					m = cockpit
 			ts = await self.framesleep(ts)

@@ -310,9 +310,9 @@ class Microverse:
 		self.aft_shield = 1.0
 		self.jumping = False
 		self.dead = False
-		self.docked = False
 		self.countdown = False
 		self.hyperspacing = False
+		self.cd.docked = False
 
 	def stop(self):
 		for o in self.objects:
@@ -385,7 +385,7 @@ class Microverse:
 		return True
 
 	def handle_docking(self):
-		self.docked = True
+		self.cd.docked = True
 
 	def handle_collision_with(self, obj):
 		if self._handle_hit(obj.energy, obj.pos):
