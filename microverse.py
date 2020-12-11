@@ -327,12 +327,16 @@ class Microverse:
 			return
 		if self.cd.target == self.cd.system:
 			return
+		d = self.universe.get_distance_by_index(self.cd.galaxy, self.cd.system, self.cd.target)
+		if d > self.cd.fuel:
+			self.set_subtext("Not enough fuel!")
+			return
 		st = self.universe.get_system_by_index(self.cd.galaxy, self.cd.target)
-		hct = self.loop.create_task(self.hyperspace_countdown(st))
+		hct = self.loop.create_task(self.hyperspace_countdown(st, d))
 		hct.add_done_callback(lambda fut: fut.result())
 		self.countdown = True
 
-	async def hyperspace_countdown(self, st):
+	async def hyperspace_countdown(self, st, d):
 		t = 9
 		while not self.dead and t > 0:
 			self.set_subtext("Hyperspace to {} {}".format(st.name, t))
@@ -341,6 +345,7 @@ class Microverse:
 		self.countdown = False
 		if t == 0:
 			self.hyperspacing = True
+		self.cd.fuel -= d
 
 	def die(self):
 		self.spawn_explosion((0,0,0), 4)

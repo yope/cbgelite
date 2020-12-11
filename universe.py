@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with CBGElite.  If not, see <http://www.gnu.org/licenses/>.
 
+from math import sqrt
+
 class SeedProcessor:
 	def __init__(self, seed):
 		self.seed = [x for x in seed]
@@ -216,6 +218,14 @@ class Universe:
 			if x0 < s.x < x1 and y0 < s.y < y1:
 				return s
 		return None
+
+	def get_distance_by_index(self, galaxy, idx0, idx1):
+		s0 = self.galaxies[galaxy][idx0]
+		s1 = self.galaxies[galaxy][idx1]
+		dx = (s0.x - s1.x) * 4
+		dy = (s0.y - s1.y) * 2
+		d = sqrt(dx*dx + dy*dy) / 10.0 # Light years
+		return d
 
 	def get_system_by_name(self, name):
 		for j in range(8):
