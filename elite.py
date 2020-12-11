@@ -625,7 +625,7 @@ class StatusScreen(MenuScreen):
 		tsy = self.universe.get_system_by_index(cd.galaxy, cd.target)
 		c.drawtext(16, 32, "Present System      : {}".format(sy.name))
 		c.drawtext(16, 40, "Hyperspace System   : {}".format(tsy.name))
-		c.drawtext(16, 48, "Condition           : Docked")
+		c.drawtext(16, 48, "Condition           : {}".format("Docked" if cd.docked else "Not docked"))
 		c.drawtext(16, 56, "Fuel: {:.1f} Light Years".format(cd.fuel))
 		c.drawtext(16, 64, "Cash: {:.6f} Bitcoin".format(cd.bitcoin))
 		c.drawtext(16, 72, "Legal Status: {}".format(self.statustext[cd.status]))
