@@ -891,6 +891,7 @@ class Elite:
 						self.cbg.redraw_screen()
 						ts = await self.framesleep(ts)
 					self.commander = Commander()
+					cd = self.commander.data
 					m.exit()
 					m = StatusScreen(self, self.cbg, cd)
 					cockpit = None
