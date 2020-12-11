@@ -402,6 +402,9 @@ class Cockpit(BaseScreen):
 		self.cbg.setclip(None)
 		return nkeys, ret
 
+	def handle_hidden(self):
+		self.m.handle()
+
 	def hyperspace(self):
 		self.m.stop()
 		self.m = Microverse(self.cbg, self.g3d, self.laser, self.elite.ships, self.cd, self.universe, hyperspace=True)
@@ -870,12 +873,15 @@ class Elite:
 		while True:
 			inp.handle()
 			nkey, ret = m.handle(inp)
+			if cockpit and m is not cockpit:
+				cockpit.handle_hidden()
 			if not ret and not docked:
 				if m.m.docked:
 					await m.launch_animation()
 					docked = True
 					m.exit()
 					m = StatusScreen(self, self.cbg, cd)
+					cockpit = None
 				elif m.m.dead:
 					for i in range(500):
 						inp.handle()
@@ -887,6 +893,7 @@ class Elite:
 					self.commander = Commander()
 					m.exit()
 					m = StatusScreen(self, self.cbg, cd)
+					cockpit = None
 				elif m.m.hyperspacing:
 					await m.hyperspace_animation_start()
 					await asyncio.sleep(1)
