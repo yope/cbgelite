@@ -35,7 +35,6 @@ class BaseAi:
 		self.roll = 0.0
 		self.randpitch = 0.0
 		self.strat = self.MOVE_TO
-		self.dist = 10000.0
 		self.dn = 0.0
 		self.task.add_done_callback(lambda fut: fut.result())
 
@@ -43,8 +42,7 @@ class BaseAi:
 		o = self.obj
 		g = self.g3d
 		o.pos = o.scale_add(o.nosev, o.pos, self.speed)
-		self.dist = g.distv(o.pos)
-		if self.dist > 50000:
+		if o.distance > 50000:
 			self.obj.vanish()
 			return
 		hvec = g.normalize(tuple(-x for x in o.pos))
@@ -100,11 +98,11 @@ class BaseAi:
 				self.strat = self.MOVE_TO
 				self.speed = self.max_speed * 0.7
 				ts = 0
-			elif self.strat is self.MOVE_AWAY and self.dist >= 5000:
+			elif self.strat is self.MOVE_AWAY and o.distance >= 5000:
 				self.strat = self.MOVE_TO
 				self.speed = self.max_speed * 0.9
 				ts = 0
-			elif self.strat is self.MOVE_TO and self.dist <= 2000:
+			elif self.strat is self.MOVE_TO and o.distance <= 2000:
 				self.strat = self.MOVE_AWAY
 				self.speed = self.max_speed * 0.8
 				ts = 0
@@ -117,11 +115,11 @@ class BaseAi:
 				self.roll = random.uniform(-0.06, 0.06)
 				self.randpitch = random.uniform(-0.06, 0.06)
 				await asyncio.sleep(0.2)
-			if self.dn > 0.975 and self.dist < 30000:
+			if self.dn > 0.975 and o.distance < 30000:
 				self.obj.mv.set_flashtext(o.name + " can hit")
 				if x < 0.3:
 					o.shoot(True)
-			elif self.dn > 0.95 and self.dist < 25000:
+			elif self.dn > 0.95 and o.distance < 25000:
 				self.obj.mv.set_flashtext(o.name + " can shoot")
 				if x < 0.2:
 					o.shoot(False)
