@@ -19,11 +19,11 @@ from cbg import CBG, G3d
 from ship import ShipReader
 import random
 from time import monotonic
-from math import sqrt, pi, inf
+from math import sqrt, pi, inf, sin, cos
 from quaternion import *
 from time import sleep
 from sounds import SoundFX
-from ai import CanisterAi
+from ai import CanisterAi, BaseAi
 
 import asyncio
 
@@ -310,15 +310,44 @@ class Microverse:
 		self.aft_shield = 1.0
 		self.jumping = False
 		self.dead = False
+		self.stopped = False
 		self.countdown = False
 		self.hyperspacing = False
 		self.cd.docked = False
+		self.tactic_task = self.loop.create_task(self.coro_tactic())
+
+	async def coro_tactic(self):
+		cd = self.cd
+		ntrans = 0
+		rocks = ("asteroid", "rock", "boulder")
+		enemies = ("cobra_mkiii", "anaconda", "python", "boa", "mamba", "krait",
+				"adder", "gecko", "cobra_mki", "asp_mkii", "fer-de-lance")
+		while not cd.docked and not self.dead:
+			rnd = random.random()
+			ds = 1000000 if not self.station else self.station.distance
+			if ds > 55000 and len(self.objects) < 10:
+				if rnd < 0.05:
+					n = random.choice(rocks)
+					self.spawn(n, (random.uniform(-200, 200), random.uniform(-200, 200), 25000), random.uniform(0, 6.2), random.uniform(0, 6.2))
+				elif 0.10 < rnd < 0.135:
+					n = random.choice(enemies)
+					r = random.uniform(4000, 12000)
+					a = random.uniform(0, 3.1)
+					x = r * cos(a)
+					z = r * sin(a)
+					y = random.uniform(5000, 5000)
+					s = self.spawn(n, (x, y, z), random.uniform(0, 6.2), random.uniform(0, 6.2))
+					s.add_ai(BaseAi)
+					self.cbg.log("Added {} at {!r}".format(n, (x, y, z)))
+			await asyncio.sleep(2.0)
 
 	def stop(self):
+		self.stopped = True
 		for o in self.objects:
 			o.vanish()
 
 	def restart(self):
+		self.stopped = False
 		for p in self.particles:
 			p.reset()
 
