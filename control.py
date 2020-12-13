@@ -121,6 +121,9 @@ class Joydev(BaseDev):
 		ret = min(max(ret * self.ascale, -100), 100)
 		return ret / 100.0
 
+	def _lpfilter(self, old, new):
+		return (old * 0.8 + new * 0.2)
+
 	def handle(self):
 		self.keys = self.kdev.keys_pressed()
 		self.btns = {self.joymap[x] for x in self.jdev.keys_pressed() if x in self.joymap}
@@ -129,9 +132,9 @@ class Joydev(BaseDev):
 				self.btns.add(self.keymap[k])
 		self.axis = axis = self.jdev.axis
 		if 0 in axis:
-			self.roll = -self._normalize(axis, 0)
+			self.roll = self._lpfilter(self.roll, -self._normalize(axis, 0))
 		if 1 in axis:
-			self.pitch = -self._normalize(axis, 1)
+			self.pitch = self._lpfilter(self.pitch, -self._normalize(axis, 1))
 		if self.throttle_axis and self.throttle_axis in axis:
 			self.throttle = (255 - axis[self.throttle_axis]) / 255.0
 		else:
