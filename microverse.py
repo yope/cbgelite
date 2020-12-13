@@ -254,7 +254,8 @@ class Planet(Object3D):
 			return
 		rp0 = min(rp, 1000)
 		self.g3d.cbg.ellipse(int(x0), int(y0), rp0, rp0, fill=self.fill)
-		self.draw_crater(rp, rp0)
+		if self.fill == 0:
+			self.draw_crater(rp, rp0)
 
 	def draw_crater(self, rp, rp0):
 		g = self.g3d
