@@ -32,17 +32,9 @@ random.seed(monotonic())
 soundfx = SoundFX()
 
 class Object3D:
-	def __init__(self, mv, pos, ship, name):
-		self.sfx = soundfx
-		self.debug = False
-		self.alive = True
-		self.ai = None
-		self.name = name.replace("_", " ").upper()
-		self.mv = mv
-		self.g3d = mv.g3d
+	def __init__(self, g3d, pos):
+		self.g3d = g3d
 		self.pos = pos
-		self.ship = ship
-		self.energy = ship.opt_max_energy
 		self.nosev = (0, 0, 1)
 		self.lnosev = (0, 0, 1)
 		self.sidev = (1, 0, 0)
@@ -57,41 +49,6 @@ class Object3D:
 		self.qltot = qmult(self.qwpitch, self.qwroll)
 		self.local_roll_pitch(0.0, 0.0)
 		self.world_roll_pitch(0.0, 0.0)
-		self.shot_time = 0
-
-	def die(self):
-		self.sfx.play_short_explosion()
-		self.vanish()
-		self.mv.spawn_explosion(self.pos, self.ship.opt_can_on_demise)
-
-	def vanish(self):
-		self.alive = False
-		self.mv.remove_object(self)
-
-	def add_ai(self, AiCls):
-		self.ai = AiCls(self)
-
-	def handle(self):
-		if self.ai:
-			self.ai.handle()
-		self.distance = self.g3d.distv(self.pos)
-		if self.energy < self.ship.opt_max_energy:
-			self.energy += 0.1
-
-	def check_collision(self, d):
-		d = self.distance - d - self.ship.opt_target_area
-		return d <= 0.0
-
-	def shoot(self, hit):
-		if self.shot_time or self.mv.dead:
-			return
-		self.shot_time = 8
-		pan = self.pos[0] / self.distance
-		if hit:
-			self.sfx.play_hit(pan)
-			self.mv.get_hit(self.ship.opt_laser_power, self.pos)
-		else:
-			self.sfx.play_shot(pan)
 
 	def local_roll_pitch(self, roll, pitch):
 		qroll = aangle2q(self.lnosev, roll)
@@ -133,9 +90,55 @@ class Object3D:
 	def get_viewpos(self):
 		return self.pos
 
-	def in_view(self):
-		vp = self.g3d.normalize(self.pos)
-		return not (-0.7 < self.g3d.dot(vp, (0, 0, 1)) < 0.7)
+	def handle(self):
+		self.distance = self.g3d.distv(self.pos)
+
+class Ship3D(Object3D):
+	def __init__(self, mv, pos, ship, name):
+		super().__init__(mv.g3d, pos)
+		self.sfx = soundfx
+		self.debug = False
+		self.alive = True
+		self.ai = None
+		self.name = name.replace("_", " ").upper()
+		self.mv = mv
+		self.ship = ship
+		self.energy = ship.opt_max_energy
+		self.shot_time = 0
+
+	def die(self):
+		self.sfx.play_short_explosion()
+		self.vanish()
+		self.mv.spawn_explosion(self.pos, self.ship.opt_can_on_demise)
+
+	def vanish(self):
+		self.alive = False
+		self.mv.remove_object(self)
+
+	def add_ai(self, AiCls):
+		self.ai = AiCls(self)
+
+	def handle(self):
+		super().handle()
+		if self.ai:
+			self.ai.handle()
+		if self.energy < self.ship.opt_max_energy:
+			self.energy += 0.1
+
+	def check_collision(self, d):
+		d = self.distance - d - self.ship.opt_target_area
+		return d <= 0.0
+
+	def shoot(self, hit):
+		if self.shot_time or self.mv.dead:
+			return
+		self.shot_time = 8
+		pan = self.pos[0] / self.distance
+		if hit:
+			self.sfx.play_hit(pan)
+			self.mv.get_hit(self.ship.opt_laser_power, self.pos)
+		else:
+			self.sfx.play_shot(pan)
 
 	def on_target(self):
 		x, y, z = self.pos
@@ -474,7 +477,7 @@ class Microverse:
 
 	def spawn(self, name, pos, roll, pitch):
 		s = self.ships[name]
-		obj = Object3D(self, pos, s, name)
+		obj = Ship3D(self, pos, s, name)
 		obj.local_roll_pitch(roll, pitch)
 		self.objects.append(obj)
 		return obj
