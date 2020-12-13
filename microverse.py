@@ -234,14 +234,14 @@ class DustParticle(Particle):
 		rnd = random.uniform
 		self.pos = x + vx + rnd(-1, 1), y + vy + rnd(-1, 1), z + vz + rnd(-1, 1)
 
-class Planet:
+class Planet(Object3D):
 	def __init__(self, mv, name, pos, dia):
+		super().__init__(mv.g3d, pos)
 		self.mv = mv
-		self.g3d = mv.g3d
 		self.name = name
-		self.pos = pos
-		self.diameter = dia
+		self.diameter = 2 * dia / 3
 		self.fill = 0
+		self.local_roll_pitch(0.7, 1.3)
 
 	def draw(self):
 		x, y, z = self.pos
@@ -252,8 +252,35 @@ class Planet:
 		rp = int(x1 - x0)
 		if (x0 - rp) > 400 or (x0 + rp) < 0 or (y0 - rp) > 200 or (y0 + rp) < 0:
 			return
-		rp = min(rp, 1000)
-		self.g3d.cbg.ellipse(int(x0), int(y0), rp, rp, fill=self.fill)
+		rp0 = min(rp, 1000)
+		self.g3d.cbg.ellipse(int(x0), int(y0), rp0, rp0, fill=self.fill)
+		self.draw_crater(rp, rp0)
+
+	def draw_crater(self, rp, rp0):
+		g = self.g3d
+		sf = rp / rp0
+		r = sf * self.diameter / 2
+		r3 = r / 2
+		h = 4 * r / 5
+		y0 = -h
+		x0 = 0
+		z0 = r3
+		n = self.normrotate((0, -1, 0))
+		p0 = self.transform((x0, y0, z0))
+		vcop = g.normalize((p0[0], p0[1], p0[2] + g.persp))
+		dp = g.dot(vcop, n)
+		if dp > 0:
+			return
+		vangle = g.dot(vcop, (0, 0, 1))
+		if -0.7 < vangle < 0.7:
+			return
+		phi = 2 * pi / 20
+		for i in range(1, 21):
+			x = r3 * sin(i * phi)
+			z = r3 * cos(i * phi)
+			p = self.transform((x, y0, z))
+			g.line(p0, p)
+			p0 = p
 
 	def move_z(self, dz):
 		x, y, z = self.pos
@@ -449,6 +476,9 @@ class Microverse:
 					return False
 		if self.station:
 			self.station.local_roll_pitch(0.005, 0.0)
+		if self.planet:
+			self.planet.handle()
+			self.planet.local_roll_pitch(0.01, 0.0)
 		if not self.dead:
 			if self.energy < 1.0:
 				self.energy += 0.0002
@@ -472,6 +502,7 @@ class Microverse:
 			o.pos = self.g3d.rotate_q(o.pos)
 		if self.planet:
 			self.planet.rotate_q()
+			self.planet.world_roll_pitch(roll, pitch)
 		if self.sun:
 			self.sun.rotate_q()
 
