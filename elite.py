@@ -106,7 +106,7 @@ class Radar:
 		self.rradx = self.w // 2 - 12
 		self.rrady = self.h // 2 - 6
 		self.rradz = (self.rrady * 2) // 2.5
-		self.rrange = 10000
+		self.rrange = 20000
 		self.sradw = 22
 		self.sradh = 22
 		self.sradx = x + w - self.sradw
@@ -176,7 +176,7 @@ class Radar:
 		objs = self.cockpit.m.get_objects()
 		for o in objs:
 			p = o.get_viewpos()
-			d = sqrt(sum([n*n for n in p]))
+			d = o.distance
 			if d > self.rrange:
 				continue
 			x = int(p[0] * self.rradx / self.rrange) + self.cx
