@@ -110,6 +110,9 @@ class Ship3D(Object3D):
 		self.sfx.play_short_explosion()
 		self.vanish()
 		self.mv.spawn_explosion(self.pos, self.ship.opt_can_on_demise)
+		bounty = self.ship.opt_bounty * 1000
+		self.mv.cd.bitcoin += bounty / 100000000
+		self.mv.set_flashtext("Bounty: {} sats".format(bounty))
 
 	def vanish(self):
 		self.alive = False
