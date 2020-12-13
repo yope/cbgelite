@@ -902,16 +902,16 @@ class Elite:
 					cd.system = cd.target
 					m.hyperspace()
 			self.cbg.redraw_screen()
-			if 5 in nkey:
+			if 6 in nkey:
 				m.exit()
 				m = GalaxyMap(self, self.cbg, cd)
-			elif 6 in nkey:
-				m.exit()
-				m = ShortRangeMap(self, self.cbg, cd)
 			elif 7 in nkey:
 				m.exit()
+				m = ShortRangeMap(self, self.cbg, cd)
+			elif 8 in nkey:
+				m.exit()
 				m = SystemData(self, self.cbg, cd)
-			elif 9 in nkey:
+			elif 10 in nkey:
 				m.exit()
 				m = StatusScreen(self, self.cbg, cd)
 			elif 2 in nkey: # FIXME: launch
