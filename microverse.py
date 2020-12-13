@@ -352,21 +352,28 @@ class Microverse:
 		rocks = ("asteroid", "rock", "boulder")
 		enemies = ("cobra_mkiii", "anaconda", "python", "boa", "mamba", "krait",
 				"adder", "gecko", "cobra_mki", "asp_mkii", "fer-de-lance")
+		rnd = random.uniform
 		while not cd.docked and not self.dead:
-			rnd = random.random()
+			dice = random.random()
 			ds = 1000000 if not self.station else self.station.distance
 			if ds > 55000 and len(self.objects) < 12:
-				if rnd < 0.05:
+				if dice < 0.05:
+					if not self.planet:
+						continue
+					pp = self.planet.pos
+					pvn = self.g3d.normalize(pp)
 					n = random.choice(rocks)
-					self.spawn(n, (random.uniform(-200, 200), random.uniform(-200, 200), 25000), random.uniform(0, 6.2), random.uniform(0, 6.2))
-				elif 0.10 < rnd < 0.135:
+					d = rnd(20000, 25000)
+					self.spawn(n, (pvn[0] * d + rnd(-200, 200), pvn[1] * d + rnd(-200, 200), pvn[2] * d + rnd(-200, 200)),
+							rnd(0, 6.2), rnd(0, 6.2))
+				elif 0.10 < dice < 0.135:
 					n = random.choice(enemies)
-					r = random.uniform(4000, 9000)
-					a = random.uniform(0, 3.1)
+					r = rnd(7000, 15000)
+					a = rnd(0, 3.1)
 					x = r * cos(a)
 					z = r * sin(a)
-					y = random.uniform(-2000, 2000)
-					s = self.spawn(n, (x, y, z), random.uniform(0, 6.2), random.uniform(0, 6.2))
+					y = rnd(-3000, 3000)
+					s = self.spawn(n, (x, y, z), rnd(0, 6.2), rnd(0, 6.2))
 					s.add_ai(BaseAi)
 					self.cbg.log("Added {} at {!r}".format(n, (x, y, z)))
 			await asyncio.sleep(2.0)
