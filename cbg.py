@@ -471,13 +471,29 @@ class G3d:
 		self.rmat = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 		self.tvec = (0.0, 0.0, 0.0)
 		self.rotc = (0.0, 0.0, 0.0)
+		self.set_camera("pz")
 
-	def project2d(self, x, y, z):
+	def _project2d_pz(self, x, y, z):
 		if z <= 0:
 			return None, None
 		x = self.persp * x / z
 		y = self.persp * y / z
 		return x + self.cx, y + self.cy
+	
+	def _inview_pz(self, p):
+		vcop = self.normalize((p[0], p[1], p[2] + self.persp))
+		vangle = self.dot(vcop, (0, 0, 1))
+		return (vangle > 0.7)
+	
+	def _visible_pz(self, p, norm):
+		vcop = self.normalize((p[0], p[1], p[2] + self.persp))
+		dp = self.dot(
+		
+	
+	def set_camera(self, cdir):
+		self.project2d = getattr(self, "_project2d_"+cdir)
+		self.inview = getattr(self, "_inview_"+cdir)
+		self.visible = getattr(self, "_visible_"+cdir)
 
 	def point(self, p):
 		x, y = self.project2d(*p)
@@ -547,7 +563,7 @@ class G3d:
 	def dot(self, v0, v1):
 		return v0[0]*v1[0] + v0[1]*v1[1] + v0[2]*v1[2]
 
-	def backface(self, p0, p1, p2):
+	def disabled_backface(self, p0, p1, p2):
 		vcop = self.normalize((p0[0], p0[1], p0[2] + self.persp))
 		dp = self.dot(vcop, self.normal(p0, p1, p2))
 		return (dp > 0)
