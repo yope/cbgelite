@@ -471,13 +471,92 @@ class G3d:
 		self.rmat = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
 		self.tvec = (0.0, 0.0, 0.0)
 		self.rotc = (0.0, 0.0, 0.0)
+		self.set_camera("pz")
 
-	def project2d(self, x, y, z):
-		if z <= 0:
+	def _project2d_pz(self, x, y, z):
+		if z <= 1:
 			return None, None
 		x = self.persp * x / z
 		y = self.persp * y / z
 		return x + self.cx, y + self.cy
+
+	def _inview_pz(self, p):
+		vcop = self.normalize((p[0], p[1], p[2] + self.persp))
+		vangle = self.dot(vcop, (0, 0, 1))
+		return (vangle > 0.9)
+
+	def _visible_pz(self, p, norm):
+		vcop = self.normalize((p[0], p[1], p[2] + self.persp))
+		dp = self.dot(vcop, norm)
+		if dp > 0:
+			return False
+		vangle = self.dot(vcop, (0, 0, 1))
+		return (vangle > 0.9)
+
+	def _project2d_nz(self, x, y, z):
+		if z >= -1:
+			return None, None
+		x = self.persp * x / z
+		y = self.persp * y / -z
+		return x + self.cx, y + self.cy
+
+	def _inview_nz(self, p):
+		vcop = self.normalize((p[0], p[1], p[2] - self.persp))
+		vangle = self.dot(vcop, (0, 0, -1))
+		return (vangle > 0.9)
+
+	def _visible_nz(self, p, norm):
+		vcop = self.normalize((p[0], p[1], p[2] - self.persp))
+		dp = self.dot(vcop, norm)
+		if dp > 0:
+			return False
+		vangle = self.dot(vcop, (0, 0, -1))
+		return (vangle > 0.9)
+
+	def _project2d_px(self, x, y, z):
+		if x <= 1:
+			return None, None
+		y = self.persp * y / x
+		x = self.persp * z / -x
+		return x + self.cx, y + self.cy
+
+	def _inview_px(self, p):
+		vcop = self.normalize((p[0] + self.persp, p[1], p[2]))
+		vangle = self.dot(vcop, (1, 0, 0))
+		return (vangle > 0.9)
+
+	def _visible_px(self, p, norm):
+		vcop = self.normalize((p[0] + self.persp, p[1], p[2]))
+		dp = self.dot(vcop, norm)
+		if dp > 0:
+			return False
+		vangle = self.dot(vcop, (1, 0, 0))
+		return (vangle > 0.9)
+
+	def _project2d_nx(self, x, y, z):
+		if x >= -1:
+			return None, None
+		y = self.persp * y / -x
+		x = self.persp * z / -x
+		return x + self.cx, y + self.cy
+
+	def _inview_nx(self, p):
+		vcop = self.normalize((p[0] - self.persp, p[1], p[2]))
+		vangle = self.dot(vcop, (-1, 0, 0))
+		return (vangle > 0.9)
+
+	def _visible_nx(self, p, norm):
+		vcop = self.normalize((p[0] - self.persp, p[1], p[2]))
+		dp = self.dot(vcop, norm)
+		if dp > 0:
+			return False
+		vangle = self.dot(vcop, (-1, 0, 0))
+		return (vangle > 0.9)
+
+	def set_camera(self, cdir):
+		self.project2d = getattr(self, "_project2d_"+cdir)
+		self.inview = getattr(self, "_inview_"+cdir)
+		self.visible = getattr(self, "_visible_"+cdir)
 
 	def point(self, p):
 		x, y = self.project2d(*p)
