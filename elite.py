@@ -713,6 +713,7 @@ class SystemData(MenuScreen):
 
 class CommanderData:
 	def __init__(self):
+		self.data_version = 1
 		self.name = "Jameson"
 		self.bitcoin = 10.0
 		self.kills = 0
