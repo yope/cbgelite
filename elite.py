@@ -21,6 +21,8 @@ from random import randint, uniform
 from cbg import CBG, G3d
 from ship import AllShips
 import sys
+import os
+import json
 from time import sleep, monotonic
 from math import sin, sqrt
 from microverse import Microverse
@@ -741,7 +743,8 @@ class CommanderData:
 class Commander:
 	def __init__(self):
 		self.data = CommanderData()
-		self.fname = "~/.cbgeliterc"
+		home = os.environ["HOME"]
+		self.fname = os.path.join(home, ".cbgeliterc")
 
 	def load_game(self):
 		try:
@@ -761,7 +764,7 @@ class Commander:
 	def save_game(self):
 		try:
 			with open(self.fname, "w") as f:
-				f.write(json.dumps(self.data, indent="\t"))
+				f.write(json.dumps(self.data.__dict__, indent="\t"))
 		except OSError:
 			return False
 
