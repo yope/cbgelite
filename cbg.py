@@ -626,11 +626,6 @@ class G3d:
 	def dot(self, v0, v1):
 		return v0[0]*v1[0] + v0[1]*v1[1] + v0[2]*v1[2]
 
-	def backface(self, p0, p1, p2):
-		vcop = self.normalize((p0[0], p0[1], p0[2] + self.persp))
-		dp = self.dot(vcop, self.normal(p0, p1, p2))
-		return (dp > 0)
-
 	def setRotQ(self, rx, ry, rz):
 		q1 = aangle2q((1, 0, 0), rx)
 		q2 = aangle2q((0, 1, 0), ry)
