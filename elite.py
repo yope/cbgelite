@@ -382,10 +382,19 @@ class Cockpit(BaseScreen):
 		nbtns = inp.get_new_buttons()
 		btns = inp.get_buttons()
 		m.set_speed(speed)
-		if BaseDev.BTN_JUMP in nbtns:
-			m.jump()
-		elif BaseDev.BTN_HYPERSPACE in nbtns:
-			m.hyperspace()
+		if nbtns:
+			if BaseDev.BTN_JUMP in nbtns:
+				m.jump()
+			elif BaseDev.BTN_HYPERSPACE in nbtns:
+				m.hyperspace()
+			elif BaseDev.BTN_VIEW_FRONT in nbtns:
+				m.set_view(m.VIEW_FRONT)
+			elif BaseDev.BTN_VIEW_REAR in nbtns:
+				m.set_view(m.VIEW_REAR)
+			elif BaseDev.BTN_VIEW_RIGHT in nbtns:
+				m.set_view(m.VIEW_RIGHT)
+			elif BaseDev.BTN_VIEW_LEFT in nbtns:
+				m.set_view(m.VIEW_LEFT)
 		self.laser.set_shooting(BaseDev.BTN_FIRE in btns)
 		ret = m.handle()
 		self.speedbar.set_value(speed / 15)

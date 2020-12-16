@@ -289,6 +289,10 @@ class Sun(Planet):
 		self.fill = 2 # Fuzzy fill
 
 class Microverse:
+	VIEW_FRONT = "pz"
+	VIEW_REAR = "nz"
+	VIEW_RIGHT = "px"
+	VIEW_LEFT = "nx"
 	def __init__(self, cbg, g3d, laser, ships, cd, universe, particles=400, hyperspace=False):
 		self.sfx = soundfx
 		self.loop = asyncio.get_event_loop()
@@ -338,7 +342,23 @@ class Microverse:
 		self.countdown = False
 		self.hyperspacing = False
 		self.cd.docked = False
+		self.view_names = {
+				self.VIEW_FRONT: "Front View",
+				self.VIEW_REAR: "Rear View",
+				self.VIEW_RIGHT: "Right View",
+				self.VIEW_LEFT: "Left View"
+			}
+		self.set_view(self.VIEW_FRONT)
 		self.tactic_task = self.loop.create_task(self.coro_tactic())
+
+	def set_view(self, view):
+		self.g3d.set_camera(view)
+		self.view = view
+		self.view_name = self.view_names[view]
+		self.view_name_x = (320 - len(self.view_name) * 8) // 2
+
+	def get_view(self):
+		return self.view
 
 	async def coro_tactic(self):
 		cd = self.cd
@@ -560,6 +580,8 @@ class Microverse:
 			self.sun.draw()
 		if self.dead:
 			return self.draw_dead()
+		if self.particles: # FIXME!
+			self.cbg.drawtext(self.view_name_x, 8, self.view_name)
 		if self.flashtout:
 			slen = len(self.flashtext) * 8
 			x = (320 - slen) // 2
