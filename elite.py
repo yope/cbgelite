@@ -540,6 +540,42 @@ class Cockpit(BaseScreen):
 			await asyncio.sleep(0.01)
 		cbg.setclip(None)
 
+class EquipShip(MenuScreen):
+	TITLE = "EQUIP SHIP"
+	def __init__(self, elite, cbg, cd):
+		super().__init__(elite, cbg)
+		self.cd = cd
+		allitems = [
+				("fuel", "Fuel", (7.0 - cd.fuel) / 10),
+				("missile", "Missile", 3.0),
+				("cargo_bay", "Large Cargo Bay", 40.0),
+				("ecm", "E.C.M. System", 60.0),
+				("pulse_laser", "Extra Pulse Lasers", 40.0),
+				("beam_laser", "Extra Beam Lasers", 100.0),
+				("scoops", "Fuel Scoops", 52.5),
+				("pod", "Escape Pod", 100.0),
+				("ebomb", "Energy Bomb", 90.0),
+				("energy", "Extra Energy Unit", 150.0),
+				("docking", "Docking Computers", 100.0),
+				("gdrive", "Galactic Hyperspace", 500.0),
+				("mil_laser", "Military Lasers", 600.0),
+				("min_laser", "Mining Lasers", 80.0)
+			]
+		syst = self.universe.get_system_by_index(cd.galaxy, cd.system)
+		tl = syst.techlevel
+		lend = max(2, tl) + 3
+		lend = min(len(allitems), lend)
+		self.items = allitems[:lend]
+
+	def draw(self):
+		c = self.cbg
+		cd = self.cd
+		y = 32
+		for i, (tag, desc, price) in enumerate(self.items):
+			c.drawtext(16, y, "{:2d} {} {:6.2f}".format(i + 1, desc.ljust(22), price))
+			y += 8
+
+
 class GalaxyMap(MenuScreen):
 	TITLE = "GALACTIC CHART"
 	def __init__(self, elite, cbg, cd):
@@ -917,7 +953,10 @@ class Elite:
 					cd.system = cd.target
 					m.hyperspace()
 			self.cbg.redraw_screen()
-			if 6 in nkey:
+			if 5 in nkey and cd.docked:
+				m.exit()
+				m = EquipShip(self, self.cbg, cd)
+			elif 6 in nkey:
 				m.exit()
 				m = GalaxyMap(self, self.cbg, cd)
 			elif 7 in nkey:
