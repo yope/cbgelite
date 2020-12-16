@@ -32,6 +32,10 @@ class BaseDev:
 	BTN_ECM = 9
 	BTN_JUMP = 10
 	BTN_HYPERSPACE = 11
+	BTN_VIEW_FRONT = 12
+	BTN_VIEW_REAR = 13
+	BTN_VIEW_RIGHT = 14
+	BTN_VIEW_LEFT = 15
 	def __init__(self):
 		self.roll = 0.0
 		self.pitch = 0.0
@@ -260,6 +264,9 @@ extra priviledges. You basically have two choices to make this work:
 		ctrl.append(("Activate ECM", BaseDev.BTN_ECM))
 		ctrl.append(("Near space JUMP", BaseDev.BTN_JUMP))
 		ctrl.append(("Hyperspace Jump", BaseDev.BTN_HYPERSPACE))
+		for i in ["Front", "Rear", "Right", "Left"]:
+			code = getattr(BaseDev, "BTN_VIEW_"+i.upper())
+			ctrl.append(("{} View".format(i), code))
 		m = []
 		for c in ctrl:
 			print("Press button or key for {}:".format(c[0]), end="", flush=True)
