@@ -167,12 +167,7 @@ class Ship3D(Object3D):
 			fe = s.face[f]
 			n = self.normrotate(s.norm[f])
 			p0 = self.transform(s.vert[s.edge[fe[0]][0]])
-			vcop = g.normalize((p0[0], p0[1], p0[2] + g.persp))
-			dp = g.dot(vcop, n)
-			if dp > 0:
-				continue
-			vangle = g.dot(vcop, (0, 0, 1))
-			if -0.7 < vangle < 0.7:
+			if not g.visible(p0, n):
 				continue
 			for ei in fe:
 				e = s.edge[ei]
@@ -251,8 +246,8 @@ class Planet(Object3D):
 		x0, y0 = self.g3d.project2d(x, y, z)
 		if x0 is None:
 			return
-		x1, y1 = self.g3d.project2d(x + self.diameter, y, z)
-		rp = int(x1 - x0)
+		x1, y1 = self.g3d.project2d(x, y + self.diameter, z)
+		rp = int(abs(y1 - y0))
 		if (x0 - rp) > 400 or (x0 + rp) < 0 or (y0 - rp) > 200 or (y0 + rp) < 0:
 			return
 		rp0 = min(rp, 1000)
@@ -271,12 +266,7 @@ class Planet(Object3D):
 		z0 = r3
 		n = self.normrotate((0, -1, 0))
 		p0 = self.transform((x0, y0, z0))
-		vcop = g.normalize((p0[0], p0[1], p0[2] + g.persp))
-		dp = g.dot(vcop, n)
-		if dp > 0:
-			return
-		vangle = g.dot(vcop, (0, 0, 1))
-		if -0.7 < vangle < 0.7:
+		if not g.visible(p0, n):
 			return
 		phi = 2 * pi / 20
 		for i in range(1, 21):
