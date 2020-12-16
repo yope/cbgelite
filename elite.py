@@ -784,6 +784,7 @@ class Elite:
 		self.inputdev = ctrl.get_evdev()
 		self.universe = Universe()
 		self.commander = Commander()
+		self.commander.load_game()
 		self.ships = AllShips("all_ships.ship").ships
 
 	def draw_title(self):
@@ -895,6 +896,7 @@ class Elite:
 					m.exit()
 					m = StatusScreen(self, self.cbg, cd)
 					cockpit = None
+					self.commander.save_game()
 				elif m.m.dead:
 					for i in range(500):
 						inp.handle()
