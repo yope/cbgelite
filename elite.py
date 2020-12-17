@@ -774,6 +774,7 @@ class CommanderData:
 		self.docking = False
 		self.energy = False
 		self.gdrive = False
+		self.pod = False
 		self.docked = True
 
 class Commander:
