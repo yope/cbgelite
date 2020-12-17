@@ -540,6 +540,43 @@ class Cockpit(BaseScreen):
 			await asyncio.sleep(0.01)
 		cbg.setclip(None)
 
+class Chooser:
+	def __init__(self, cbg, items, x, y, fstr):
+		self.items = items
+		self.x = x
+		self.y = y
+		self.fstr = fstr
+		self.cbg = cbg
+		self.index = 0
+		self.indexf = 0.0
+		self.index_max = len([x for x in items if x[0]])
+		self.selected = None
+
+	def draw_item(self, y, item, num, selected):
+		active = item[0]
+		if active and selected:
+			fg, bg = 14, 4
+			self.selected = item
+		elif active:
+			fg, bg = 15, 0
+		else:
+			fg, bg = 8, 0
+		self.cbg.drawtext(self.x, y, self.fstr.format(num, *item), fg=fg, bg=bg)
+
+	def draw_list(self):
+		y = self.y
+		i = 0
+		for num, item in enumerate(self.items):
+			self.draw_item(y, item, num, (i==self.index))
+			if item[0]:
+				i += 1
+			y += 8
+		return y
+
+	def handle(self, incr):
+		self.indexf = min(max(self.indexf + incr, 0.0), self.index_max * 4.0 - 1.0)
+		self.index = int(self.indexf / 4)
+
 class EquipShip(MenuScreen):
 	TITLE = "EQUIP SHIP"
 	def __init__(self, elite, cbg, cd):
@@ -561,20 +598,84 @@ class EquipShip(MenuScreen):
 				("mil_laser", "Military Lasers", 600.0),
 				("min_laser", "Mining Lasers", 80.0)
 			]
+		self.laser_types = ["pulse", "beam", "mil", "min"]
+		self.laser_dirs = ["front", "rear", "right", "left"]
+		self.item_end_y = 32+len(allitems)*8
 		syst = self.universe.get_system_by_index(cd.galaxy, cd.system)
 		tl = syst.techlevel
 		lend = max(2, tl) + 3
 		lend = min(len(allitems), lend)
-		self.items = allitems[:lend]
+		self.allitems = allitems[:lend]
+		self.filter_items()
+		self.menulevel = 0
+
+	def filter_items(self):
+		cd = self.cd
+		self.items = []
+		for item in self.allitems:
+			active = item[2] <= cd.bitcoin
+			tag = item[0]
+			if "laser" in tag:
+				pos = 0
+				for i, d in enumerate(self.laser_dirs):
+					lt = getattr(cd, "laser_" + d)
+					if lt is not None and self.laser_types[lt] in tag:
+						pos |= (1 << i)
+				active = active and pos != 15
+			elif tag == "missile":
+				active = active and cd.missiles < 4
+			elif tag == "fuel":
+				activa = active and cd.fuel < 7.0
+			elif hasattr(cd, tag):
+				active = active and not getattr(cd, tag)
+			self.items.append((active, *item))
+		self.itemchooser = Chooser(self.cbg, self.items, 16, 32, "{0:2d} {3:22s} {4:6.2f}")
 
 	def draw(self):
 		c = self.cbg
 		cd = self.cd
-		y = 32
-		for i, (tag, desc, price) in enumerate(self.items):
-			c.drawtext(16, y, "{:2d} {} {:6.2f}".format(i + 1, desc.ljust(22), price))
-			y += 8
+		c.colorrect(16, 32, 256, 160, 15, 0)
+		self.itemchooser.draw_list()
+		if self.menulevel == 0:
+			return
+		_, tag, desc, price = self.itemchooser.selected
+		y = self.item_end_y
+		if "laser" in tag:
+			c.drawtext(16, y, "location:")
+			y = self.laserchooser.draw_list() + 8
+		if self.menulevel == 1:
+			return
+		c.drawtext(16, y, "Buy {} for {}?".format(desc, price))
+		y += 8
 
+	def handle(self, inp):
+		if self.menulevel == 0:
+			self.itemchooser.handle(-inp.get_pitch())
+		elif self.menulevel == 1:
+			self.laserchooser.handle(-inp.get_pitch())
+		nbtn = inp.get_new_buttons()
+		if BaseDev.BTN_FIRE in nbtn:
+			if self.menulevel == 0:
+				tag = self.itemchooser.selected[1]
+				if "laser" in tag:
+					laser_items = []
+					for d in self.laser_dirs:
+						lt = getattr(self.cd, "laser_"+d)
+						laser_items.append((lt is None or self.laser_types[lt] not in tag, d))
+					self.laserchooser = Chooser(self.cbg, laser_items, 96, self.item_end_y, "{2:6s}")
+					self.menulevel = 1
+				else:
+					self.menulevel = 2
+			elif self.menulevel == 1:
+				self.menulevel += 1
+			else:
+				self.menulevel == 0 # FIXME: Notify succesful purchase?
+		nkey, ret = super().handle(inp)
+		return nkey, ret
+
+	def exit(self):
+		self.cbg.colorrect(16, 32, 256, 160, 15, 0)
+		return super().exit()
 
 class GalaxyMap(MenuScreen):
 	TITLE = "GALACTIC CHART"
