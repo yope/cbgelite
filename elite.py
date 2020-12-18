@@ -192,12 +192,11 @@ class Radar:
 					self.cbg.fillrect(x, y, 2, bh)
 				self.cbg.fillrect(x - 2, y + bh - 1, 4, 2)
 
-class Laser:
+class PulseLaser:
 	def __init__(self, cp, x, y, w, h):
 		self.cp = cp
 		self.cbg = cp.cbg
 		self.g3d = cp.g3d
-		self.type = "pulse"
 		self.cx = x + w // 2
 		self.cy = y + h // 2
 		self.lcpos = (-40, 20, 20)
@@ -210,9 +209,10 @@ class Laser:
 		self.shooting = False
 		self.fire = False
 		self.shot_timer = 0
-
-	def set_type(self, t):
-		self.type = t
+		self.shot_timer_max = 20
+		self.shot_timer_off = 6
+		self.shot_seglen = 1500
+		self.shot_dist = 1000
 
 	def draw(self, m, trg):
 		if trg is not self.trg:
@@ -225,9 +225,9 @@ class Laser:
 				self.highlite_count = self.highlite_count_max
 		else:
 			self.highlite_count = 0
-		getattr(self, "draw_" + self.type)()
+		self.draw_target()
 
-	def draw_pulse(self):
+	def draw_target(self):
 		p = int(4.0 / (self.highlite_count_max + 1 - self.highlite_count))
 		r0 = 10 + p
 		l = 12
@@ -238,30 +238,57 @@ class Laser:
 		self.cbg.fillrect(self.cx, self.cy + r0, 2, l)
 		if not self.shooting and not self.fire:
 			return
+		self.draw_shooting()
+
+	def draw_shooting(self):
 		self.shooting = True
 		i = self.shot_timer
 		if i == 0:
 			self._xm = self.cx + randint(-2, 2)
 			self._ym = self.cy + randint(-2, 2)
 			self.cp.shot_fired(self.trg)
-		if i < 6:
+		sd = self.shot_dist
+		sl = self.shot_seglen
+		if i < self.shot_timer_off:
 			i0 = max(0, i - 1)
 			x, y, z = self.lcpos
-			self.g3d.line((x, y, z + i0*1000), (x, y, z + i*1000+1500))
+			self.g3d.line((x, y, z + i0*sd), (x, y, z + i*sd+sl))
 			x += 10
-			self.g3d.line((x, y, z + i0*1000), (x, y, z + i*1000+1500))
+			self.g3d.line((x, y, z + i0*sd), (x, y, z + i*sd+sl))
 			x, y, z = self.rcpos
-			self.g3d.line((x, y, z + i0*1000), (x, y, z + i*1000+1500))
+			self.g3d.line((x, y, z + i0*sd), (x, y, z + i*sd+sl))
 			x -= 10
-			self.g3d.line((x, y, z + i0*1000), (x, y, z + i*1000+1500))
+			self.g3d.line((x, y, z + i0*sd), (x, y, z + i*sd+sl))
 		self.shot_timer += 1
-		if self.shot_timer >= 20:
+		if self.shot_timer >= self.shot_timer_max:
 			self.shot_timer = 0
 			if not self.fire:
 				self.shooting = False
 
 	def set_shooting(self, shooting):
 		self.fire = shooting
+
+class BeamLaser(PulseLaser):
+	def __init__(self, cp, x, y, w, h):
+		super().__init__(cp, x, y, w, h)
+		self.shot_timer_max = 5
+		self.shot_timer_off = 4
+		self.shot_seglen = 2100
+		self.shot_dist = 1400
+
+class MilitaryLaser(PulseLaser):
+	def __init__(self, cp, x, y, w, h):
+		super().__init__(cp, x, y, w, h)
+		self.shot_timer_max = 7
+		self.shot_timer_off = 5
+		self.shot_seglen = 1800
+		self.shot_dist = 1200
+
+class MiningLaser(PulseLaser):
+	def __init__(self, cp, x, y, w, h):
+		super().__init__(cp, x, y, w, h)
+		self.shot_timer_max = 30
+		self.shot_timer_off = 20
 
 class BaseScreen:
 	def __init__(self, elite, cbg):
@@ -317,10 +344,21 @@ class Cockpit(BaseScreen):
 		self.speedbar = BarGraph(self.cbg, rbx, self.ystatus + 4, 40, 7, 11, 0, ticks=8)
 		self.rlmeter = Meter(self.cbg, rbx, self.ystatus + 12, 40, 7, 14, 0, ticks=8)
 		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
-		self.laser = Laser(self, 0, 0, self.width, self.ystatus)
-		self.m = Microverse(self.cbg, self.g3d, self.laser, self.elite.ships, cd, self.universe)
+		self.setup_lasers()
+		self.m = Microverse(self.cbg, self.g3d, self.lasers, self.elite.ships, cd, self.universe)
 		self.radar = Radar(self.cbg, self, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
 		self.setup_screen()
+
+	def setup_lasers(self):
+		lasertypes = [PulseLaser, BeamLaser, MilitaryLaser, MiningLaser]
+		lasers = []
+		for d in ["front", "rear", "right", "left"]:
+			lt = getattr(self.cd, "laser_"+d)
+			if lt is None:
+				lasers.append(None)
+			else:
+				lasers.append(lasertypes[lt](self, 0, 0, self.width, self.ystatus))
+		self.lasers = lasers
 
 	def setup_screen(self):
 		super().setup_screen()
@@ -397,7 +435,8 @@ class Cockpit(BaseScreen):
 				m.set_view(m.VIEW_RIGHT)
 			elif BaseDev.BTN_VIEW_LEFT in nbtns:
 				m.set_view(m.VIEW_LEFT)
-		self.laser.set_shooting(BaseDev.BTN_FIRE in btns)
+		if m.laser:
+			m.laser.set_shooting(BaseDev.BTN_FIRE in btns)
 		ret = m.handle()
 		self.speedbar.set_value(speed / 15)
 		self.rlmeter.set_value(roll * 33)
@@ -418,7 +457,7 @@ class Cockpit(BaseScreen):
 
 	def hyperspace(self):
 		self.m.stop()
-		self.m = Microverse(self.cbg, self.g3d, self.laser, self.elite.ships, self.cd, self.universe, hyperspace=True)
+		self.m = Microverse(self.cbg, self.g3d, self.lasers, self.elite.ships, self.cd, self.universe, hyperspace=True)
 
 	def game_over_iteration(self):
 		m = self.m

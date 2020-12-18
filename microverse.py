@@ -293,13 +293,19 @@ class Microverse:
 	VIEW_REAR = "nz"
 	VIEW_RIGHT = "px"
 	VIEW_LEFT = "nx"
-	def __init__(self, cbg, g3d, laser, ships, cd, universe, particles=400, hyperspace=False):
+	def __init__(self, cbg, g3d, lasers, ships, cd, universe, particles=400, hyperspace=False):
 		self.sfx = soundfx
 		self.loop = asyncio.get_event_loop()
 		self.g3d = g3d
 		self.cbg = cbg
 		self.ships = ships
-		self.laser = laser
+		self.lasers = lasers
+		self.laser_index = {
+				self.VIEW_FRONT: 0,
+				self.VIEW_REAR: 1,
+				self.VIEW_RIGHT: 2,
+				self.VIEW_LEFT: 3
+			}
 		self.cd = cd
 		self.universe = universe
 		self.objects = []
@@ -356,6 +362,10 @@ class Microverse:
 		self.view = view
 		self.view_name = self.view_names[view]
 		self.view_name_x = (320 - len(self.view_name) * 8) // 2
+		if self.lasers is not None:
+			self.laser = self.lasers[self.laser_index[view]]
+		else:
+			self.laser = None
 
 	def get_view(self):
 		return self.view
@@ -593,7 +603,7 @@ class Microverse:
 			x = (320 - slen) // 2
 			self.cbg.drawtext(x, 160, self.subtext)
 			self.subtout -= 1
-		if self.laser:
+		if self.laser is not None:
 			self.laser.draw(self, trg)
 
 	def draw_dead(self):
