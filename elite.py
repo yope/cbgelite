@@ -764,7 +764,7 @@ class StatusScreen(MenuScreen):
 		self.statustext = ["Clean", "Offender", "Fugutive"]
 		self.ranktext = ["Harmless", "Mostly Harmless", "Poor", "Average",
 				"Above Average", "Competent", "Dangerous", "Deadly", "---- E L I T E ----"]
-		self.lasertext = ["Pulse", "Mining", "Beam", "Military"]
+		self.lasertext = ["Pulse", "Beam", "Military", "Mining"]
 
 	def draw(self):
 		c = self.cbg
