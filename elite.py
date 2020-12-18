@@ -582,6 +582,13 @@ class EquipShip(MenuScreen):
 	def __init__(self, elite, cbg, cd):
 		super().__init__(elite, cbg)
 		self.cd = cd
+		self.laser_types = ["pulse", "beam", "mil", "min"]
+		self.laser_dirs = ["front", "rear", "right", "left"]
+		self.filter_items()
+		self.menulevel = 0
+
+	def filter_items(self):
+		cd = self.cd
 		allitems = [
 				("fuel", "Fuel", (7.0 - cd.fuel) / 10),
 				("missile", "Missile", 3.0),
@@ -598,21 +605,14 @@ class EquipShip(MenuScreen):
 				("mil_laser", "Military Lasers", 600.0),
 				("min_laser", "Mining Lasers", 80.0)
 			]
-		self.laser_types = ["pulse", "beam", "mil", "min"]
-		self.laser_dirs = ["front", "rear", "right", "left"]
 		self.item_end_y = 32+len(allitems)*8
 		syst = self.universe.get_system_by_index(cd.galaxy, cd.system)
 		tl = syst.techlevel
 		lend = max(2, tl) + 3
 		lend = min(len(allitems), lend)
-		self.allitems = allitems[:lend]
-		self.filter_items()
-		self.menulevel = 0
-
-	def filter_items(self):
-		cd = self.cd
+		allitems = allitems[:lend]
 		self.items = []
-		for item in self.allitems:
+		for item in allitems:
 			active = item[2] <= cd.bitcoin
 			tag = item[0]
 			if "laser" in tag:
@@ -641,12 +641,32 @@ class EquipShip(MenuScreen):
 		_, tag, desc, price = self.itemchooser.selected
 		y = self.item_end_y
 		if "laser" in tag:
-			c.drawtext(16, y, "location:")
+			c.drawtext(16, y, "Location:")
 			y = self.laserchooser.draw_list() + 8
 		if self.menulevel == 1:
 			return
 		c.drawtext(16, y, "Buy {} for {}?".format(desc, price))
 		y += 8
+
+	def do_purchase(self):
+		tag, _, price = self.itemchooser.selected[1:]
+		if "laser" in tag:
+			loc = self.laserchooser.selected[1]
+			typ = tag.split("_")[0]
+			ntyp = self.laser_types.index(typ)
+			setattr(self.cd, "laser_" + loc, ntyp)
+		elif tag == "fuel":
+			self.cd.fuel = 7.0
+		elif tag == "missile":
+			self.cd.missiles += 1
+		elif hasattr(self.cd, tag):
+			setattr(self.cd, tag, True)
+		else:
+			raise ValueError
+		self.cd.bitcoin -= price
+		self.filter_items()
+		self.cbg.log("Buy {} for {}".format(tag, price))
+		#FIXME: Play some soundfx
 
 	def handle(self, inp):
 		if self.menulevel == 0:
@@ -669,7 +689,8 @@ class EquipShip(MenuScreen):
 			elif self.menulevel == 1:
 				self.menulevel += 1
 			else:
-				self.menulevel == 0 # FIXME: Notify succesful purchase?
+				self.do_purchase()
+				self.menulevel = 0 # FIXME: Notify succesful purchase?
 		nkey, ret = super().handle(inp)
 		return nkey, ret
 
