@@ -114,6 +114,7 @@ the space station.
 
 Currently working screens:
 
+ * [4] Equip Ship
  * [5] Galactic Chart
  * [6] Short Range Chart
  * [7] Data on target system
@@ -149,10 +150,6 @@ random turns.
 
 If you manage to kill an enemy ship, it might leave some cargo cannisters floaring
 around. Currently you can only either leave them clutter space, or shoot them.
-
-Currently only front view is supported. You can not yet look to the left, right
-or rear of your ship. Also missiles are not implemented yet, so your only weapon
-is the default pulse laser cannon in the front of your ship. Good luck with that ;-)
 
 #### Docking
 
