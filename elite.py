@@ -240,6 +240,17 @@ class PulseLaser:
 			return
 		self.draw_shooting()
 
+	def line3d(self, x0, y0, z0, x1, y1, z1):
+		v = self.cp.m.get_view()
+		if v == "pz":
+			self.g3d.line((x0, y0, z0), (x1, y1, z1))
+		elif v == "nz":
+			self.g3d.line((x0, y0, -z0), (x1, y1, -z1))
+		elif v == "px":
+			self.g3d.line((z0, y0, x0), (z1, y1, x1))
+		else:
+			self.g3d.line((-z0, y0, x0), (-z1, y1, x1))
+
 	def draw_shooting(self):
 		self.shooting = True
 		i = self.shot_timer
@@ -252,13 +263,13 @@ class PulseLaser:
 		if i < self.shot_timer_off:
 			i0 = max(0, i - 1)
 			x, y, z = self.lcpos
-			self.g3d.line((x, y, z + i0*sd), (x, y, z + i*sd+sl))
+			self.line3d(x, y, z + i0*sd, x, y, z + i*sd+sl)
 			x += 10
-			self.g3d.line((x, y, z + i0*sd), (x, y, z + i*sd+sl))
+			self.line3d(x, y, z + i0*sd, x, y, z + i*sd+sl)
 			x, y, z = self.rcpos
-			self.g3d.line((x, y, z + i0*sd), (x, y, z + i*sd+sl))
+			self.line3d(x, y, z + i0*sd, x, y, z + i*sd+sl)
 			x -= 10
-			self.g3d.line((x, y, z + i0*sd), (x, y, z + i*sd+sl))
+			self.line3d(x, y, z + i0*sd, x, y, z + i*sd+sl)
 		self.shot_timer += 1
 		if self.shot_timer >= self.shot_timer_max:
 			self.shot_timer = 0
