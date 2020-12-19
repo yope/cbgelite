@@ -145,6 +145,13 @@ class Ship3D(Object3D):
 
 	def on_target(self):
 		x, y, z = self.pos
+		v = self.mv.get_view()
+		if v == "nz":
+			z = -z
+		elif v == "px":
+			x, z = z, x
+		elif v == "nx":
+			x, z = z, -x
 		if z < 0:
 			return False
 		r = self.ship.opt_target_area
