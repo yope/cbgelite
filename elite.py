@@ -27,6 +27,7 @@ from time import sleep, monotonic
 from math import sin, sqrt
 from microverse import Microverse
 from universe import Universe
+from market import Market
 from ai import BaseAi
 from control import Control, BaseDev
 from collections import deque
@@ -827,6 +828,31 @@ class ShortRangeMap(GalaxyMap):
 		self.cbg.line(curx, cury - 8, curx, cury + 8, mode=2)
 		self.cbg.line(curx - 8, cury, curx + 8, cury, mode=2)
 
+class MarketPrices(MenuScreen):
+	def __init__(self, elite, cbg, cd):
+		s = elite.universe.get_system_by_index(cd.galaxy, cd.target)
+		self.TITLE = s.name.upper() + " MARKET PRICES"
+		super().__init__(elite, cbg)
+		self.cd = cd
+
+	def draw(self):
+		c = self.cbg
+		c.colorrect(16, 32, 256, 160, 15, 0)
+		pt = self.cd.current_market
+		c.drawtext(144, 32, "UNIT  QUANTITY")
+		c.drawtext(16, 40, " PRODUCT   UNIT PRICE FOR SALE")
+		y = 56
+		for name, price, stock, unit, _ in pt:
+			c.drawtext(16, y, "{:12s} {:2s} {:4.2f}   {:2d}{}".format(name, unit, price, stock, unit))
+			y += 8
+
+class MarketBuy(MenuScreen):
+	TITLE = "BUY ITEMS"
+	def __init__(self, elite, cbg, cd):
+		super().__init__(elite, cbg)
+		self.cd = cd
+		self.choser = Chooser(cbg, cd.current_market, 16, 56, "{1:12s} {4:2s} {2:4.2f}  {3:2d}{4:2s}     {5:2d}")
+
 class StatusScreen(MenuScreen):
 	def __init__(self, elite, cbg, cd):
 		self.TITLE = "COMMANDER "+cd.name.upper()
@@ -948,6 +974,8 @@ class CommanderData:
 		self.gdrive = False
 		self.pod = False
 		self.docked = True
+		self.current_market = None
+		self.cargo = []
 
 class Commander:
 	def __init__(self):
@@ -994,7 +1022,15 @@ class Elite:
 		self.universe = Universe()
 		self.commander = Commander()
 		self.commander.load_game()
+		self.market = Market()
+		if self.commander.data.current_market is None:
+			self.set_pricelist()
 		self.ships = AllShips("all_ships.ship").ships
+
+	def set_pricelist(self):
+		cd = self.commander.data
+		s = self.universe.get_system_by_index(cd.galaxy, cd.system)
+		self.commander.data.current_market = self.market.get_pricelist(s.economy)
 
 	def draw_title(self):
 		sw = 320
@@ -1125,6 +1161,7 @@ class Elite:
 					await m.hyperspace_animation_end()
 					cd.system = cd.target
 					m.hyperspace()
+					self.set_pricelist()
 			self.cbg.redraw_screen()
 			if 5 in nkey and cd.docked:
 				m.exit()
@@ -1138,6 +1175,9 @@ class Elite:
 			elif 8 in nkey:
 				m.exit()
 				m = SystemData(self, self.cbg, cd)
+			elif 9 in nkey:
+				m.exit()
+				m = MarketPrices(self, self.cbg, cd)
 			elif 10 in nkey:
 				m.exit()
 				m = StatusScreen(self, self.cbg, cd)
