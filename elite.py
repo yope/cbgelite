@@ -315,7 +315,7 @@ class BaseScreen:
 
 	def setup_screen(self):
 		self.cbg.colorrect(0, 0, self.width, self.height, 11, 0)
-		self.cbg.colorrect(2, 4, self.width-3, self.ystatus-4, 15, 0)
+		self.cbg.colorrect(2, 4, self.width-3, self.height-4, 15, 0)
 
 	def draw_background(self):
 		self.cbg.rect(1, 2, self.width-2, self.height-4)
@@ -373,7 +373,8 @@ class Cockpit(BaseScreen):
 		self.lasers = lasers
 
 	def setup_screen(self):
-		super().setup_screen()
+		self.cbg.colorrect(0, 0, self.width, self.height, 11, 0)
+		self.cbg.colorrect(2, 4, self.width-3, self.ystatus-4, 15, 0)
 		bglen = 40
 		bgcolors = [5, 5, 3, 1, 1, 10]
 		bgticks = [0, 0, 6, 5, 6, 5]
@@ -602,12 +603,14 @@ class Chooser:
 		self.indexf = 0.0
 		self.index_max = len([x for x in items if x[0]])
 		self.selected = None
+		self.selected_idx = None
 
 	def draw_item(self, y, item, num, selected):
 		active = item[0]
 		if active and selected:
 			fg, bg = 14, 4
 			self.selected = item
+			self.selected_idx = num
 		elif active:
 			fg, bg = 15, 0
 		else:
@@ -637,6 +640,7 @@ class EquipShip(MenuScreen):
 		self.laser_dirs = ["front", "rear", "right", "left"]
 		self.filter_items()
 		self.menulevel = 0
+		self.setup_screen()
 
 	def filter_items(self):
 		cd = self.cd
@@ -755,6 +759,7 @@ class GalaxyMap(MenuScreen):
 		super().__init__(elite, cbg)
 		self.cd = cd
 		self.galaxy = cd.galaxy
+		self.setup_screen()
 
 	def get_position(self, s):
 		return s.x + 32, (s.y >> 1) + 32
@@ -780,6 +785,7 @@ class ShortRangeMap(GalaxyMap):
 		self.cy = s.y
 		self.curx = st.x
 		self.cury = st.y
+		self.setup_screen()
 
 	def _coord(self, x, y):
 		x = int((x - self.cx) * 4 + 160)
@@ -834,6 +840,7 @@ class MarketPrices(MenuScreen):
 		self.TITLE = s.name.upper() + " MARKET PRICES"
 		super().__init__(elite, cbg)
 		self.cd = cd
+		self.setup_screen()
 
 	def draw(self):
 		c = self.cbg
@@ -842,7 +849,7 @@ class MarketPrices(MenuScreen):
 		c.drawtext(144, 32, "UNIT  QUANTITY")
 		c.drawtext(16, 40, " PRODUCT   UNIT PRICE FOR SALE")
 		y = 56
-		for name, price, stock, unit, _ in pt:
+		for name, price, stock, unit in pt:
 			c.drawtext(16, y, "{:12s} {:2s} {:4.2f}   {:2d}{}".format(name, unit, price, stock, unit))
 			y += 8
 
@@ -851,7 +858,86 @@ class MarketBuy(MenuScreen):
 	def __init__(self, elite, cbg, cd):
 		super().__init__(elite, cbg)
 		self.cd = cd
-		self.choser = Chooser(cbg, cd.current_market, 16, 56, "{1:12s} {4:2s} {2:4.2f}  {3:2d}{4:2s}     {5:2d}")
+		lst = []
+		for i, item in enumerate(cd.current_market):
+			if i in cd.cargo and cd.cargo[i] > 0:
+				inv = str(cd.cargo[i]) + item[3]
+			else:
+				inv = "-"
+			lst.append([*item, inv])
+		self.market = lst
+		self.chooser = Chooser(cbg, self.market, 16, 56, "{1:12s} {4:2s} {2:4.2f}  {3:2d}{4:2s}     {5:3s}")
+		self.setup_screen()
+
+	def exit(self):
+		for i, (name, price, stock, unit, inv) in enumerate(self.market):
+			inv = self.parse_inv(i)
+			if inv > 0:
+				self.cd.cargo[i] = inv
+			elif i in self.cd.cargo:
+				del self.cd.cargo[i]
+		return super().exit()
+
+	def draw(self):
+		c = self.cbg
+		cd = self.cd
+		c.drawtext(144, 32, "UNIT  QUANTITY INVEN-")
+		c.drawtext(16, 40, " PRODUCT   UNIT PRICE FOR SALE TORY")
+		c.colorrect(16, 32, 256, 160, 15, 0)
+		self.chooser.draw_list()
+
+	def parse_inv(self, i):
+		inv = self.market[i][-1]
+		if inv == "-":
+			return 0
+		return int(inv.strip("tkg"))
+
+	def get_total_inv(self):
+		inv = 0
+		for i in range(len(self.market)):
+			if self.market[i][3] != "t":
+				continue
+			inv += self.parse_inv(i)
+		return inv
+
+	def try_buy(self, i, name, price, stock, unit, inv):
+		maxcargo = 35 if self.cd.cargo_bay else 20
+		inv = self.parse_inv(i)
+		tinv = self.get_total_inv()
+		if tinv >= maxcargo and unit == "t":
+			return False
+		if price > self.cd.bitcoin:
+			return False
+		if stock <= 0:
+			return False
+		inv = str(inv+1) + unit
+		self.cd.bitcoin -= price
+		self.cd.current_market[i][2] = stock - 1
+		self.market[i][2] = stock - 1
+		self.market[i][4] = inv
+
+	def try_sell(self, i, name, price, stock, unit, inv):
+		inv = self.parse_inv(i)
+		if inv <= 0:
+			return
+		if inv == 1:
+			inv = "-"
+		else:
+			inv = str(inv - 1) + unit
+		self.cd.bitcoin += price
+		self.cd.current_market[i][2] = stock + 1
+		self.market[i][2] = stock + 1
+		self.market[i][4] = inv
+
+	def handle(self, inp):
+		self.chooser.handle(-inp.get_pitch())
+		nbtn = inp.get_new_buttons()
+		if BaseDev.BTN_FIRE in nbtn:
+			self.try_buy(self.chooser.selected_idx, *self.chooser.selected)
+		elif BaseDev.BTN_MISSILE1 in nbtn or BaseDev.BTN_MISSILE2 in nbtn:
+			self.try_sell(self.chooser.selected_idx, *self.chooser.selected)
+		nkey, ret = super().handle(inp)
+		return nkey, ret
 
 class StatusScreen(MenuScreen):
 	def __init__(self, elite, cbg, cd):
@@ -862,6 +948,7 @@ class StatusScreen(MenuScreen):
 		self.ranktext = ["Harmless", "Mostly Harmless", "Poor", "Average",
 				"Above Average", "Competent", "Dangerous", "Deadly", "---- E L I T E ----"]
 		self.lasertext = ["Pulse", "Beam", "Military", "Mining"]
+		self.setup_screen()
 
 	def draw(self):
 		c = self.cbg
@@ -907,6 +994,7 @@ class SystemData(MenuScreen):
 		self.TITLE = "DATA ON "+s.name.upper()
 		super().__init__(elite, cbg)
 		self.system = s
+		self.setup_screen()
 
 	def _txt_align(self, l, n):
 		words = l.split()
@@ -975,7 +1063,7 @@ class CommanderData:
 		self.pod = False
 		self.docked = True
 		self.current_market = None
-		self.cargo = []
+		self.cargo = {}
 
 class Commander:
 	def __init__(self):
@@ -1182,12 +1270,17 @@ class Elite:
 				m.exit()
 				m = StatusScreen(self, self.cbg, cd)
 			elif 2 in nkey: # FIXME: launch
-				m.exit()
+				if m is not cockpit:
+					m.exit()
 				if cd.docked:
 					m = cockpit = Cockpit(self, self.cbg, cd)
 					await m.launch_animation()
 				else:
 					m = cockpit
+					m.setup_screen()
+			elif 3 in nkey:
+				m.exit()
+				m = MarketBuy(self, self.cbg, cd)
 			ts = await self.framesleep(ts)
 
 	async def startup(self, showfps=False):

@@ -55,16 +55,16 @@ class Market:
 		for name, bp, ef, unit, bq, mask in self.price_table:
 			price = self.calc_price(bp, mask, econ, ef)
 			stock = self.calc_stock(bq, mask, econ, ef)
-			mkt.append([name, price, stock, unit, 0])
+			mkt.append([name, price, stock, unit])
 		return mkt
 
 if __name__ == "__main__":
 	m = Market()
 	pt = m.get_pricelist(5)
-	for name, price, stock, unit, _ in pt:
+	for name, price, stock, unit in pt:
 		print("{:20s}: {:5.2f} Cr, available: {} {}".format(name, price, stock, unit))
 	print("")
 	pt = m.get_pricelist(0)
-	for name, price, stock, unit, _ in pt:
+	for name, price, stock, unit in pt:
 		print("{:20s}: {:5.2f} Cr, available: {} {}".format(name, price, stock, unit))
 	print("")
