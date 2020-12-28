@@ -114,17 +114,37 @@ the space station.
 
 Currently working screens:
 
+ * [1] Launch/front view
+ * [2] Buy/Sell cargo
  * [4] Equip Ship
  * [5] Galactic Chart
  * [6] Short Range Chart
  * [7] Data on target system
+ * [8] Price chart
  * [9] Status screen
+
+Screens [2]...[4] are only available when docked in a space station.
 
 Use the short range chart to select a target system (use configured roll/pitch
 controls to move the cursor). The cicrle indicates the range of your current fuel
 level. You cannot directly get to a system that is outside of this circle.
 The press [7] to view some interesting data on the
 selected planet. You can also access most of these screens while flying.
+
+Pressing [2], you can buy or sell cargo at the current system market prices. To
+buy one unit of cargo, highlight the item you want to buy from the menu by moving
+the joystick or keyboard *ROLL* controls, then press the *FIRE* button.
+To sell one unit of cargo, use either the *ARM MISSILE* or *FIRE MISSILE* button.
+
+If you have enough money (Bitcoin) and want to buy some equipment for your ship,
+press [4]. You will see a list of items available on the current system. Depending
+on the Tech-Level of the current system, you may have more or less items available.
+Highlight the item you want to add to your ship by using the *ROLL* controls.
+Press the *FIRE* button to select. You will be either asked to confirm the
+purchase by pressing *FIRE* a second time (or change to a different screen to
+cancel), or in case of a laser cannon select the direction you want it to fire.
+For example if you add extra pulse lasers to the *rear* of your ship, you will be
+able to operate (fire) the laser cannon while looking out of the rear view.
 
 Press [1] to launch from the space station of the planet you start on (Lave).
 Use the throttle to adjust speed, and you *roll* and *pitch* controls to maneuver
@@ -142,13 +162,13 @@ not always be the case. In the original game, you cannot *jump* if any other
 objects are close.
 
 Once in a while you will see some asteroids or other space rocks appearing in
-front of you. Als some enemy ships might appear and probably try to attack you
+front of you. Also some enemy ships might appear and probably try to attack you
 right away. Currently there is only one rather simple AI for other ships. Other
 ships will just intermittently come flying at you and shooting when you are in
 their target area, fly away from you if they got too close, or just make some
 random turns.
 
-If you manage to kill an enemy ship, it might leave some cargo cannisters floaring
+If you manage to kill an enemy ship, it might leave some cargo cannisters floating
 around. Currently you can only either leave them clutter space, or shoot them.
 
 #### Docking
@@ -167,7 +187,7 @@ entrance as perpendicular to the top surface as possible. Too much of an angle
 will make you crash into the space station. Try to adjust your rolling speed
 such that it matches the station. Try to keep the entrance as horizontal as
 possible and accelerate a bit toward the station. If successful you will see
-the docking sequence and be presented the status screen.
+the docking sequence and be presented with the status screen.
 
 ### Copying ###
 
