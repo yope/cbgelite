@@ -383,7 +383,7 @@ class Microverse:
 		rocks = ("asteroid", "rock", "boulder")
 		enemies = ("cobra_mkiii", "anaconda", "python", "boa", "mamba", "krait",
 				"adder", "gecko", "cobra_mki", "asp_mkii", "fer-de-lance",
-				"sidewinder", "moray_start_boat")
+				"sidewinder", "moray_star_boat")
 		rnd = random.uniform
 		while not cd.docked and not self.dead:
 			dice = random.random()
