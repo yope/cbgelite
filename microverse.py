@@ -634,6 +634,10 @@ class Microverse:
 		if self.get_planet_dist() < 60000:
 			self.set_subtext("Too Close")
 			return
+		for o in self.objects:
+			if o.distance < 20000:
+				self.set_subtext("Mass Locked!")
+				return
 		j = self.loop.create_task(self.coro_jump())
 		j.add_done_callback(lambda f: f.result())
 		self.jumping = True
@@ -644,19 +648,32 @@ class Microverse:
 			if self.get_planet_dist() < 60000 or self.dead:
 				self.jumpspeed = 0.0
 				return False
+			for o in self.objects:
+				if o.distance < 20000:
+					self.jumpspeed = 0.0
+					return False
 			self.jumpspeed += ramp
 			await asyncio.sleep(0.1)
 		return True
 
 	async def coro_jump(self):
-		self.sfx.play_jump()
+		splayer = self.sfx.play_jump()
 		if not await self._check_jump_dist(15.0):
+			if splayer is not None:
+				splayer.stop_play()
+			self.sfx.play_jumpabort()
 			return
 		self.jumpspeed = 300.0
 		for i in range(2):
 			if not await self._check_jump_dist(0.0):
+				if splayer is not None:
+					splayer.stop_play()
+				self.sfx.play_jumpabort()
 				return
 		if not await self._check_jump_dist(-15.0):
+			if splayer is not None:
+				splayer.stop_play()
+			self.sfx.play_jumpabort()
 			return
 		self.jumpspeed = 0.0
 		self.jumping = False
