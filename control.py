@@ -237,7 +237,10 @@ extra priviledges. You basically have two choices to make this work:
 			obj = json.loads(txt)
 			self.evdev.set_mapping(obj["mapping"])
 			if obj["use_joystick_throttle"]:
-				self.evdev.set_throttle_axis(3)
+				try:
+					self.evdev.set_throttle_axis(3)
+				except AttributeError:
+					pass
 
 	def edit_controls(self):
 		ctrl = []
