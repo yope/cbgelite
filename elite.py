@@ -1280,7 +1280,7 @@ class Elite:
 				else:
 					m = cockpit
 					m.setup_screen()
-			elif 3 in nkey:
+			elif 3 in nkey and cd.docked:
 				m.exit()
 				m = MarketBuy(self, self.cbg, cd)
 			ts = await self.framesleep(ts)
