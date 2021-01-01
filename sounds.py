@@ -261,45 +261,50 @@ class SoundFX:
 		pan0 = max(-1.0, pan - 0.2)
 		pan1 = min(1.0, pan + 0.2)
 		buf = self.synth.mix_s16le_2ch(self.laser1, self.laser2, 0.1, 0.1, pan0, pan1)
-		self.play(buf)
+		return self.play(buf)
 
 	def play_myshot(self):
-		self.play(self.myshot)
+		return self.play(self.myshot)
 
 	def play_myhit(self):
-		self.play(self.myhit)
+		return self.play(self.myhit)
 
 	def play(self, buf, force=False):
 		for p in self.players:
 			if not p.busy:
 				p.start_play(buf)
-				return
+				return p
 		if force:
 			self.players[-1].start_play(buf)
+			return self.players[-1]
+		return None
 
 	def play_hit(self, pan=0.0):
 		pan0 = max(-1.0, pan - 0.2)
 		pan1 = min(1.0, pan + 0.2)
 		buf = self.synth.mix_s16le_2ch(self.laser_long, self.damage, 0.5, 1.0, pan0, pan1)
-		self.play(buf)
+		return self.play(buf)
 
 	def play_jump(self):
-		self.play(self.jump1)
+		return self.play(self.jump1)
+
+	def play_jumpabort(self):
+		return self.play(self.jumpabrt)
 
 	def play_explosion(self):
-		self.play(self.exp, force=True)
+		return self.play(self.exp, force=True)
 
 	def play_short_explosion(self):
-		self.play(self.exp_short)
+		return self.play(self.exp_short)
 
 	def play_launch(self):
-		self.play(self.launch)
+		return self.play(self.launch)
 
 	def play_hyperspace_start(self):
-		self.play(self.hyp1, force=True)
+		return self.play(self.hyp1, force=True)
 
 	def play_hyperspace_end(self):
-		self.play(self.hyp2, force=True)
+		return self.play(self.hyp2, force=True)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
