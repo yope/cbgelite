@@ -860,8 +860,9 @@ class MarketBuy(MenuScreen):
 		self.cd = cd
 		lst = []
 		for i, item in enumerate(cd.current_market):
-			if i in cd.cargo and cd.cargo[i] > 0:
-				inv = str(cd.cargo[i]) + item[3]
+			key = str(i) # JSon object keys must be strings
+			if key in cd.cargo and cd.cargo[key] > 0:
+				inv = str(cd.cargo[key]) + item[3]
 			else:
 				inv = "-"
 			lst.append([*item, inv])
@@ -872,10 +873,11 @@ class MarketBuy(MenuScreen):
 	def exit(self):
 		for i, (name, price, stock, unit, inv) in enumerate(self.market):
 			inv = self.parse_inv(i)
+			key = str(i) # JSon object keys must be strings
 			if inv > 0:
-				self.cd.cargo[i] = inv
-			elif i in self.cd.cargo:
-				del self.cd.cargo[i]
+				self.cd.cargo[key] = inv
+			elif key in self.cd.cargo:
+				del self.cd.cargo[key]
 		return super().exit()
 
 	def draw(self):
