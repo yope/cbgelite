@@ -850,7 +850,7 @@ class MarketPrices(MenuScreen):
 		c.drawtext(16, 40, " PRODUCT   UNIT PRICE FOR SALE")
 		y = 56
 		for name, price, stock, unit in pt:
-			c.drawtext(16, y, "{:12s} {:2s} {:4.2f}   {:2d}{}".format(name, unit, price, stock, unit))
+			c.drawtext(16, y, "{:12s} {:2s} {:5.2f}   {:2d}{}".format(name, unit, price, stock, unit))
 			y += 8
 
 class MarketBuy(MenuScreen):
@@ -867,7 +867,7 @@ class MarketBuy(MenuScreen):
 				inv = "-"
 			lst.append([*item, inv])
 		self.market = lst
-		self.chooser = Chooser(cbg, self.market, 16, 56, "{1:12s} {4:2s} {2:4.2f}  {3:2d}{4:2s}     {5:3s}")
+		self.chooser = Chooser(cbg, self.market, 16, 56, "{1:12s} {4:2s} {2:5.2f}  {3:2d}{4:2s}     {5:3s}")
 		self.setup_screen()
 
 	def exit(self):
