@@ -231,14 +231,18 @@ class SoundFX:
 		adsr_j1 = ADSR(0.0, 2.0, 0.0, 1.0, 0.0, 0.0) # Frist 2 seconds
 		adsr_j2 = ADSR(0.0, 0.0, 0.0, 1.0, 4.0, 0.0) # Middle 4 seconds
 		adsr_j3 = ADSR(0.0, 0.0, 2.0, 0.0, 0.0, 0.0) # Last 2 seconds
+		adsr_jabrt = ADSR(0.0, 0.0, 1.0, 0.0, 0.0, 0.0) # Mass lock break
 		j11 = self.synth.gen_square(55, 220, 0.5, adsr_j1, noise=True)
 		j12 = self.synth.gen_square(220, 220, 0.5, adsr_j2, noise=True)
 		j13 = self.synth.gen_square(220, 55, 0.5, adsr_j3, noise=True)
 		j21 = self.synth.gen_square(33, 330, 0.1, adsr_j1, noise=True)
 		j22 = self.synth.gen_square(330, 330, 0.1, adsr_j2, noise=True)
 		j23 = self.synth.gen_square(330, 33, 0.1, adsr_j3, noise=True)
+		j1abrt = self.synth.gen_square(220, 55, 0.5, adsr_jabrt, noise=True)
+		j2abrt = self.synth.gen_square(330, 33, 0.1, adsr_jabrt, noise=True)
 		self.jump1 = self.synth.mix_s16le_2ch(
 				j11 + j12 + j13, j21 + j22 + j23, vol0=0.1, vol1=0.08, pan0=-0.5, pan1=0.5)
+		self.jumpabrt = self.synth.mix_s16le_2ch(j1abrt, j2abrt, vol0=0.2, vol1=0.16, pan0=-0.5, pan1=0.5)
 		adsr_exp1 = ADSR(0.0, 0.0, 2.0, 0.1, 2.0, 2.0)
 		adsr_exp2 = ADSR(0.0, 0.0, 1.0, 0.1, 3.0, 2.0)
 		exp1 = self.synth.gen_square(80, 50, 0.5, adsr_exp1, noise=True, ac0=-0.95)
