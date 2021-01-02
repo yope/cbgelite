@@ -228,15 +228,25 @@ class PulseLaser:
 			self.highlite_count = 0
 		self.draw_target()
 
+	def hline(self, x0, y, x1):
+		for x in range(x0, x1 + 1):
+			self.cbg._putpixel(x, y)
+
+	def vline(self, x, y0, y1):
+		for y in range(y0, y1 + 1):
+			self.cbg._putpixel(x, y)
+
 	def draw_target(self):
 		p = int(4.0 / (self.highlite_count_max + 1 - self.highlite_count))
-		r0 = 10 + p
-		l = 12
-		r1 = 10 + l + p
-		self.cbg.fillrect(self.cx - r1, self.cy, l, 2)
-		self.cbg.fillrect(self.cx + r0, self.cy, l, 2)
-		self.cbg.fillrect(self.cx, self.cy - r1, 2, l)
-		self.cbg.fillrect(self.cx, self.cy + r0, 2, l)
+		r0 = 8 + p
+		l = 10
+		r1 = 8 + l + p
+		cx = self.cx
+		cy = self.cy
+		self.hline(cx - r1, cy, cx - r0)
+		self.hline(cx + r0, cy, cx + r1)
+		self.vline(cx, cy - r1, cy - r0)
+		self.vline(cx, cy + r0, cy + r1)
 		if not self.shooting and not self.fire:
 			return
 		self.draw_shooting()
