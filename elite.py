@@ -298,6 +298,26 @@ class BeamLaser(PulseLaser):
 		self.shot_seglen = 2100
 		self.shot_dist = 1400
 
+	def draw_target(self):
+		p = int(4.0 / (self.highlite_count_max + 1 - self.highlite_count))
+		h0 = 6 + p
+		h1 = 10 + p
+		h2 = 16 + p
+		w = 12
+		cx = self.cx
+		cy = self.cy
+		self.vline(cx - w, cy - h1, cy - h0)
+		self.vline(cx + w, cy - h1, cy - h0)
+		self.vline(cx - w, cy + h0, cy + h1)
+		self.vline(cx + w, cy + h0, cy + h1)
+		self.hline(cx - w, cy - h1, cx + w)
+		self.hline(cx - w, cy + h1, cx + w)
+		self.vline(cx, cy - h2, cy - h1)
+		self.vline(cx, cy + h1, cy + h2)
+		if not self.shooting and not self.fire:
+			return
+		self.draw_shooting()
+
 class MilitaryLaser(PulseLaser):
 	def __init__(self, cp, x, y, w, h):
 		super().__init__(cp, x, y, w, h)
@@ -305,6 +325,30 @@ class MilitaryLaser(PulseLaser):
 		self.shot_timer_off = 5
 		self.shot_seglen = 1800
 		self.shot_dist = 1200
+
+	def draw_target(self):
+		p = int(4.0 / (self.highlite_count_max + 1 - self.highlite_count))
+		r0 = 6 + p
+		r1 = 8 + p
+		r2 = 14 + p
+		cx = self.cx
+		cy = self.cy
+		c = self.cbg
+		self.hline(cx - r0 + 1, cy + r2, cx + r0 - 1)
+		self.hline(cx - r0 + 1, cy - r2, cx + r0 - 1)
+		self.vline(cx + r2, cy - r0 + 1, cy + r0 - 1)
+		self.vline(cx - r2, cy - r0 + 1, cy + r0 - 1)
+		c.line(cx - r0, cy - r2, cx, cy - r1)
+		c.line(cx + r0, cy - r2, cx, cy - r1)
+		c.line(cx - r0, cy + r2, cx, cy + r1)
+		c.line(cx + r0, cy + r2, cx, cy + r1)
+		c.line(cx - r2, cy - r0, cx - r1, cy)
+		c.line(cx + r2, cy - r0, cx + r1, cy)
+		c.line(cx - r2, cy + r0, cx - r1, cy)
+		c.line(cx + r2, cy + r0, cx + r1, cy)
+		if not self.shooting and not self.fire:
+			return
+		self.draw_shooting()
 
 class MiningLaser(PulseLaser):
 	def __init__(self, cp, x, y, w, h):
