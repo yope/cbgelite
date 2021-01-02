@@ -191,8 +191,8 @@ the docking sequence and be presented with the status screen.
 
 ### Copying ###
 
-All source files, except "chargen.rom" and "all_ships.ship" may be distributed
-under the terms and conditions of the GPL version 2 license.
+All source files, except "all_ships.ship" may be distributed under the terms
+and conditions of the GPL version 2 license.
 
 The ship data is extracted from the source code of "Elite The New Kind" as published
 here on github: https://github.com/fesh0r/newkind
@@ -203,6 +203,7 @@ it is possibly not allowed to distribute them.
 The ship data and the original game are Copyright by Ian Bell, David Braben
 and/or Acornsoft in 1984.
 
-The file "chargen.rom" contains a data dump from the Commodore C64 character
-generator ROM, which is probably copyrighted and may not be distributed. OTOH,
-there are numerous places where this file can be downloaded.
+The file "chargen.rom" is a copy of this file from the [MEGA64](https://github.com/MEGA65)
+project:
+
+ [chargen_pxlfont_2.3.rom](https://github.com/MEGA65/open-roms/blob/master/bin/chargen_pxlfont_2.3.rom)
