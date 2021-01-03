@@ -100,6 +100,7 @@ class Ship3D(Object3D):
 		self.debug = False
 		self.alive = True
 		self.ai = None
+		self.type = name
 		self.name = name.replace("_", " ").upper()
 		self.mv = mv
 		self.ship = ship
