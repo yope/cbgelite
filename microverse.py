@@ -387,11 +387,14 @@ class Microverse:
 				"adder", "gecko", "cobra_mki", "asp_mkii", "fer-de-lance",
 				"sidewinder", "moray_star_boat")
 		rnd = random.uniform
-			dice = random.random()
 		while not cd.docked and not self.dead and not self.stopped:
 			ds = 1000000 if not self.station else self.station.distance
-			if ds > 55000 and len(self.objects) < 12:
-				if dice < 0.05:
+			nobj = len(self.objects)
+			if ds > 55000 and nobj < 12:
+				dice = random.random()
+				lim1 = 0.05 - nobj * 0.003
+				lim2 = 0.13 - nobj * 0.002
+				if dice < lim1:
 					if not self.planet:
 						continue
 					pp = self.planet.pos
@@ -400,7 +403,7 @@ class Microverse:
 					d = rnd(20000, 25000)
 					self.spawn(n, (pvn[0] * d + rnd(-200, 200), pvn[1] * d + rnd(-200, 200), pvn[2] * d + rnd(-200, 200)),
 							rnd(0, 6.2), rnd(0, 6.2))
-				elif 0.10 < dice < 0.135:
+				elif 0.10 < dice < lim2:
 					n = random.choice(enemies)
 					r = rnd(7000, 15000)
 					a = rnd(0, 3.1)
