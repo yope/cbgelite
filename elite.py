@@ -411,7 +411,7 @@ class Cockpit(BaseScreen):
 		self.rlmeter = Meter(self.cbg, rbx, self.ystatus + 12, 40, 7, 14, 0, ticks=8)
 		self.dcmeter = Meter(self.cbg, rbx, self.ystatus + 20, 40, 7, 14, 0, ticks=8)
 		self.setup_lasers()
-		self.m = Microverse(self.cbg, self.g3d, self.lasers, self.elite.ships, cd, self.universe)
+		self.m = Microverse(self.cbg, self.g3d, self.lasers, self.elite.ships, elite.commander, self.universe)
 		self.radar = Radar(self.cbg, self, self.sboxw + 1, self.ystatus + 8, self.radarw - 2, self.hstatus - 10)
 		self.setup_screen()
 
@@ -524,7 +524,7 @@ class Cockpit(BaseScreen):
 
 	def hyperspace(self):
 		self.m.stop()
-		self.m = Microverse(self.cbg, self.g3d, self.lasers, self.elite.ships, self.cd, self.universe, hyperspace=True)
+		self.m = Microverse(self.cbg, self.g3d, self.lasers, self.elite.ships, self.elite.commander, self.universe, hyperspace=True)
 
 	def game_over_iteration(self):
 		m = self.m
@@ -571,7 +571,7 @@ class Cockpit(BaseScreen):
 
 	async def hyperspace_animation_start(self):
 		cbg = self.cbg
-		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, self.cd, self.universe, particles=0)
+		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, self.elite.commander, self.universe, particles=0)
 		m.sfx.play_hyperspace_start()
 		cobs = []
 		for i in range(5):
@@ -614,7 +614,7 @@ class Cockpit(BaseScreen):
 
 	async def hyperspace_animation_end(self):
 		cbg = self.cbg
-		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, self.cd, self.universe, particles=0)
+		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, self.elite.commander, self.universe, particles=0)
 		m.sfx.play_hyperspace_end()
 		cobs = []
 		for i in range(5):
@@ -1187,7 +1187,7 @@ class Elite:
 		dz = 20050
 		cockpit = Cockpit(self, self.cbg, self.commander.data)
 		cockpit.setup_screen()
-		tm = Microverse(self.cbg, cockpit.g3d, None, self.ships, self.commander.data, self.universe, particles=0)
+		tm = Microverse(self.cbg, cockpit.g3d, None, self.ships, self.commander, self.universe, particles=0)
 		cobra = tm.spawn("cobra_mkiii", (0, 0, dz), 0.0, 0.0)
 		if showfps:
 			t0 = monotonic()

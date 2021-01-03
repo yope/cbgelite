@@ -300,7 +300,7 @@ class Microverse:
 	VIEW_REAR = "nz"
 	VIEW_RIGHT = "px"
 	VIEW_LEFT = "nx"
-	def __init__(self, cbg, g3d, lasers, ships, cd, universe, particles=400, hyperspace=False):
+	def __init__(self, cbg, g3d, lasers, ships, commander, universe, particles=400, hyperspace=False):
 		self.sfx = soundfx
 		self.loop = asyncio.get_event_loop()
 		self.g3d = g3d
@@ -313,7 +313,8 @@ class Microverse:
 				self.VIEW_RIGHT: 2,
 				self.VIEW_LEFT: 3
 			}
-		self.cd = cd
+		self.commander = commander
+		self.cd = commander.data
 		self.universe = universe
 		self.objects = []
 		self.particles = set()
