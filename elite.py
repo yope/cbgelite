@@ -572,6 +572,7 @@ class Cockpit(BaseScreen):
 	async def hyperspace_animation_start(self):
 		cbg = self.cbg
 		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, self.elite.commander, self.universe, particles=0)
+		m.stop() # Avoid running tactic task
 		m.sfx.play_hyperspace_start()
 		cobs = []
 		for i in range(5):
@@ -615,6 +616,7 @@ class Cockpit(BaseScreen):
 	async def hyperspace_animation_end(self):
 		cbg = self.cbg
 		m = Microverse(self.cbg, self.g3d, None, self.elite.ships, self.elite.commander, self.universe, particles=0)
+		m.stop() # Avoid running tactic task
 		m.sfx.play_hyperspace_end()
 		cobs = []
 		for i in range(5):
@@ -1188,6 +1190,7 @@ class Elite:
 		cockpit = Cockpit(self, self.cbg, self.commander.data)
 		cockpit.setup_screen()
 		tm = Microverse(self.cbg, cockpit.g3d, None, self.ships, self.commander, self.universe, particles=0)
+		tm.stop() # Avoid running tactic task
 		cobra = tm.spawn("cobra_mkiii", (0, 0, dz), 0.0, 0.0)
 		if showfps:
 			t0 = monotonic()

@@ -386,8 +386,8 @@ class Microverse:
 				"adder", "gecko", "cobra_mki", "asp_mkii", "fer-de-lance",
 				"sidewinder", "moray_star_boat")
 		rnd = random.uniform
-		while not cd.docked and not self.dead:
 			dice = random.random()
+		while not cd.docked and not self.dead and not self.stopped:
 			ds = 1000000 if not self.station else self.station.distance
 			if ds > 55000 and len(self.objects) < 12:
 				if dice < 0.05:
