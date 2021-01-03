@@ -1151,6 +1151,15 @@ class Commander:
 		except OSError:
 			return False
 
+	def get_free_cargo_space(self):
+		maxcargo = 35 if self.data.cargo_bay else 20
+		for idx in self.data.cargo:
+			_, _, _, unit = self.data.current_market[int(idx)]
+			if unit == "t":
+				amount = self.data.cargo[idx]
+				maxcargo -= amount
+		return maxcargo
+
 class Elite:
 	def __init__(self, loop=None, config=False):
 		self.loop = loop or asyncio.get_event_loop()
