@@ -492,10 +492,54 @@ class Microverse:
 			self.front_shield = shield
 		return True
 
+	def _handle_scoop(self, obj):
+		if not self.cd.scoops:
+			return False
+		if obj.type == "cargo_canister":
+			idx = random.randrange(len(self.cd.current_market))
+			name, _, _, unit = self.cd.current_market[idx]
+			if unit == "t" and self.commander.get_free_cargo_space() < 1:
+				return False
+			idx = str(idx)
+			self.cd.cargo[idx] = self.cd.cargo.get(idx, 0) + 1
+			self.set_subtext("Cargo acquired: {}".format(name))
+			obj.vanish()
+			return True
+		elif obj.type == "rock" or obj.type == "boulder":
+			rnd = random.random()
+			if rnd < 0.05:
+				idx = 14 # Platinum
+			elif rnd < 0.15:
+				idx = 13 # Gold
+			elif rnd < 0.25:
+				idx = 15 # Gem stones
+			else:
+				idx = 12 # Minerals
+			qty = int(random.betavariate(1, 3)*4) + 1
+			if idx == 12 and self.commander.get_free_cargo_space() < qty:
+				return False
+			name = self.cd.current_market[idx][0]
+			idx = str(idx)
+			self.cd.cargo[idx] = self.cd.cargo.get(idx, 0) + qty
+			self.set_subtext("Cargo acquired: {}".format(name))
+			obj.vanish()
+			return True
+		elif obj.type == "thargon":
+			if self.commander.get_free_cargo_space() < 1:
+				return False
+			self.cd.cargo["16"] = self.cd.cargo.get("16", 0) + 1
+			self.set_subtext("Cargo acquired: Alien Items")
+			obj.vanish()
+			return True
+		return False
+
 	def handle_docking(self):
 		self.cd.docked = True
 
 	def handle_collision_with(self, obj):
+		if obj.pos[1] > 0 and obj.pos[2] > 0 and self.speed <= 10.0:
+			if self._handle_scoop(obj):
+				return True
 		if self._handle_hit(obj.energy, obj.pos):
 			obj.die()
 			return True
