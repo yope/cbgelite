@@ -652,9 +652,11 @@ class Microverse:
 		for t in range(20):
 			if self.get_planet_dist() < 60000 or self.dead:
 				self.jumpspeed = 0.0
+				self.jumping = False
 				return False
 			for o in self.objects:
 				if o.distance < 20000:
+					self.jumping = False
 					self.jumpspeed = 0.0
 					return False
 			self.jumpspeed += ramp
