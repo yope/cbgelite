@@ -892,7 +892,7 @@ class ShortRangeMap(GalaxyMap):
 
 class MarketPrices(MenuScreen):
 	def __init__(self, elite, cbg, cd):
-		s = elite.universe.get_system_by_index(cd.galaxy, cd.target)
+		s = elite.universe.get_system_by_index(cd.galaxy, cd.system)
 		self.TITLE = s.name.upper() + " MARKET PRICES"
 		super().__init__(elite, cbg)
 		self.cd = cd
