@@ -338,7 +338,7 @@ class Microverse:
 		for i in range(particles):
 			self.particles.add(Particle(self.g3d))
 		if particles:
-			s = self.universe.get_system_by_index(self.cd.galaxy, self.cd.system)
+			self.system = s = self.universe.get_system_by_index(self.cd.galaxy, self.cd.system)
 			dps = 1000000
 			pr = s.radius * 3
 			if hyperspace:
@@ -354,6 +354,7 @@ class Microverse:
 			self.planet = None
 			self.sun = None
 			self.station = None
+			self.system = None
 		self.roll = 0.0
 		self.pitch = 0.0
 		self.set_roll_pitch(0.0, 0.0)
@@ -401,6 +402,7 @@ class Microverse:
 		enemies = ("cobra_mkiii", "anaconda", "python", "boa", "mamba", "krait",
 				"adder", "gecko", "cobra_mki", "asp_mkii", "fer-de-lance",
 				"sidewinder", "moray_star_boat")
+		govdanger = 0 if self.system is None else self.system.danger
 		rnd = random.uniform
 		while not cd.docked and not self.dead and not self.stopped:
 			ds = 1000000 if not self.station else self.station.distance
@@ -408,7 +410,7 @@ class Microverse:
 			if ds > 55000 and nobj < 12:
 				dice = random.random()
 				lim1 = 0.05 - nobj * 0.003
-				lim2 = 0.13 - nobj * 0.002
+				lim2 = 0.13 - nobj * 0.002 + govdanger * 0.006
 				if dice < lim1:
 					if not self.planet:
 						continue

@@ -180,6 +180,7 @@ class System:
 				"Mainly Agricultural", "Rich Agricultural", "Average Agricultural", "Poor Agricultural"][self.economy]
 		self.str_government = ["Anarchy", "Feudal", "Multi-gov", "Dictatorship",
 				"Communist", "Confederacy", "Democracy", "Corporate State"][self.government]
+		self.danger = [5, 3, 1, 1, 1, 0, 0, 0][self.government]
 		sp.set_seed(s)
 
 	def __repr__(self):
