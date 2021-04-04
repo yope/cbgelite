@@ -114,6 +114,21 @@ class Ship3D(Object3D):
 		bounty = self.ship.opt_bounty * 1000
 		self.mv.cd.bitcoin += bounty / 100000000
 		self.mv.set_flashtext("Bounty: {} sats".format(bounty))
+		if not self.type in ["rock", "asteroid", "boulder"]:
+			self.mv.cd.kills += 1
+			k = self.mv.cd.kills
+			kb =  k // 8
+			bl = kb.bit_length()
+			if bl <= 5:
+				self.mv.cd.nrank = bl
+			elif k < 512:
+				self.mv.cd.nrank = 5
+			elif k < 2560:
+				self.mv.cd.nrank = 6
+			elif k < 6400:
+				self.mv.cd.nrank = 7
+			else:
+				self.mv.cd.nrank = 8 # Elite
 
 	def vanish(self):
 		self.alive = False
