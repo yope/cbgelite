@@ -910,7 +910,7 @@ class MarketPrices(MenuScreen):
 			y += 8
 
 class MarketBuy(MenuScreen):
-	TITLE = "BUY ITEMS"
+	TITLE = "BUY/SELL ITEMS"
 	def __init__(self, elite, cbg, cd):
 		super().__init__(elite, cbg)
 		self.cd = cd
