@@ -299,7 +299,7 @@ class SoundFX:
 		return self.play(self.exp, force=True)
 
 	def play_short_explosion(self):
-		return self.play(self.exp_short)
+		return self.play(self.exp_short, force=True)
 
 	def play_launch(self):
 		return self.play(self.launch)
