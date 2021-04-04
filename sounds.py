@@ -260,6 +260,9 @@ class SoundFX:
 		hyper21 = self.synth.gen_square(440, 880, 0.5, adsr_hyp21, noise=True)
 		hyper22 = self.synth.gen_square(60, 30, 0.5, adsr_hyp22, noise=True, ac0=-0.985)
 		self.hyp2 = self.synth.mix_s16le_2ch(hyper21, hyper22, 0.1, 1.0, 0.4, -0.1)
+		self.beep = self.synth.render_s16le_2ch(
+				self.synth.gen_square(880, 880, 0.45, ADSR(0, 0, 0.1, 0.6, 0.3, 0.1), noise=False, ac0=-0.75),
+				vol=0.5)
 
 	def play_shot(self, pan=0.0):
 		pan0 = max(-1.0, pan - 0.2)
@@ -309,6 +312,9 @@ class SoundFX:
 
 	def play_hyperspace_end(self):
 		return self.play(self.hyp2, force=True)
+
+	def play_beep(self):
+		return self.play(self.beep, force=True)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
