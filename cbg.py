@@ -177,7 +177,9 @@ class CBG:
 		self.map[idx] ^= bmp
 
 	def drawglyph(self, x, y, char):
-		data = self.font.getchar(char)
+		self.drawcustomglyph(x, y, self.font.getchar(char))
+
+	def drawcustomglyph(self, x, y, data):
 		x = int(x / 2)
 		y = int(y / 4)
 		for r in range(2):
