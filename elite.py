@@ -1197,7 +1197,6 @@ class Elite:
 	async def title_screen(self, showfps=False):
 		dz = 20050
 		cockpit = Cockpit(self, self.cbg, self.commander.data)
-		cockpit.setup_screen()
 		tm = Microverse(self.cbg, cockpit.g3d, None, self.ships, self.commander, self.universe, particles=0)
 		tm.stop() # Avoid running tactic task
 		cobra = tm.spawn("cobra_mkiii", (0, 0, dz), 0.0, 0.0)
@@ -1247,7 +1246,6 @@ class Elite:
 
 	async def microtest(self):
 		cockpit = Cockpit(self, self.cbg, self.commander.data)
-		cockpit.setup_screen()
 		m = cockpit.m
 		cobra = m.spawn("cobra_mkiii", (-500, 0, 10000), 0.0, 0.0)
 		cobra.add_ai(BaseAi)
