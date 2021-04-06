@@ -444,6 +444,7 @@ class Cockpit(BaseScreen):
 			bgr.set_value(bgvals[i])
 			setattr(self, "bar_"+self.bgnames[i].lower(), bgr)
 			bgr.setup()
+		self.bgnames.append("MI") # Missiles doesn't have a bargraph
 		self.cbg.colorrect(2, self.ystatus+6, 18, 16, 15, 0)
 		self.cbg.colorrect(self.width-20, self.ystatus+6, 16, 24, 14, 0)
 		self.cbg.colorrect(2, self.ystatus+6+16, 18, 32, 14, 0)
@@ -460,7 +461,6 @@ class Cockpit(BaseScreen):
 		self.cbg.line(self.sboxw, self.ystatus, self.sboxw, self.height-2)
 		self.cbg.line(self.sboxw + self.radarw + 1, self.ystatus, self.sboxw + self.radarw + 1, self.height-2)
 		tl = self.bgnames
-		tl.append("MI")
 		tr = ["SP", "RL", "DC", "1", "2", "3", "4"]
 		bglen = 40
 		for i in range(7):
