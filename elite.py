@@ -405,6 +405,7 @@ class Cockpit(BaseScreen):
 		self.radarw = self.width-2*self.sboxw
 		self.g3d = G3d(self.cbg, cx = self.width // 2, cy = self.ystatus // 2)
 		self.bgnames = ["FS", "AS", "FV", "CT", "LT", "AL"]
+		self.missile_glyph = b'\x66\xf6\xf6\x04\x00\x00\x00\x00'
 		rbx = self.sboxw + self.radarw + 2
 		self.battery = Battery(self.cbg, rbx, self.ystatus + 28, 40, 7)
 		self.speedbar = BarGraph(self.cbg, rbx, self.ystatus + 4, 40, 7, 11, 0, ticks=8)
@@ -466,12 +467,15 @@ class Cockpit(BaseScreen):
 		for i in range(7):
 			y = self.ystatus + 11 + i * 8
 			x2 = self.sboxw + self.radarw + 1
+			if i < 6:
+				getattr(self, "bar_"+self.bgnames[i].lower()).redraw()
+			elif i == 6:
+				for j in range(self.cd.missiles):
+					self.cbg.drawcustomglyph(24 + j * 10, y-5, self.missile_glyph)
 			self.cbg.line(self.sboxw - bglen, y, self.sboxw, y)
 			self.cbg.line(x2, y, x2 + bglen, y)
 			self.cbg.drawtext(4, y-5, tl[i])
 			self.cbg.drawtext(self.width-20, y-5, tr[i])
-			if i<6:
-				getattr(self, "bar_"+self.bgnames[i].lower()).redraw()
 		self.battery.redraw()
 		self.speedbar.redraw()
 		self.rlmeter.redraw()
