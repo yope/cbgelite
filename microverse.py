@@ -341,14 +341,21 @@ class Microverse:
 			self.system = s = self.universe.get_system_by_index(self.cd.galaxy, self.cd.system)
 			dps = 1000000
 			pr = s.radius * 3
+			if s.techlevel < 10:
+				stype = "coriolis_space_station"
+				sdiam = 160
+			else:
+				stype = "dodec_space_station"
+				sdiam = 180
+			stype = "coriolis_space_station" if s.techlevel < 10 else "dodec_space_station"
 			if hyperspace:
 				pd = 300000
 				self.sun = Sun(self, s.name+"'s Sun", (0, 0, -dps + pd), 40000)
-				self.station = self.spawn("coriolis_space_station", (pr*0.85, pr*0.85, pd), 0.0, 0.0)
+				self.station = self.spawn(stype, (pr*0.85, pr*0.85, pd), 0.0, 0.0)
 			else:
 				pd = pr * 0.84
 				self.sun = Sun(self, s.name + "'s Sun", (dps, 0, pd), 40000)
-				self.station = self.spawn("coriolis_space_station", (0, 0, -256), 0.0, 0.0)
+				self.station = self.spawn(stype, (0, 0, -96-sdiam), 0.0, 0.0)
 			self.planet = Planet(self, s.name, (0, 0, pd), pr)
 		else:
 			self.planet = None
