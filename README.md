@@ -2,6 +2,9 @@
 ## Console braille graphics ELITE
 
 ![Screenshot](https://github.com/yope/cbgelite/blob/master/Documentation/screenshot.png)
+![Screenshot](https://github.com/yope/cbgelite/blob/master/Documentation/short-range-map.png)
+![Screenshot](https://github.com/yope/cbgelite/blob/master/Documentation/data-on-planet.png)
+![Screenshot](https://github.com/yope/cbgelite/blob/master/Documentation/equip-ship.png)
 
 This is an extremely lame attempt at doing graphics in a terminal window and on
 top of that reimplement the classic BBC micro (and C64, etc...) game ELITE.
@@ -32,7 +35,7 @@ Notes:
  change in cbg.py to work properly and is not currently supported. Let me know if
  you want this.
 
-### invocation
+### Invocation
 
 This game runs in a terminal, but a terminal program does not have support for
 low level input events as they are required for such a game as this one.
