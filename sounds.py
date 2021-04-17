@@ -263,6 +263,9 @@ class SoundFX:
 		self.beep = self.synth.render_s16le_2ch(
 				self.synth.gen_square(880, 880, 0.45, ADSR(0, 0, 0.1, 0.6, 0.3, 0.1), noise=False, ac0=-0.75),
 				vol=0.5)
+		self.boop = self.synth.render_s16le_2ch(
+				self.synth.gen_square(220, 220, 0.45, ADSR(0, 0, 0.1, 0.6, 0.3, 0.1), noise=False, ac0=-0.75),
+				vol=0.5)
 
 	def play_shot(self, pan=0.0):
 		pan0 = max(-1.0, pan - 0.2)
@@ -315,6 +318,9 @@ class SoundFX:
 
 	def play_beep(self):
 		return self.play(self.beep, force=True)
+
+	def play_boop(self):
+		return self.play(self.boop, force=True)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
