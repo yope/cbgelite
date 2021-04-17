@@ -26,6 +26,7 @@ from sounds import SoundFX
 from ai import CanisterAi, BaseAi
 
 import asyncio
+from enum import Enum
 
 random.seed(monotonic())
 
@@ -311,6 +312,8 @@ class Sun(Planet):
 		super().__init__(mv, name, pos, dia)
 		self.fill = 2 # Fuzzy fill
 
+MissileState = Enum("MissileState", "UNARMED ARMED TARGET")
+
 class Microverse:
 	VIEW_FRONT = "pz"
 	VIEW_REAR = "nz"
@@ -388,6 +391,8 @@ class Microverse:
 			}
 		self.set_view(self.VIEW_FRONT)
 		self.tactic_task = self.loop.create_task(self.coro_tactic())
+		self.missile_state = MissileState.UNARMED
+		self.missile_target = None
 
 	def set_view(self, view):
 		self.g3d.set_camera(view)
@@ -473,6 +478,21 @@ class Microverse:
 		if t == 0:
 			self.hyperspacing = True
 		self.cd.fuel -= d
+
+	def arm_missile(self):
+		if self.cd.missiles == 0:
+			self.sfx.play_boop()
+			return
+		if self.missile_state == MissileState.UNARMED:
+			self.set_subtext("Missile armed")
+			self.missile_state = MissileState.ARMED
+		else:
+			self.set_subtext("Missile disarmed")
+			self.missile_state = MissileState.UNARMED
+			self.missile_target = None
+
+	def launch_missile(self):
+		pass
 
 	def die(self):
 		self.spawn_explosion((0,0,0), 4)
@@ -647,6 +667,10 @@ class Microverse:
 		self.loop.call_later(10, self._remove_particles, particles)
 
 	def remove_object(self, obj):
+		if self.missile_target == obj and self.missile_state == MissileState.TARGET:
+			self.set_subtext("Target lost!")
+			self.sfx.play_boop()
+			self.missile_state = MissileState.UNARMED
 		self.objects.remove(obj)
 
 	def set_flashtext(self, s):
@@ -685,6 +709,11 @@ class Microverse:
 			self.subtout -= 1
 		if self.laser is not None:
 			self.laser.draw(self, trg)
+		if self.missile_state == MissileState.ARMED and trg is not None:
+			self.set_subtext("Target acquired!")
+			self.sfx.play_beep()
+			self.missile_state = MissileState.TARGET
+			self.missile_target = trg
 
 	def draw_dead(self):
 		self.cbg.drawtext(120, 100, "GAME OVER!")

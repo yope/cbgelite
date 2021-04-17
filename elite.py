@@ -506,6 +506,10 @@ class Cockpit(BaseScreen):
 				m.set_view(m.VIEW_RIGHT)
 			elif BaseDev.BTN_VIEW_LEFT in nbtns:
 				m.set_view(m.VIEW_LEFT)
+			elif BaseDev.BTN_MISSILE1 in nbtns:
+				m.arm_missile()
+			elif BaseDev.BTN_MISSILE2 in nbtns:
+				m.launch_missile()
 		if m.laser:
 			m.laser.set_shooting(BaseDev.BTN_FIRE in btns)
 		ret = m.handle()
