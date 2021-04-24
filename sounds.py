@@ -261,10 +261,10 @@ class SoundFX:
 		hyper22 = self.synth.gen_square(60, 30, 0.5, adsr_hyp22, noise=True, ac0=-0.985)
 		self.hyp2 = self.synth.mix_s16le_2ch(hyper21, hyper22, 0.1, 1.0, 0.4, -0.1)
 		self.beep = self.synth.render_s16le_2ch(
-				self.synth.gen_square(880, 880, 0.45, ADSR(0, 0, 0.1, 0.6, 0.3, 0.1), noise=False, ac0=-0.75),
+				self.synth.gen_square(880, 880, 0.45, ADSR(0, 0, 0.1, 0.6, 0.05, 0.1), noise=False, ac0=-0.85),
 				vol=0.5)
 		self.boop = self.synth.render_s16le_2ch(
-				self.synth.gen_square(220, 220, 0.45, ADSR(0, 0, 0.1, 0.6, 0.3, 0.1), noise=False, ac0=-0.75),
+				self.synth.gen_square(220, 220, 0.45, ADSR(0, 0, 0.1, 0.6, 0.05, 0.1), noise=False, ac0=-0.85),
 				vol=0.5)
 
 	def play_shot(self, pan=0.0):
