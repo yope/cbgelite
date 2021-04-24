@@ -23,7 +23,7 @@ from math import sqrt, pi, inf, sin, cos
 from quaternion import *
 from time import sleep
 from sounds import SoundFX
-from ai import CanisterAi, BaseAi
+from ai import CanisterAi, BaseAi, MissileAi
 
 import asyncio
 from enum import Enum
@@ -115,6 +115,9 @@ class Ship3D(Object3D):
 		bounty = self.ship.opt_bounty * 1000
 		self.mv.cd.bitcoin += bounty / 100000000
 		self.mv.set_flashtext("Bounty: {} sats".format(bounty))
+		self._incr_kills()
+
+	def _incr_kills(self):
 		if not self.type in ["rock", "asteroid", "boulder"]:
 			self.mv.cd.kills += 1
 			k = self.mv.cd.kills
@@ -176,6 +179,25 @@ class Ship3D(Object3D):
 			return True
 		else:
 			return False
+
+	def hit_target(self, target):
+		# Missile hits target
+		self.sfx.play_short_explosion()
+		self.vanish()
+		target.vanish()
+		self.mv.spawn_explosion(self.pos, 0)
+		self.mv.spawn_explosion(target.pos, 0)
+		bounty = target.ship.opt_bounty * 1000
+		self.mv.cd.bitcoin += bounty / 100000000
+		self.mv.set_flashtext("Bounty: {} sats".format(bounty))
+		self._incr_kills()
+
+	def autodestruct(self):
+		# Missile lost target, explodes
+		self.sfx.play_short_explosion()
+		self.mv.spawn_explosion(self.pos, 0)
+		self.vanish()
+		self.mv.set_flashtext("Target lost")
 
 	def draw(self, pattern=None):
 		s = self.ship
@@ -492,7 +514,12 @@ class Microverse:
 			self.missile_target = None
 
 	def launch_missile(self):
-		pass
+		if self.missile_target is not None and self.missile_target.alive:
+			missile = self.spawn("missile", (0, 0, 170), 0, 0)
+			missile.add_ai(MissileAi)
+			missile.ai.add_target(self.missile_target)
+			self.missile_state = MissileState.UNARMED
+			self.missile_target = None
 
 	def die(self):
 		self.spawn_explosion((0,0,0), 4)
