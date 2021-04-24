@@ -137,3 +137,65 @@ class CanisterAi:
 		o = self.obj
 		o.local_roll_pitch(self.roll, self.pitch)
 		o.pos = o.scale_add(self.vec, o.pos, self.speed)
+
+class MissileAi:
+	def __init__(self, obj):
+		self.obj = obj
+		self.trg = None
+		self.g3d = obj.g3d
+		self.cbg = obj.mv.cbg
+		self.max_speed = obj.ship.opt_max_speed / 1.5
+		self.min_speed = self.max_speed / 8
+		self.speed = self.max_speed
+
+	def add_target(self, target):
+		self.trg = target
+
+	def handle(self):
+		o = self.obj
+		g = self.g3d
+		t = self.trg
+		o.pos = o.scale_add(o.nosev, o.pos, self.speed)
+		if o.distance > 50000:
+			self.obj.vanish()
+			return
+		if not t.alive:
+			o.autodestruct()
+			return
+		tdir = g.sub(t.pos, o.pos)
+		tdist = g.distv(tdir)
+		if tdist < 150:
+			self.obj.hit_target(t)
+			return
+		sdist = g.distv(o.pos)
+		if sdist < 800:
+			# Try to move away from cobra at max speed before slowing down.
+			return
+		hvec  = g.normalize(tdir)
+		dn = g.dot(o.nosev, hvec)
+		ds = g.dot(o.sidev, hvec)
+		dr = g.dot(o.roofv, hvec)
+		p = 0.0
+		r = 0.0
+		if dn > 0.7:
+			self.speed = self.max_speed
+		else:
+			self.speed = self.min_speed
+		ddn = abs(1 - dn) / 2
+		if ddn > abs(dr) and ddn > abs(ds):
+			if dr > 0.0:
+				p = -0.04
+			else:
+				p = 0.04
+		elif abs(dr) > abs(ds):
+			if dr > 0.0:
+				p = -0.04
+			else:
+				p = 0.04
+		else:
+			if ds > 0.0:
+				r = 0.04
+			else:
+				r = -0.04
+		if r or p:
+			o.local_roll_pitch(r, p)
