@@ -182,6 +182,9 @@ class Ship3D(Object3D):
 
 	def hit_target(self, target):
 		# Missile hits target
+		if "station" in target.type:
+			# FIXME: Make station angry
+			return self.autodestruct()
 		self.sfx.play_short_explosion()
 		self.vanish()
 		target.vanish()
