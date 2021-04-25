@@ -518,7 +518,7 @@ class Microverse:
 
 	def launch_missile(self):
 		if self.missile_target is not None and self.missile_target.alive:
-			missile = self.spawn("missile", (0, 0, 170), 0, 0)
+			missile = self.spawn("missile", (0, 50, 170), 0, 0)
 			missile.add_ai(MissileAi)
 			missile.ai.add_target(self.missile_target)
 			self.missile_state = MissileState.UNARMED
