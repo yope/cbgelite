@@ -526,7 +526,17 @@ class Microverse:
 			self.cd.missiles -= 1
 
 	def trigger_ecm(self):
+		if not self.cd.ecm:
+			self.set_subtext("ECM not fitted!")
+			return
+		if self.energy < 0.125:
+			self.set_subtext("Energy too low!")
+			return
+		self.energy -= 0.0625
 		self.sfx.play_ecm()
+		for o in self.objects:
+			if o.type == "missile":
+				o.autodestruct()
 
 	def die(self):
 		self.spawn_explosion((0,0,0), 4)
