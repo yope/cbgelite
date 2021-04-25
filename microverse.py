@@ -520,6 +520,7 @@ class Microverse:
 			missile.ai.add_target(self.missile_target)
 			self.missile_state = MissileState.UNARMED
 			self.missile_target = None
+			self.cd.missiles -= 1
 
 	def die(self):
 		self.spawn_explosion((0,0,0), 4)
