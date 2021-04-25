@@ -510,6 +510,8 @@ class Cockpit(BaseScreen):
 				m.arm_missile()
 			elif BaseDev.BTN_MISSILE2 in nbtns:
 				m.launch_missile()
+			elif BaseDev.BTN_ECM in nbtns:
+				m.trigger_ecm()
 		if m.laser:
 			m.laser.set_shooting(BaseDev.BTN_FIRE in btns)
 		ret = m.handle()

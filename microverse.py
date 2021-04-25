@@ -525,6 +525,9 @@ class Microverse:
 			self.missile_target = None
 			self.cd.missiles -= 1
 
+	def trigger_ecm(self):
+		self.sfx.play_ecm()
+
 	def die(self):
 		self.spawn_explosion((0,0,0), 4)
 		self.sfx.play_explosion()
