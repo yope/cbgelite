@@ -266,6 +266,17 @@ class SoundFX:
 		self.boop = self.synth.render_s16le_2ch(
 				self.synth.gen_square(220, 220, 0.45, ADSR(0, 0, 0.1, 0.6, 0.05, 0.1), noise=False, ac0=-0.85),
 				vol=0.5)
+		ecm_sub_adsr = ADSR(0.0, 0.0, 0.02, 0.5, 0.03, 0.01)
+		ecmttot = []
+		ecmbtot = []
+		t = 1
+		for tfreq in range(1320, 720, -20):
+			bfreq = tfreq / 3
+			f = max(-1 + 1 / t, -0.997)
+			t += 1
+			ecmttot += self.synth.gen_square(tfreq, tfreq / 5, 0.3, ecm_sub_adsr, noise=False, ac0=f)
+			ecmbtot += self.synth.gen_square(bfreq, bfreq / 4, 0.4, ecm_sub_adsr, noise=False, ac0=f)
+		self.ecm = self.synth.mix_s16le_2ch(ecmttot, ecmbtot, 0.4, 0.4, -0.8, 0.8)
 
 	def play_shot(self, pan=0.0):
 		pan0 = max(-1.0, pan - 0.2)
@@ -321,6 +332,9 @@ class SoundFX:
 
 	def play_boop(self):
 		return self.play(self.boop, force=True)
+
+	def play_ecm(self):
+		return self.play(self.ecm)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
