@@ -22,6 +22,7 @@ from time import monotonic
 from math import sqrt, pi, inf, sin, cos
 from quaternion import *
 from time import sleep
+from collections import deque
 from sounds import SoundFX
 from ai import CanisterAi, BaseAi, MissileAi
 
@@ -395,7 +396,7 @@ class Microverse:
 		self.set_roll_pitch(0.0, 0.0)
 		self.flashtext = ""
 		self.flashtout = 0
-		self.subtext = ""
+		self.subtext = deque(maxlen=3)
 		self.subtout = 0
 		self.speed = 0.0
 		self.jumpspeed = 0.0
@@ -722,7 +723,7 @@ class Microverse:
 		self.flashtout = 50
 
 	def set_subtext(self, s):
-		self.subtext = s
+		self.subtext.append(s)
 		self.subtout = 30
 
 	def draw(self):
@@ -747,10 +748,14 @@ class Microverse:
 			self.cbg.drawtext(x, 16, self.flashtext)
 			self.flashtout -= 1
 		if self.subtout:
-			slen = len(self.subtext) * 8
+			slen = len(self.subtext[0]) * 8
 			x = (320 - slen) // 2
-			self.cbg.drawtext(x, 160, self.subtext)
+			self.cbg.drawtext(x, 160, self.subtext[0])
 			self.subtout -= 1
+			if self.subtout <= 0:
+				self.subtext.popleft()
+				if self.subtext:
+					self.subtout = 30
 		if self.laser is not None:
 			self.laser.draw(self, trg)
 		if self.missile_state == MissileState.ARMED and trg is not None:
