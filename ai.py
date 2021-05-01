@@ -94,7 +94,7 @@ class BaseAi:
 				self.strat = self.MOVE_RANDOM
 				self.speed = self.max_speed
 				ts = 0
-			elif self.strat is self.MOVE_RANDOM and x < 0.3:
+			elif self.strat is self.MOVE_RANDOM and x < 0.3 and o.angry:
 				self.strat = self.MOVE_TO
 				self.speed = self.max_speed * 0.7
 				ts = 0
@@ -116,12 +116,12 @@ class BaseAi:
 				self.randpitch = random.uniform(-0.06, 0.06)
 				await asyncio.sleep(0.2)
 			if self.dn > 0.975 and o.distance < 30000:
-				self.obj.mv.set_flashtext(o.name + " can hit")
-				if x < 0.3:
+				# self.obj.mv.set_flashtext(o.name + " can hit")
+				if x < 0.3 and o.angry:
 					o.shoot(True)
 			elif self.dn > 0.95 and o.distance < 25000:
-				self.obj.mv.set_flashtext(o.name + " can shoot")
-				if x < 0.2:
+				# self.obj.mv.set_flashtext(o.name + " can shoot")
+				if x < 0.2 and o.angry:
 					o.shoot(False)
 
 class CanisterAi:
