@@ -58,6 +58,9 @@ class Market:
 			mkt.append([name, price, stock, unit])
 		return mkt
 
+def contraband_score(cargo):
+	return cargo.get("3", 0) + 2 * cargo.get("6", 0) + cargo.get("10", 0)
+
 if __name__ == "__main__":
 	m = Market()
 	pt = m.get_pricelist(5)
