@@ -688,7 +688,7 @@ class Microverse:
 					alignr = abs(self.g3d.dot(o.sidev, (0, 1, 0)))
 					dx = abs(o.pos[0])
 					dy = abs(o.pos[1])
-					if alignn < -0.96 and dx < 40 and dy < 30 and alignr > 0.85:
+					if alignn < -0.96 and dx < 40 and dy < 32 and alignr > 0.85:
 						self.cbg.log("DOCKED!", alignn, alignr, dx, dy)
 						self.handle_docking()
 						return False
