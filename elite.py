@@ -1028,7 +1028,8 @@ class StatusScreen(MenuScreen):
 		c.drawtext(16, 48, "Condition           : {}".format("Docked" if cd.docked else "Green"))
 		c.drawtext(16, 56, "Fuel: {:.1f} Light Years".format(cd.fuel))
 		c.drawtext(16, 64, "Cash: {:.6f} Bitcoin".format(cd.bitcoin))
-		c.drawtext(16, 72, "Legal Status: {}".format(self.statustext[cd.status]))
+		lsi = 0 if cd.status == 0 else (1 if cd.status < 50 else 2)
+		c.drawtext(16, 72, "Legal Status: {}".format(self.statustext[lsi]))
 		c.drawtext(16, 80, "Rating: {}".format(self.ranktext[cd.nrank]))
 		c.drawtext(16, 96, "EQUIPMENT:")
 		y = 104
