@@ -364,6 +364,8 @@ class Microverse:
 		self.objects = []
 		self.particles = set()
 		self.max_particles = particles
+		self.roll = 0.0
+		self.pitch = 0.0
 		for i in range(particles):
 			self.particles.add(Particle(self.g3d))
 		if particles:
@@ -376,23 +378,25 @@ class Microverse:
 			else:
 				stype = "dodec_space_station"
 				sdiam = 180
-			if hyperspace:
-				pd = 300000
-				self.sun = Sun(self, s.name+"'s Sun", (0, 0, -dps + pd), 40000)
-				self.station = self.spawn(stype, (pr*0.85, pr*0.85, pd), 0.0, 0.0)
-			else:
-				pd = pr * 0.84
-				self.sun = Sun(self, s.name + "'s Sun", (dps, 0, pd), 40000)
-				self.station = self.spawn(stype, (0, 0, -96-sdiam), 0.0, 0.0)
+			pd = pr * 0.84
+			self.sun = Sun(self, s.name + "'s Sun", (dps, 0, pd), 40000)
+			self.station = self.spawn(stype, (0, 0, -96-sdiam), 0.0, 0.0)
 			self.planet = Planet(self, s.name, (0, 0, pd), pr)
+			if hyperspace:
+				# We are spawned somewhere between sun and planet:
+				dp = 300000
+				for o in (self.sun, self.planet, self.station):
+					x, y, z = o.pos
+					o.pos = x - dp, y, z
+				self.set_roll_pitch(1.5708 + random.uniform(-0.1, 0.1), -1.55 + random.uniform(-0.1, 0.1))
+				self.set_roll_pitch(random.uniform(-3.1415, 3.1415), 0.0)
+			else:
+				self.set_roll_pitch(0.0, 0.0)
 		else:
 			self.planet = None
 			self.sun = None
 			self.station = None
 			self.system = None
-		self.roll = 0.0
-		self.pitch = 0.0
-		self.set_roll_pitch(0.0, 0.0)
 		self.flashtext = ""
 		self.flashtout = 0
 		self.subtext = deque(maxlen=3)
