@@ -124,7 +124,7 @@ class Ship3D(Object3D):
 		self._incr_kills()
 
 	def _incr_kills(self):
-		if not self.type in ["rock", "asteroid", "boulder"]:
+		if not self.type in ["rock", "asteroid", "boulder", "cargo_canister"]:
 			self.mv.cd.kills += 1
 			k = self.mv.cd.kills
 			kb =  k // 8
