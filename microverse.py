@@ -23,8 +23,10 @@ from math import sqrt, pi, inf, sin, cos
 from quaternion import *
 from time import sleep
 from collections import deque
+import functools
 from sounds import SoundFX
 from ai import CanisterAi, BaseAi, MissileAi
+from market import contraband_score
 
 import asyncio
 from enum import Enum
@@ -51,6 +53,7 @@ class Object3D:
 		self.qltot = qmult(self.qwpitch, self.qwroll)
 		self.local_roll_pitch(0.0, 0.0)
 		self.world_roll_pitch(0.0, 0.0)
+		self.angry = False
 
 	def local_roll_pitch(self, roll, pitch):
 		qroll = aangle2q(self.lnosev, roll)
@@ -108,6 +111,8 @@ class Ship3D(Object3D):
 		self.ship = ship
 		self.energy = ship.opt_max_energy
 		self.shot_time = 0
+		self.bold = False
+		self.ecm = False
 
 	def die(self):
 		self.sfx.play_short_explosion()
@@ -422,6 +427,7 @@ class Microverse:
 		self.tactic_task = self.loop.create_task(self.coro_tactic())
 		self.missile_state = MissileState.UNARMED
 		self.missile_target = None
+		self.in_combat = False
 
 	def set_view(self, view):
 		self.g3d.set_camera(view)
@@ -436,41 +442,74 @@ class Microverse:
 	def get_view(self):
 		return self.view
 
+	def _spawn_ships(self, n, bold=False, angry=False, ecm=False):
+		if not isinstance(n, list):
+			n = [n]
+		if not isinstance(ecm, list):
+			ecm = [ecm]
+		rnd = random.uniform
+		r = rnd(7000, 15000)
+		a = rnd(0, 3.1)
+		x = r * cos(a)
+		z = r * sin(a)
+		y = rnd(-3000, 3000)
+		for i, name in enumerate(n):
+			s = self.spawn(name, (x + rnd(-300, 300), y + rnd(-300, 300), z + rnd(-300, 300)), rnd(0, 6.2), rnd(0, 6.2))
+			s.add_ai(BaseAi)
+			s.bold = bold
+			s.angry = angry
+			s.ecm = ecm[i]
+
 	async def coro_tactic(self):
 		cd = self.cd
-		ntrans = 0
 		rocks = ("asteroid", "rock", "boulder")
-		enemies = ("cobra_mkiii", "anaconda", "python", "boa", "mamba", "krait",
-				"adder", "gecko", "cobra_mki", "asp_mkii", "fer-de-lance",
-				"sidewinder", "moray_star_boat")
+		lone_wolves = ("cobra_mkiii", "asp_mkii", "python", "fer-de-lance", "moray_star_boat")
+		wolf_pack = ("sidewinder", "mamba", "krait", "adder", "gecko", "cobra_mki", "worm", "cobra_mkiii")
+		traders = ("cobra_mkiii", "python", "boa", "anaconda")
+		asteroids = 0
+		cops = 0
 		govdanger = 0 if self.system is None else self.system.danger
 		rnd = random.uniform
+		rndr = random.randrange
 		while not cd.docked and not self.dead and not self.stopped:
 			ds = 1000000 if not self.station else self.station.distance
 			nobj = len(self.objects)
-			if ds > 55000 and nobj < 12:
-				dice = random.random()
-				lim1 = 0.05 - nobj * 0.003
-				lim2 = 0.13 - nobj * 0.002 + govdanger * 0.006
-				if dice < lim1:
-					if not self.planet:
-						continue
+			if ds > 55000 and nobj < 12 and self.planet and rndr(4) == 1:
+				if rndr(512) == 1:
+					if rndr(62) == 1:
+						self._spawn_ships("cougar")
+					else:
+						self._spawn_ships("thargoid")
+				if rndr(32) == 1:
+					self._spawn_ships(random.choice(traders))
+				if rndr(8) == 0 and asteroids < 3:
+					asteroids += 1
 					pp = self.planet.pos
 					pvn = self.g3d.normalize(pp)
-					n = random.choice(rocks)
 					d = rnd(20000, 25000)
-					self.spawn(n, (pvn[0] * d + rnd(-200, 200), pvn[1] * d + rnd(-200, 200), pvn[2] * d + rnd(-200, 200)),
+					if rndr(256) < 253:
+						n = "asteroid"
+						self.spawn("asteroid", (pvn[0] * d + rnd(-500, 500), pvn[1] * d + rnd(-500, 500), pvn[2] * d + rnd(-500, 500)),
 							rnd(0, 6.2), rnd(0, 6.2))
-				elif 0.10 < dice < lim2:
-					n = random.choice(enemies)
-					r = rnd(7000, 15000)
-					a = rnd(0, 3.1)
-					x = r * cos(a)
-					z = r * sin(a)
-					y = rnd(-3000, 3000)
-					s = self.spawn(n, (x, y, z), rnd(0, 6.2), rnd(0, 6.2))
-					s.add_ai(BaseAi)
-					self.cbg.log("Added {} at {!r}".format(n, (x, y, z)))
+					else:
+						self._spawn_ships("rock_hermit")
+				offense = contraband_score(self.cd.cargo)
+				if not cops:
+					offense |= self.cd.status
+				if rndr(256) < offense:
+					self._spawn_ships("viper", ecm=(rndr(256) < 10), angry=True, bold=True)
+					cops += 1
+				if not cops and not self.in_combat:
+					if rndr(7) < govdanger:
+						if rndr(256) < 100:
+							self._spawn_ships(random.choice(lone_wolves), ecm=(rndr(256) > 200), angry=True, bold=True)
+						else:
+							n = []
+							ecm = []
+							for i in range(rndr(4) + 1):
+								n.append(random.choice(wolf_pack))
+								ecm.append(rndr(256) < 10)
+							self._spawn_ships(n, ecm=ecm, bold=True, angry=True)
 			await asyncio.sleep(2.0)
 
 	def stop(self):
@@ -639,8 +678,10 @@ class Microverse:
 
 	def handle(self):
 		self.move(self.speed + self.jumpspeed)
+		angry = False
 		for o in self.objects:
 			o.handle()
+			angry = angry or o.angry
 			if not self.dead and o.check_collision(95): # Target area of Cobra MK III
 				if o is self.station:
 					alignn = self.g3d.dot(o.nosev, (0, 0, 1))
@@ -654,6 +695,7 @@ class Microverse:
 					self.cbg.log("NOT DOCKED!", alignn, alignr, dx, dy)
 				if not self.handle_collision_with(o):
 					return False
+		self.in_combat = angry
 		if self.station:
 			self.station.local_roll_pitch(0.005, 0.0)
 		if self.planet:
@@ -837,6 +879,7 @@ class Microverse:
 	def shot_fired(self, target):
 		if target:
 			self.sfx.play_myhit()
+			target.angry = True
 			if target.energy > 20:
 				target.energy -= 20
 			else:
