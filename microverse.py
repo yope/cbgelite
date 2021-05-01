@@ -376,7 +376,6 @@ class Microverse:
 			else:
 				stype = "dodec_space_station"
 				sdiam = 180
-			stype = "coriolis_space_station" if s.techlevel < 10 else "dodec_space_station"
 			if hyperspace:
 				pd = 300000
 				self.sun = Sun(self, s.name+"'s Sun", (0, 0, -dps + pd), 40000)
