@@ -762,7 +762,7 @@ class Microverse:
 		if self.laser is not None:
 			self.laser.draw(self, trg)
 		if self.missile_state == MissileState.ARMED and trg is not None:
-			self.set_subtext("Target acquired!")
+			self.set_subtext("Target locked!")
 			self.sfx.play_beep()
 			self.missile_state = MissileState.TARGET
 			self.missile_target = trg
