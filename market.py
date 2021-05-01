@@ -20,23 +20,23 @@ import random
 class Market:
 	def __init__(self):
 		self.price_table = [
-				("Food",         19,  -2, "t", 6,   0x01),
-				("Textiles",     20,  -1, "t", 10,  0x03),
-				("Radioactives", 65,  -3, "t", 2,   0x07),
-				("Slaves",       40,  -5, "t", 226, 0x1f),
-				("Liquor/Wines", 83,  -5, "t", 251, 0x0f),
-				("Luxuries",     196,  8, "t", 54,  0x03),
-				("Narcotics",    235, 29, "t", 8,   0x78),
-				("Computers",    154, 14, "t", 56,  0x03),
-				("Machinery",    117, 6,  "t", 40,  0x07),
-				("Alloys",       78,  1,  "t", 17,  0x1f),
-				("Firearms",     124, 14, "t", 29,  0x07),
-				("Furs",         176, -9, "t", 220, 0x3f),
-				("Minerals",     32,  -1, "t", 53,  0x03),
-				("Gold",         97,  -1, "kg", 66, 0x07),
-				("Platinum",     171, -2, "kg", 55, 0x1f),
-				("Gem-stones",   45,  -1, "g", 250, 0x0f),
-				("Alien Items",  53,  15, "t", 192, 0x03)
+				("Food",         19,  -2, "t", 6,   0x01), # 0
+				("Textiles",     20,  -1, "t", 10,  0x03), # 1
+				("Radioactives", 65,  -3, "t", 2,   0x07), # 2
+				("Slaves",       40,  -5, "t", 226, 0x1f), # 3
+				("Liquor/Wines", 83,  -5, "t", 251, 0x0f), # 4
+				("Luxuries",     196,  8, "t", 54,  0x03), # 5
+				("Narcotics",    235, 29, "t", 8,   0x78), # 6
+				("Computers",    154, 14, "t", 56,  0x03), # 7
+				("Machinery",    117, 6,  "t", 40,  0x07), # 8
+				("Alloys",       78,  1,  "t", 17,  0x1f), # 9
+				("Firearms",     124, 14, "t", 29,  0x07), # 10
+				("Furs",         176, -9, "t", 220, 0x3f), # 11
+				("Minerals",     32,  -1, "t", 53,  0x03), # 12
+				("Gold",         97,  -1, "kg", 66, 0x07), # 13
+				("Platinum",     171, -2, "kg", 55, 0x1f), # 14
+				("Gem-stones",   45,  -1, "g", 250, 0x0f), # 15
+				("Alien Items",  53,  15, "t", 192, 0x03)  # 16
 			]
 
 	def calc_price(self, bp, mask, econ, ef):
