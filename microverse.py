@@ -512,6 +512,9 @@ class Microverse:
 								ecm.append(rndr(256) < 10)
 							self._spawn_ships(n, ecm=ecm, bold=True, angry=True)
 			await asyncio.sleep(2.0)
+			if self.energy < 0.1:
+				self.sfx.play_beep()
+				self.set_subtext("ENERGY LOW!")
 
 	def stop(self):
 		self.stopped = True
