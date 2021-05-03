@@ -199,3 +199,6 @@ class MissileAi:
 				r = -0.04
 		if r or p:
 			o.local_roll_pitch(r, p)
+
+class ThargoidAi(BaseAi):
+	pass

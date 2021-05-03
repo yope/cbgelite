@@ -17,7 +17,7 @@
 # along with CBGElite.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
-from random import randint, uniform
+from random import randint, uniform, randrange
 from cbg import CBG, G3d
 from ship import AllShips
 import sys
@@ -28,7 +28,7 @@ from math import sin, sqrt
 from microverse import Microverse
 from universe import Universe
 from market import Market
-from ai import BaseAi
+from ai import BaseAi, ThargoidAi
 from control import Control, BaseDev
 from collections import deque
 
@@ -534,7 +534,21 @@ class Cockpit(BaseScreen):
 
 	def hyperspace(self):
 		self.m.stop()
-		self.m = Microverse(self.cbg, self.g3d, self.lasers, self.elite.ships, self.elite.commander, self.universe, hyperspace=True)
+		witch = (randrange(128) == 1)
+		if witch:
+			self.m = Microverse(self.cbg, self.g3d, self.lasers, self.elite.ships, self.elite.commander, self.universe, particles=100)
+			x = [-1500, 0, 2000, 0]
+			y = [0, -2000, 1000, 0]
+			z = [0, 0, -1000, 3000]
+			for i in range(randrange(3) + 1):
+				pos = (x[i] + uniform(-500, 500), y[i] + uniform(-500, 500), z[i] + uniform(-500, 500))
+				t = self.m.spawn("thargoid", pos, uniform(-3.1415, 3.1415), uniform(-3.1415, 3.1415))
+				t.add_ai(ThargoidAi)
+				t.angry = True
+				t.ecm = True
+		else:
+			self.cd.system = self.cd.target
+			self.m = Microverse(self.cbg, self.g3d, self.lasers, self.elite.ships, self.elite.commander, self.universe, hyperspace=True)
 
 	def game_over_iteration(self):
 		m = self.m
@@ -1324,7 +1338,6 @@ class Elite:
 					await m.hyperspace_animation_start()
 					await asyncio.sleep(1)
 					await m.hyperspace_animation_end()
-					cd.system = cd.target
 					m.hyperspace()
 					self.set_pricelist()
 			self.cbg.redraw_screen()

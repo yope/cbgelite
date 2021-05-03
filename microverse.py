@@ -373,7 +373,7 @@ class Microverse:
 		self.pitch = 0.0
 		for i in range(particles):
 			self.particles.add(Particle(self.g3d))
-		if particles:
+		if particles > 200:
 			self.system = s = self.universe.get_system_by_index(self.cd.galaxy, self.cd.system)
 			dps = 1000000
 			pr = s.radius * 3
