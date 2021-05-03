@@ -550,6 +550,7 @@ class Microverse:
 		if t == 0:
 			self.hyperspacing = True
 		self.cd.fuel -= d
+		self.cd.status >>= 1
 
 	def arm_missile(self):
 		if self.cd.missiles == 0:
