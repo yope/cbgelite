@@ -428,6 +428,7 @@ class Microverse:
 		self.missile_state = MissileState.UNARMED
 		self.missile_target = None
 		self.in_combat = False
+		self.non_ml_objects = ("asteroid", "cargo_canister", "rock", "boulder", "escape_capsule")
 
 	def set_view(self, view):
 		self.g3d.set_camera(view)
@@ -831,7 +832,7 @@ class Microverse:
 			self.set_subtext("Too Close")
 			return
 		for o in self.objects:
-			if o.distance < 20000:
+			if o.distance < 20000 and not o.type in self.non_ml_objects:
 				self.set_subtext("Mass Locked!")
 				return
 		j = self.loop.create_task(self.coro_jump())
