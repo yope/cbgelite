@@ -602,6 +602,11 @@ class Microverse:
 			return inf
 		return self.g3d.distv(self.planet.pos)
 
+	def get_sun_dist(self):
+		if not self.sun:
+			return inf
+		return self.g3d.distv(self.sun.pos)
+
 	def get_station_dist(self):
 		if not self.station:
 			return inf
@@ -831,7 +836,7 @@ class Microverse:
 	def jump(self):
 		if self.jumping:
 			return
-		if self.get_planet_dist() < 60000:
+		if self.get_planet_dist() < 60000 or self.get_sun_dist() < 60000:
 			self.set_subtext("Too Close")
 			return
 		for o in self.objects:
