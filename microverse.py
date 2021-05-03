@@ -367,6 +367,7 @@ class Microverse:
 		self.cd = commander.data
 		self.universe = universe
 		self.objects = []
+		self.num_objects = {}
 		self.particles = set()
 		self.max_particles = particles
 		self.roll = 0.0
@@ -467,8 +468,6 @@ class Microverse:
 		lone_wolves = ("cobra_mkiii", "asp_mkii", "python", "fer-de-lance", "moray_star_boat")
 		wolf_pack = ("sidewinder", "mamba", "krait", "adder", "gecko", "cobra_mki", "worm", "cobra_mkiii")
 		traders = ("cobra_mkiii", "python", "boa", "anaconda")
-		asteroids = 0
-		cops = 0
 		govdanger = 0 if self.system is None else self.system.danger
 		rnd = random.uniform
 		rndr = random.randrange
@@ -483,8 +482,7 @@ class Microverse:
 						self._spawn_ships("thargoid")
 				if rndr(32) == 1:
 					self._spawn_ships(random.choice(traders))
-				if rndr(8) == 0 and asteroids < 3:
-					asteroids += 1
+				if rndr(8) == 0 and self.num_objects.get("asteroids", 0) < 3:
 					pp = self.planet.pos
 					pvn = self.g3d.normalize(pp)
 					d = rnd(20000, 25000)
@@ -495,12 +493,11 @@ class Microverse:
 					else:
 						self._spawn_ships("rock_hermit")
 				offense = contraband_score(self.cd.cargo)
-				if not cops:
+				if not self.num_objects.get("viper", 0):
 					offense |= self.cd.status
 				if rndr(256) < offense:
 					self._spawn_ships("viper", ecm=(rndr(256) < 10), angry=True, bold=True)
-					cops += 1
-				if not cops and not self.in_combat:
+				if not self.num_objects.get("viper", 0) and not self.in_combat:
 					if rndr(7) < govdanger:
 						if rndr(256) < 100:
 							self._spawn_ships(random.choice(lone_wolves), ecm=(rndr(256) > 200), angry=True, bold=True)
@@ -743,6 +740,7 @@ class Microverse:
 		obj = Ship3D(self, pos, s, name)
 		obj.local_roll_pitch(roll, pitch)
 		self.objects.append(obj)
+		self.num_objects[name] = self.num_objects.get(name, 0) + 1
 		return obj
 
 	def _remove_particles(self, particles):
@@ -772,6 +770,7 @@ class Microverse:
 			self.sfx.play_boop()
 			self.missile_state = MissileState.UNARMED
 		self.objects.remove(obj)
+		self.num_objects[obj.type] -= 1
 
 	def set_flashtext(self, s):
 		self.flashtext = s
