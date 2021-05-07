@@ -18,11 +18,15 @@
 import struct
 import os
 import fcntl
+import platform
 from time import sleep
 
 class Input:
 	def __init__(self, fname):
-		s = struct.Struct("<QQHHi")
+		if "64" in platform.architecture()[0]:
+			s = struct.Struct("<QQHHi")
+		else:
+			s = struct.Struct("<IIHHi")
 		self.rlen = s.size
 		self.event_parser = s.unpack
 		self.fd = open(fname, "rb")
