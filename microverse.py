@@ -595,6 +595,7 @@ class Microverse:
 			self.missile_state = MissileState.UNARMED
 			self.missile_target = None
 			self.cd.missiles -= 1
+			self.sfx.play_launch()
 
 	def trigger_ecm(self):
 		if not self.cd.ecm:
