@@ -143,6 +143,8 @@ class Radar:
 				dp = ds
 			else:
 				self.near_station = False
+		else:
+			self.near_station = False
 		if self.near_station:
 			self.cbg.drawtext(cx, cy + 40, "S", fg=4)
 		pm = self.pmaxdist
