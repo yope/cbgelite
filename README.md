@@ -31,7 +31,7 @@ Notes:
  * You might want to change the color theme of your terminal program to improve contrast.
  * Bold fonts give better contrast. Ubunutu Mono Bold is one of the best looking.
  * Even running in a Linux virtual terminal (without any graphical environment) is
- possible if installing the 'console bralle' package. Note that this needs a tiny
+ possible if installing the 'console braille' package. Note that this needs a tiny
  change in cbg.py to work properly and is not currently supported. Let me know if
  you want this.
 
@@ -60,10 +60,14 @@ There are two possible command-line options:
 
 #### Configuring input devices
 
-This is currently a work in progress, but you can try out the game if you want.
-Currently you can fly around, hyperspace to another system and get into a fight
-with enemy ships. The trading engine isn't implemented yet, and you cannot buy
-any equipment for your Cobra MK-III... not even fuel.
+This game is not entirely finished but already well playable. You can travel to
+different systems, trade, earn bitcoins, equip your ship with extra stuff (like
+fuel, extra cargo space, missiles, better laser cannons, E.C.M. system, etc...).
+
+Basically like the original game. Among the few things that do not yet work are:
+galactic hyperspace drive (so you can only stay on chart 1 out of 8), docking
+computers, energy bomb, mining lasers, police attacking when fugitive, escape
+capsules nor special missions.
 
 The first thing you might probably want to do is configure your input devices.
 You can either play with keyboard or joystick or a combination of both.
@@ -97,7 +101,7 @@ laptop.
 
 This game uses pyalsaaudio directly to produce sound. At startup a simple analog
 synthesizer in the game engine is used to render all the different sound samples.
-If you are running pulse audio, this should be detected and used. If not, the game
+If you are running pulseaudio, this should be detected and used. If not, the game
 just choses the "default" sound card configured.
 
 #### Playing the game
@@ -131,8 +135,8 @@ Screens [2]...[4] are only available when docked in a space station.
 Use the short range chart to select a target system (use configured roll/pitch
 controls to move the cursor). The cicrle indicates the range of your current fuel
 level. You cannot directly get to a system that is outside of this circle.
-The press [7] to view some interesting data on the
-selected planet. You can also access most of these screens while flying.
+Then press [7] to view some interesting data on the
+selected system. You can also access most of these screens while flying.
 
 Pressing [2], you can buy or sell cargo at the current system market prices. To
 buy one unit of cargo, highlight the item you want to buy from the menu by moving
@@ -151,7 +155,7 @@ able to operate (fire) the laser cannon while looking out of the rear view.
 
 Press [1] to launch from the space station of the planet you start on (Lave).
 Use the throttle to adjust speed, and you *roll* and *pitch* controls to maneuver
-around. If you selected a target within fuel range, you can now press the
+around. If you selected a target system within fuel range, you can now press the
 *Hyperspace* button and the countdown starts before you are transported to the
 target system.
 
@@ -159,20 +163,51 @@ Once there, you will appear at a distance of the planet. You will see the target
 planet directly ahead of you. And if you look closely, you might be able to see
 the space station in orbit around the planet. Flying towards the planet will take
 time, even at maximum speed. This is what "Jumps" are for. Press the *Jump*
-button to dash closer to the planet. Currently you will be able to use the
-*jump* button at any time while not too close to the plant or station. This will
-not always be the case. In the original game, you cannot *jump* if any other
-objects are close.
+button to dash closer to the planet. But beware of other ships appearing (specially
+hunters or piracte ships when near a anarchic or feudal system), these will
+prevent you from *jump*ing further. The message "Mass locked" will appear when
+that happens.
 
-Once in a while you will see some asteroids or other space rocks appearing in
-front of you. Also some enemy ships might appear and probably try to attack you
-right away. Currently there is only one rather simple AI for other ships. Other
-ships will just intermittently come flying at you and shooting when you are in
-their target area, fly away from you if they got too close, or just make some
-random turns.
+Once in a while you will see some asteroids appearing in front of you.
+Also some enemy ships might appear and probably try to attack you
+right away.
 
 If you manage to kill an enemy ship, it might leave some cargo cannisters floating
-around. Currently you can only either leave them clutter space, or shoot them.
+around. If your ship has *fuel scoops* fitted, you can pick them up if you fly at
+them slowly (under 40% max speed), while maintaining them below your crosshairs.
+You can then sell the cargo when docked at the station. Please beware that if your
+ship is loaded to maximum cargo capacity, you will not be able to pick up any
+cargo cannisters and instead collide with them, costing you some energy.
+
+#### Missiles
+
+If you have missiles fitted to your ship, you can fire them by first pressing the
+*arm missile* button once. The missile is now armed and ready to acquire a target.
+If you press the *arm missile* button a second time, the missile will be disarmed.
+When a missile is armed, once you get a ship in your crosshairs, the missile will
+lock target to that ship. Whenever you press the *fire missile* button, the missile
+is launched and will home in on the locked target until it hits it.
+
+In the same way, some enemy ships might launch a missile at you. If this happens,
+and the missile hits you, your chances of survival are very slim.
+To avoid being hit by a missile, you can shoot it down with your laser cannon, or
+activate the *E.C.M.* system if fitted. When activating the *E.C.M.* system, all
+flying missiles within radar range will be instantly destroyed... also yours if you
+launched one.
+
+#### Witch space
+
+On very few occasions, a hyperspace jump to another system is interrupted in
+*witch space*. Thargoid ships are able to intercept you during a hyperspace jump
+and will attack you. Thargoids are touch to beat and may launch smaller Tharglets
+(unmanned drones) to attack you from all sides. If you manage to kill the Thargoid
+mother-ship, the Thatglets get deactivated and float aimlessly in space. In that
+state, you can pick them up with your *fuel scoops*, if you have some cargo space
+left.
+
+If you manage to survive *witch space*, you are not automatically safe though.
+There is no way to return to the system you come from, and you can only get to
+a different system if you have enough fuel left. If not... you are doomed.
 
 #### Docking
 
@@ -180,12 +215,12 @@ Ah, yeah. Docking. This has always been the trauma of every beginning Elite play
 There are no docking computers in this game yet, so you have to hone those docking
 skills!
 
-At this moment the entrance to the space station is facing away from where you
-approach it initially, instead of facing towards the planet. Will be fixed later.
+Like in the original game, the entrance to the docking station always faces
+towards its planet.
 
 The space station is rotating slowly around its Z-axis. you will need to align
 your space ship with the station in such a way that the entrance is in front of
-you and horizontally alighned. For succesful docking, try to fly towards the
+you and horizontally aligned. For succesful docking, try to fly towards the
 entrance as perpendicular to the top surface as possible. Too much of an angle
 will make you crash into the space station. Try to adjust your rolling speed
 such that it matches the station. Try to keep the entrance as horizontal as
