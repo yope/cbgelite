@@ -180,7 +180,8 @@ class Ship3D(Object3D):
 		m.bold = True
 		self.missiles -= 1
 		if name == "missile":
-			self.sfx.play_launch()
+			pan = self.pos[0] / self.distance
+			self.sfx.play_missile_launch(pan)
 			self.mv.set_flashtext("INCOMING MISSILE!")
 		return m
 
@@ -595,7 +596,7 @@ class Microverse:
 			self.missile_state = MissileState.UNARMED
 			self.missile_target = None
 			self.cd.missiles -= 1
-			self.sfx.play_launch()
+			self.sfx.play_missile_launch(0)
 
 	def trigger_ecm(self):
 		if not self.cd.ecm:
