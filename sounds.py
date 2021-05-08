@@ -251,6 +251,9 @@ class SoundFX:
 		launch1 = self.synth.gen_square(500, 500, 0.5, adsr_exp1, noise=True)
 		launch2 = self.synth.gen_square(400, 400, 0.5, adsr_exp2, noise=True)
 		self.launch = self.synth.mix_s16le_2ch(launch1, launch2, 1.0, 1.0, -0.5, 0.5)
+		adsr_mlaunch = ADSR(0.0, 0.0, 1.0, 0.1, 0.4, 0.8)
+		self.mlaunch1 = self.synth.gen_square(700, 800, 0.5, adsr_mlaunch, noise=True, ac0=-0.95)
+		self.mlaunch2 = self.synth.gen_square(1000, 900, 0.5, adsr_mlaunch, noise=True, ac0=-0.96)
 		adsr_hyp1 = ADSR(0, 0.3, 1.0, 0.5, 0.3, 1.0)
 		hyper11 = self.synth.gen_square(110, 880, 0.5, adsr_hyp1, noise=True)
 		hyper12 = self.synth.gen_square(2200, 8800, 0.3, adsr_hyp1)
@@ -335,6 +338,12 @@ class SoundFX:
 
 	def play_ecm(self):
 		return self.play(self.ecm)
+
+	def play_missile_launch(self, pan=0.0):
+		pan0 = max(-1.0, pan - 0.2)
+		pan1 = min(1.0, pan + 0.2)
+		buf = self.synth.mix_s16le_2ch(self.mlaunch1, self.mlaunch2, 0.5, 0.5, pan0, pan1)
+		return self.play(buf)
 
 if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
