@@ -74,51 +74,66 @@ class BaseAi:
 		if r or p:
 			o.local_roll_pitch(r, p)
 
-	async def task(self):
+	async def _movement_strategy(self, x, ts):
 		o = self.obj
+		if x > 0.9:
+			self.roll = 0.02
+		elif x < 0.1:
+			self.roll = -0.02
+		else:
+			self.roll = 0.0
+		if x > 0.98 and self.strat is self.MOVE_TO:
+			self.strat = self.MOVE_RANDOM
+			self.speed = self.max_speed
+			ts = 0
+		elif self.strat is self.MOVE_RANDOM and x < 0.3 and o.angry:
+			self.strat = self.MOVE_TO
+			self.speed = self.max_speed * 0.7
+			ts = 0
+		elif self.strat is self.MOVE_AWAY and o.distance >= 5000:
+			self.strat = self.MOVE_TO
+			self.speed = self.max_speed * 0.9
+			ts = 0
+		elif self.strat is self.MOVE_TO and o.distance <= 2000:
+			self.strat = self.MOVE_AWAY
+			self.speed = self.max_speed * 0.8
+			ts = 0
+		ts += 1
+		if ts > 500:
+			self.strat = self.MOVE_RANDOM
+			speed = self.max_speed * 0.85
+			ts = 0
+		if self.strat is self.MOVE_RANDOM:
+			self.roll = random.uniform(-0.06, 0.06)
+			self.randpitch = random.uniform(-0.06, 0.06)
+			await asyncio.sleep(0.2)
+		return ts
+
+	async def _shooting_strategy(self, x, ts):
+		o = self.obj
+		if self.dn > 0.975 and o.distance < 30000:
+			if x < 0.3 and o.angry:
+				o.shoot(True)
+		elif self.dn > 0.95 and o.distance < 25000:
+			if x < 0.2 and o.angry:
+				o.shoot(False)
+		return ts
+
+	async def _missile_strategy(self, x, ts):
+		o = self.obj
+		if o.angry and o.missiles and o.energy < (o.ship.opt_max_energy / 2):
+			if x < (0.03 * o.missiles):
+				o.launch_missile()
+		return ts
+
+	async def task(self):
 		ts = 0
-		while o.alive:
+		while self.obj.alive:
 			await asyncio.sleep(0.1)
 			x = random.random()
-			if x > 0.9:
-				self.roll = 0.02
-			elif x < 0.1:
-				self.roll = 0.02
-			else:
-				self.roll = 0.0
-			if x > 0.98 and self.strat is self.MOVE_TO:
-				self.strat = self.MOVE_RANDOM
-				self.speed = self.max_speed
-				ts = 0
-			elif self.strat is self.MOVE_RANDOM and x < 0.3 and o.angry:
-				self.strat = self.MOVE_TO
-				self.speed = self.max_speed * 0.7
-				ts = 0
-			elif self.strat is self.MOVE_AWAY and o.distance >= 5000:
-				self.strat = self.MOVE_TO
-				self.speed = self.max_speed * 0.9
-				ts = 0
-			elif self.strat is self.MOVE_TO and o.distance <= 2000:
-				self.strat = self.MOVE_AWAY
-				self.speed = self.max_speed * 0.8
-				ts = 0
-			ts += 1
-			if ts > 500:
-				self.strat = self.MOVE_RANDOM
-				speed = self.max_speed * 0.85
-				ts = 0
-			if self.strat is self.MOVE_RANDOM:
-				self.roll = random.uniform(-0.06, 0.06)
-				self.randpitch = random.uniform(-0.06, 0.06)
-				await asyncio.sleep(0.2)
-			if self.dn > 0.975 and o.distance < 30000:
-				# self.obj.mv.set_flashtext(o.name + " can hit")
-				if x < 0.3 and o.angry:
-					o.shoot(True)
-			elif self.dn > 0.95 and o.distance < 25000:
-				# self.obj.mv.set_flashtext(o.name + " can shoot")
-				if x < 0.2 and o.angry:
-					o.shoot(False)
+			ts = await self._movement_strategy(x, ts)
+			ts = await self._shooting_strategy(x, ts)
+			ts = await self._missile_strategy(x, ts)
 
 class CanisterAi:
 	def __init__(self, obj):
