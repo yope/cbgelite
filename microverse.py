@@ -503,9 +503,9 @@ class Microverse:
 			if ds > 55000 and nobj < 12 and self.planet and rndr(4) == 1:
 				if rndr(512) == 1:
 					if rndr(62) == 1:
-						self._spawn_ships("cougar")
+						self._spawn_ships("cougar", bold=True, angry=True, ecm=True)
 					else:
-						self._spawn_ships("thargoid")
+						self._spawn_ships("thargoid", bold=True, angry=True, ecm=True)
 				if rndr(32) == 1:
 					self._spawn_ships(random.choice(traders))
 				if rndr(8) == 0 and self.num_objects.get("asteroids", 0) < 3:
