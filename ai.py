@@ -228,4 +228,37 @@ class EnemyMissileAi(MissileAi):
 		self.obj.hit_player()
 
 class ThargoidAi(BaseAi):
-	pass
+	def __init__(self, obj):
+		super().__init__(obj)
+		self.thargons = []
+
+	async def _missile_strategy(self, x, ts):
+		o = self.obj
+		if o.energy < (o.ship.opt_max_energy / 2) and x < 0.12 and o.missiles:
+			self.thargons.append(o.launch_missile("thargon", ThargonAi))
+		return ts
+
+	async def task(self):
+		await super().task()
+		for t in self.thargons:
+			t.ai.aimless = True
+
+class ThargonAi(BaseAi):
+	def __init__(self, obj):
+		super().__init__(obj)
+		self.aimless = False
+
+	async def _movement_strategy(self, x, ts):
+		if self.aimless:
+			self.speed = 1
+			self.strat = self.MOVE_RANDOM
+			self.randpitch = 0
+			await asyncio.sleep(1)
+			return ts
+		return await super()._movement_strategy(x, ts)
+
+	async def _shooting_strategy(self, x, ts):
+		if self.aimless:
+			await asyncio.sleep(1)
+			return ts
+		return await super()._shooting_strategy(x, ts)
