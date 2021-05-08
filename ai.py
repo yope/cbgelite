@@ -51,10 +51,8 @@ class BaseAi:
 		dr = g.dot(o.roofv, hvec)
 		if self.dn > 0.95:
 			canshoot = True
-			cs = " can shoot"
 		else:
 			canshoot = False
-			cs = ""
 		p = 0.0
 		r = self.roll
 		if self.strat is self.MOVE_TO:
@@ -75,8 +73,6 @@ class BaseAi:
 			#self.cbg.log(o.name + " move random {:6.1f}".format(self.dist))
 		if r or p:
 			o.local_roll_pitch(r, p)
-		#if o.name == "KRAIT":
-		#	self.cbg.log("dist: {:6.1f} dn: {:5.2f} ds: {:5.2f} dr: {:5.2f} strat={}".format(self.dist, dn, ds, dr, self.strat) + cs)
 
 	async def task(self):
 		o = self.obj
