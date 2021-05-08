@@ -25,7 +25,7 @@ from time import sleep
 from collections import deque
 import functools
 from sounds import SoundFX
-from ai import CanisterAi, BaseAi, MissileAi
+from ai import CanisterAi, BaseAi, MissileAi, EnemyMissileAi
 from market import contraband_score
 
 import asyncio
@@ -110,6 +110,7 @@ class Ship3D(Object3D):
 		self.mv = mv
 		self.ship = ship
 		self.energy = ship.opt_max_energy
+		self.missiles = random.randint(0, ship.opt_missiles)
 		self.shot_time = 0
 		self.bold = False
 		self.ecm = False
@@ -168,6 +169,20 @@ class Ship3D(Object3D):
 			self.mv.get_hit(self.ship.opt_laser_power, self.pos)
 		else:
 			self.sfx.play_shot(pan)
+
+	def launch_missile(self, name="missile", aicls=EnemyMissileAi):
+		if self.missiles <= 0:
+			return None
+		x, y, z = self.pos
+		m = self.mv.spawn(name, (x, y, z + 250), self.roll, self.pitch)
+		m.add_ai(aicls)
+		m.angry = True
+		m.bold = True
+		self.missiles -= 1
+		if name == "missile":
+			self.sfx.play_launch()
+			self.mv.set_flashtext("INCOMING MISSILE!")
+		return m
 
 	def on_target(self):
 		x, y, z = self.pos
