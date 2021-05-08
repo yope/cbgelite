@@ -525,7 +525,7 @@ class Microverse:
 				if rndr(256) < offense:
 					self._spawn_ships("viper", ecm=(rndr(256) < 10), angry=True, bold=True)
 				if not self.num_objects.get("viper", 0) and not self.in_combat:
-					if rndr(7) < govdanger:
+					if rndr(15) <= govdanger:
 						if rndr(256) < 100:
 							self._spawn_ships(random.choice(lone_wolves), ecm=(rndr(256) > 200), angry=True, bold=True)
 						else:
