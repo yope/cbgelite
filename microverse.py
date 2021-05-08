@@ -201,6 +201,14 @@ class Ship3D(Object3D):
 		self.mv.set_flashtext("Bounty: {} sats".format(bounty))
 		self._incr_kills()
 
+	def hit_player(self):
+		# An enemy missile hits the player.
+		self.mv.spawn_explosion(self.pos, 0)
+		self.vanish()
+		# Simulate a laser hit with a force that will deplete almost all of
+		# max. shield + energy. So there is a small chance of surviving.
+		self.mv.get_hit(320, self.pos)
+
 	def target_lost(self):
 		self.mv.set_flashtext("Target lost")
 		self.autodestruct()

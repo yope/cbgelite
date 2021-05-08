@@ -214,5 +214,18 @@ class MissileAi:
 		if r or p:
 			o.local_roll_pitch(r, p)
 
+class MissileTargetDummy:
+	def __init__(self):
+		self.pos = (0, 0, 0)
+		self.alive = True
+
+class EnemyMissileAi(MissileAi):
+	def __init__(self, obj):
+		super().__init__(obj)
+		self.trg = MissileTargetDummy()
+
+	def _hit_target(self):
+		self.obj.hit_player()
+
 class ThargoidAi(BaseAi):
 	pass
