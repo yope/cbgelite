@@ -201,12 +201,15 @@ class Ship3D(Object3D):
 		self.mv.set_flashtext("Bounty: {} sats".format(bounty))
 		self._incr_kills()
 
+	def target_lost(self):
+		self.mv.set_flashtext("Target lost")
+		self.autodestruct()
+
 	def autodestruct(self):
 		# Missile lost target, explodes
 		self.sfx.play_short_explosion()
 		self.mv.spawn_explosion(self.pos, 0)
 		self.vanish()
-		self.mv.set_flashtext("Target lost")
 
 	def draw(self, pattern=None):
 		s = self.ship

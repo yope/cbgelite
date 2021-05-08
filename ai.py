@@ -171,7 +171,7 @@ class MissileAi:
 			self.obj.vanish()
 			return
 		if not t.alive:
-			o.autodestruct()
+			o.target_lost()
 			return
 		tdir = g.sub(t.pos, o.pos)
 		tdist = g.distv(tdir)
