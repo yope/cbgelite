@@ -162,6 +162,9 @@ class MissileAi:
 	def add_target(self, target):
 		self.trg = target
 
+	def _hit_target(self):
+		return self.obj.hit_target(self.trg)
+
 	def handle(self):
 		o = self.obj
 		g = self.g3d
@@ -176,7 +179,7 @@ class MissileAi:
 		tdir = g.sub(t.pos, o.pos)
 		tdist = g.distv(tdir)
 		if tdist < 150:
-			self.obj.hit_target(t)
+			self._hit_target()
 			return
 		sdist = g.distv(o.pos)
 		if sdist < 800:
