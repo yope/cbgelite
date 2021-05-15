@@ -14,6 +14,7 @@ David Braben for the BBC microcomputer. Read more about it [here](http://www.eli
 ### Prerequisites:
 
  * Python3
+ * Cython3
  * Python alsaaudio
  * Terminal program capable of displaying unicode and minimal 160x60 caracter size.
  * A mono-spaced font that contains braille characters in the same width as other characters.
@@ -34,6 +35,14 @@ Notes:
  possible if installing the 'console braille' package. Note that this needs a tiny
  change in cbg.py to work properly and is not currently supported. Let me know if
  you want this.
+
+### Building the cython extension
+
+To build the cython modules, do this
+
+```bash
+python3 setup.py build_ext --inplace
+```
 
 ### Invocation
 
