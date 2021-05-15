@@ -32,7 +32,7 @@ class SoundPlayer:
 			device = "default"
 		self.channels = 2
 		self.wordsize = 2
-		self.periodsize = 256
+		self.periodsize = 1024
 		self.pcm = alsaaudio.PCM(mode=alsaaudio.PCM_NONBLOCK, device=device)
 		self.pcm.setchannels(self.channels)
 		self.pcm.setperiodsize(self.periodsize)
