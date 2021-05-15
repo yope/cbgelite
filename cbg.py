@@ -29,17 +29,19 @@ from random import randint
 from ship import ShipReader
 from text import FontData
 from quaternion import *
+from screendiff import ScreenDiff
 
-class CBG:
+class CBG(ScreenDiff):
 	def __init__(self):
-		self.charcodes = [chr(x) for x in range(0x2800, 0x2900)]
-		self.charcodes[0] = ' ' # Replace 0 with space. This is faster in some cases.
 		self.bitmasks = ((1, 8), (2, 16), (4, 32), (64, 128))
 		self.cheight, self.cwidth = (int(x) for x in os.popen('stty size', 'r').read().split())
 		self.curx = 5
 		self.cury = 5
 		self.putcursor(0, 0)
 		self.set_log_area(max(0, self.cheight-60))
+		super().__init__(self.cwidth, self.cheight)
+		self.map = self._get_map()
+		self.colormap = self._get_colormap()
 		self.width = self.cwidth * 2
 		self.height = self.cheight * 4
 		self.setclip()
@@ -128,14 +130,6 @@ class CBG:
 			self.clxmax = cr[2]
 			self.clymax = cr[3]
 
-	def clearmap(self):
-		size = self.cwidth * self.cheight
-		self.map = bytearray(b'\x00' * size)
-
-	def clearcolormap(self):
-		size = self.cwidth * self.cheight
-		self.colormap = bytearray(b'\x0f' * size)
-
 	def clearscreen(self):
 		self.clearmap()
 		self.redraw_screen()
@@ -217,30 +211,6 @@ class CBG:
 				idx = i * self.cwidth
 				for j in range(x, x+w):
 					self.colormap[idx + j] = c
-
-	def redraw_screen(self):
-		fg0 = 16
-		bg0 = 16
-		curc = 256
-		for y in range(self.cheight):
-			print("\x1b[{};1H".format(y+1), end='')
-			for x in range(self.cwidth):
-				idx = y * self.cwidth + x
-				b = self.map[idx]
-				c = self.colormap[idx]
-				if curc != c:
-					fg = c & 0x0f
-					curc = c
-					if fg0 != fg:
-						fg0 = fg
-						print("\x1b[38;5;{}m".format(fg), end='')
-					bg = c >> 4
-					if bg0 != bg:
-						bg0 = bg
-						print("\x1b[48;5;{}m".format(bg), end='')
-				u = self.charcodes[b]
-				print(u, end='')
-		sys.stdout.flush()
 
 	def line(self, x0, y0, x1, y1, mode=0, pattern=None):
 		self.set_putpixel(mode)
