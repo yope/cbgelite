@@ -103,7 +103,6 @@ class ADSR:
 
 class SynthVoice:
 	def __init__(self):
-		self.wordsize = 2
 		self.rate = 44100 # FIXME
 		self.maxamp = 20000
 
