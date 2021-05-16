@@ -1188,9 +1188,9 @@ class Commander:
 		return maxcargo
 
 class Elite:
-	def __init__(self, loop=None, config=False):
+	def __init__(self, loop=None, config=False, showfps=False):
 		self.loop = loop or asyncio.get_event_loop()
-		self.cbg = CBG()
+		self.cbg = CBG(showfps=showfps)
 		if self.cbg.width < 320 or self.cbg.height < 240:
 			print("Screen is too small.")
 			print("Please resize your terminal to minimal 160x60 characters.")
@@ -1221,16 +1221,12 @@ class Elite:
 		tx = sw // 2 - 80
 		self.cbg.drawtext(tx, 176 - 16, "Press ESC to start")
 
-	async def title_screen(self, showfps=False):
+	async def title_screen(self):
 		dz = 20050
 		cockpit = Cockpit(self, self.cbg, self.commander.data)
 		tm = Microverse(self.cbg, cockpit.g3d, None, self.ships, self.commander, self.universe, particles=0)
 		tm.stop() # Avoid running tactic task
 		cobra = tm.spawn("cobra_mkiii", (0, 0, dz), 0.0, 0.0)
-		if showfps:
-			t0 = monotonic()
-			fr = 0
-			fps = 0.0
 		ts = monotonic()
 		i = 131
 		while True:
@@ -1252,18 +1248,7 @@ class Elite:
 			self.inputdev.handle()
 			if 1 in self.inputdev.get_new_keys():
 				break
-			if showfps:
-				print("\x1b[2;2HFPS:{:.2f}".format(fps))
-			else:
-				ts = await self.framesleep(ts)
-				continue
-			fr += 1
-			if fr > 10:
-				t = monotonic()
-				fps = fr / (t - t0)
-				t0 = t
-				fr = 0
-			await asyncio.sleep(0)
+			ts = await self.framesleep(ts)
 
 	async def framesleep(self, ts):
 		now = self.loop.time()
@@ -1375,12 +1360,12 @@ class Elite:
 				m = MarketBuy(self, self.cbg, cd)
 			ts = await self.framesleep(ts)
 
-	async def startup(self, showfps=False):
-		mt = self.loop.create_task(self.run(showfps))
+	async def startup(self):
+		mt = self.loop.create_task(self.run())
 		mt.add_done_callback(lambda fut: self.cbg.exit(fut.result()))
 
-	async def run(self, showfps=False):
-		await self.title_screen(showfps)
+	async def run(self):
+		await self.title_screen()
 		await self.menu()
 		#await self.cockpit.launch_animation()
 		#await self.cockpit.hyperspace_animation_start()
@@ -1393,6 +1378,6 @@ if __name__ == "__main__":
 	loop = asyncio.get_event_loop()
 	showfps = ("-fps" in sys.argv)
 	config = ("-config" in sys.argv)
-	e = Elite(config=config)
-	loop.run_until_complete(e.startup(showfps=showfps))
+	e = Elite(config=config, showfps=showfps)
+	loop.run_until_complete(e.startup())
 	loop.run_forever()
