@@ -57,8 +57,7 @@ by other users than the one logged into the X/Wayland session.
 
 There are two possible command-line options:
 
- * -fps: Run the title animation at maximum speed and display the achjieved FPS
-   value in the top left of the screen.
+ * -fps: Show FPS and CPU load in the top right of the screen.
  * -config: Start a rudimentary input config editor before the game starts, to
    reconfigure the input devices. You can assign joystick buttons or keyboard
    keys to the different functions. The configuration will be saved in the file
