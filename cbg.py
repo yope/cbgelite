@@ -32,14 +32,14 @@ from quaternion import *
 from screendiff import ScreenDiff
 
 class CBG(ScreenDiff):
-	def __init__(self):
+	def __init__(self, showfps=False):
 		self.bitmasks = ((1, 8), (2, 16), (4, 32), (64, 128))
 		self.cheight, self.cwidth = (int(x) for x in os.popen('stty size', 'r').read().split())
 		self.curx = 5
 		self.cury = 5
 		self.putcursor(0, 0)
 		self.set_log_area(max(0, self.cheight-60))
-		super().__init__(self.cwidth, self.cheight)
+		super().__init__(self.cwidth, self.cheight, showfps=showfps)
 		self.map = self._get_map()
 		self.colormap = self._get_colormap()
 		self.width = self.cwidth * 2

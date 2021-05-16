@@ -19,6 +19,7 @@
 
 cimport cython
 from libc.stdio cimport printf, fflush, stdout
+from time import monotonic, process_time
 
 cdef class ScreenDiff:
 	cdef char * _cmap
@@ -30,7 +31,15 @@ cdef class ScreenDiff:
 	cdef object _cmap_back, _cmap0_back
 	cdef object _ccolormap_back, _ccolormap0_back
 	cdef list _charcodes
-	def __init__(self, cw, ch):
+	cdef bint _showfps
+	cdef float _tscpu, _ts, _fps, _fpscount, _cpuload
+	def __init__(self, cw, ch, showfps=False):
+		self._showfps = showfps
+		self._fps = 0.0
+		self._cpuload = 0.0
+		self._fpscount = 0.0
+		self._tscpu = process_time()
+		self._ts = monotonic()
 		self._charcodes = [chr(x).encode("utf-8") for x in range(0x2800, 0x2900)]
 		self._charcodes[0] = b' ' # Replace 0 with space. This is faster in some cases.
 		cdef unsigned int size = cw * ch
@@ -62,6 +71,25 @@ cdef class ScreenDiff:
 		for i in range(self._buflen):
 			self._ccolormap[i] = 0x0f
 
+	@cython.cdivision(True)
+	cdef void _show_stats(self):
+		cdef double tscpu, ts, dcpu, dt
+		if self._fpscount >= 100:
+			tscpu = process_time()
+			ts = monotonic()
+			dcpu = tscpu - self._tscpu
+			dt = ts - self._ts
+			if dt > 0:
+				self._fps = self._fpscount / dt
+				self._cpuload = (100.0 * dcpu) / dt
+			self._ts = ts
+			self._tscpu = tscpu
+			self._fpscount = 0
+		else:
+			self._fpscount += 1
+		printf("\x1b[2;149HFPS:%5.1f", self._fps)
+		printf("\x1b[3;149HCPU:%5.1f%%", self._cpuload)
+
 	cpdef unsigned int full_redraw_screen(self):
 		cdef char fg0 = 16
 		cdef char bg0 = 16
@@ -88,6 +116,8 @@ cdef class ScreenDiff:
 						count += printf("\x1b[48;5;%dm", bg)
 				u = self._charcodes[b]
 				count += printf("%s",u)
+		if self._showfps:
+			self._show_stats()
 		fflush(stdout)
 		return count
 
@@ -128,5 +158,7 @@ cdef class ScreenDiff:
 		bg = 0
 		if fg != fg0 or bg != bg0:
 			count += printf("\x1b[48;5;%dm\x1b[38;5;%dm", bg, fg)
+		if self._showfps:
+			self._show_stats()
 		fflush(stdout)
 		return count
