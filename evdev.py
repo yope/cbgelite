@@ -23,10 +23,7 @@ from time import sleep
 
 class Input:
 	def __init__(self, fname):
-		if "64" in platform.architecture()[0]:
-			s = struct.Struct("<QQHHi")
-		else:
-			s = struct.Struct("<IIHHi")
+		s = struct.Struct("@LLHHi")
 		self.rlen = s.size
 		self.event_parser = s.unpack
 		self.fd = open(fname, "rb")
