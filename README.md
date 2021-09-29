@@ -38,7 +38,7 @@ Notes:
 
 ### Building the cython extension
 
-To build the cython modules, do this
+To build the cython modules, do this:
 
 ```bash
 python3 setup.py build_ext --inplace
